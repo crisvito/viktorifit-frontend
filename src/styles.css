@@ -1,1 +1,45 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/assets/fonts/Poppins-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/assets/fonts/Poppins-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+:root {
+  /* color */
+  --main-color: #AFFA01; 
+  
+  /* font */
+  --font-family: 'Poppins', sans-serif;
+
+  /* text */
+  --banner-title: 128px;  
+  --banner-sub: 32px;  
+
+  /* line-height */
+  --lh-tight: 100px;             
+  --lh-relaxed: 120px;
+  
+}
+
+body {
+  /* scrollbar-width: none; 
+  -ms-overflow-style: none; 
+  */
+  
+  font-family: var(--font-family);
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}

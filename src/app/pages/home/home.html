@@ -1,0 +1,75 @@
+<section class="relative h-[125vh] w-full bg-black overflow-hidden px-20 flex items-center">
+  <div class="absolute right-0 top-0 w-2/3 h-full">
+    <img src="assets/home/banner.png" alt="Banner" class="w-full h-full object-cover" />
+    <!-- <div class="absolute inset-0 bg-linear-to-r from-black via-black/60 to-transparent"></div> -->
+  </div>
+
+  <div class="h-fit container relative z-10">
+    <div class="max-w-4/5">
+      <h1 class="text-(--main-color) text-[110px] leading-[110px] font-bold mb-4 italic">
+        RAISE YOUR POTENTIAL
+      </h1>
+      <p class="text-slate-300 w-3/4 text-[30px] leading-[35px]">
+        Planning your workout and get the best recommendation with ViktoriFit!
+      </p>
+      <app-button ariaLabel="Klik untuk memulai pendaftaran"> Start Now </app-button>
+    </div>
+  </div>
+</section>
+
+<section class="h-screen px-20 flex items-center">
+  <div class="flex-1 relative">
+    <div
+      class="absolute bottom-7 left-7 w-100 h-full bg-(--main-color) rounded-3xl shadow-md"
+    ></div>
+    <div class="relative">
+      <img src="/assets/home/image1.png" alt="" class="w-[400px]" />
+    </div>
+  </div>
+
+  <div class="flex-1">
+    <h2 class="text-7xl leading-[90px] font-bold mb-4 text-[#557A00] italic">PLAN YOUR WORKOUT</h2>
+    <p class="text-[24px]">
+      Viktorifit hadir sebagai personal workout trainer berbasis Machine Learning yang akan membantu
+      mu menjadwalkan olahraga dan olahraga apa yang cocok dengan kondisi mu saat ini!
+    </p>
+    <app-button ariaLabel="Klik untuk mempelajari lebih lanjut"> Learn More </app-button>
+  </div>
+</section>
+
+<section class="h-fit px-20 py-20 flex flex-col gap-10 bg-[#CFED89]">
+  <div class="flex-1">
+    <h2 class="text-7xl leading-[90px] font-bold text-[#557A00] italic">OUR BENEFITS</h2>
+    <p class="text-[24px] w-3/4">
+      Melalui layanan kami, kamu bisa mendapatkan berbagai benefit tanpa mengeluarkan biaya sama
+      sekali!
+    </p>
+  </div>
+
+  <div class="flex-1 flex justify-between gap-5">
+    <div class="bg-white rounded-xl flex-1 p-10 flex flex-col items-center justify-center">
+      <img src="/assets/home/image2.png" alt="" class="w-[195px]" />
+      <h3 class="text-[30px] font-bold text-[#82BA00] mb-4">Free</h3>
+      <p class="text-center">Semua fitur dapat diakses tanpa terbatas dan gratis</p>
+    </div>
+    <div class="bg-white rounded-xl flex-1 p-10 flex flex-col items-center justify-center">
+      <img src="/assets/home/image3.png" alt="" class="w-[195px]" />
+      <h3 class="text-[30px] font-bold text-[#82BA00] mb-4">Machine Learning</h3>
+      <p class="text-center">Sistem rekomendasi berbasis machine learning</p>
+    </div>
+    <div class="bg-white rounded-xl flex-1 p-10 flex flex-col items-center justify-center">
+      <img src="/assets/home/image4.png" alt="" class="w-[195px]" />
+      <h3 class="text-[30px] font-bold text-[#82BA00] mb-4">Scheduling</h3>
+      <p class="text-center">Personalisasi jadwal berdasarkan waktu luangmu</p>
+    </div>
+  </div>
+
+  <div class="flex justify-end">
+    <app-button
+      ariaLabel="Klik untuk melihat rekomendasi"
+      extraClass="bg-black text-white !mt-0 w-auto"
+    >
+      Try Recommendation
+    </app-button>
+  </div>
+</section>
