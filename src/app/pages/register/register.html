@@ -1,0 +1,99 @@
+<div class="h-full flex">
+  <div class="w-[43%] bg-(--main-color)"></div>
+  <div class="w-[57%] flex flex-col gap-8 py-20 px-32">
+    <div class="flex flex-col items-center">
+      <h2 class="text-[48px] font-bold">Sign Up</h2>
+      <p class="text-[16px]">Create New Account and Start Your Journey Now!</p>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-2">
+        <label for="username" class="font-medium text-black">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="e.g johngreen"
+          required
+          class="rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="email" class="font-medium text-black">Email</label>
+        <input
+          type="text"
+          id="email"
+          name="email"
+          placeholder="e.g johngreen@abc.com"
+          required
+          class="rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="password" class="font-medium text-gray-700">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="at least 8 character"
+          required
+          class="rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="confirm-password" class="font-medium text-gray-700">Confirm Password</label>
+        <input
+          type="password"
+          id="confirm-password"
+          name="confirm-password"
+          required
+          class="rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
+        />
+      </div>
+
+      <div class="flex gap-2 items-center text-[12px]">
+        <input
+          type="checkbox"
+          id="terms-and-use"
+          name="terms-and-use"
+          title="term-and-use"
+          class="self-start bg-gray-500 border border-gray-500"
+        />
+        <label for="terms-and-use" class="text-gray-600">
+          I have read and agree all of
+          <a class="underline text-blue-500">terms and use</a>
+        </label>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <app-button extraClass="w-full !rounded-sm !text-[18px] !font-medium !mt-5">
+          Create Account
+        </app-button>
+        <span class="text-[12px] text-center text-gray-400">
+          Already have an account?
+          <a routerLink="/login" class="underline text-blue-500">Sign In</a>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="flex-1 h-px bg-gray-300"></div>
+        <span class="text-gray-400 font-semibold">or</span>
+        <div class="flex-1 h-px bg-gray-300"></div>
+      </div>
+
+      <div class="flex justify-center gap-5">
+        <span class="bg-[#F5F5F5] border-[1.4px] border-gray-600 rounded-full p-2.5">
+          <img src="/assets/login/apple.png" alt="" />
+        </span>
+        <span class="bg-[#F5F5F5] border-[1.4px] border-gray-600 rounded-full p-2.5">
+          <img src="/assets/login/google.png" alt="" />
+        </span>
+        <span class="bg-[#F5F5F5] border-[1.4px] border-gray-600 rounded-full p-2.5">
+          <img src="/assets/login/fb.png" alt="" />
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

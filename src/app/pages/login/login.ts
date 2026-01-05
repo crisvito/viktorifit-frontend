@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { ButtonComponent } from '../../shared/components/button/button';
+import { ButtonComponent } from '../../shared/components';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [ButtonComponent],
+  imports: [RouterModule, ButtonComponent],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
