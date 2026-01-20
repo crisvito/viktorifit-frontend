@@ -1,0 +1,93 @@
+<div class="font-poppins">
+    <div class="flex justify-center space-x-2.5 pt-12">
+        <div *ngFor="let step of steps; let i = index" class="w-35 h-2 rounded-full transition-all duration-300"
+            [ngClass]="currentStep > i ? 'bg-[#AFFA01]' : 'bg-[#DFDFDF]'">
+        </div>
+    </div>
+
+    <section class="pt-17" *ngIf="currentStep === 1">
+        <div>
+            <div class="grid justify-center">
+                <h2 class="grid justify-center text-[3.5rem] font-bold">What is Your Goal?</h2>
+                <span class="text-center max-w-3xl text-[1.4rem]">Next, we need to know what is your purpose to join with us, so what things you want to reach?</span>
+            </div>
+
+            <div class="flex justify-center gap-4 pt-12">
+                <div (click)="selectGoal('gain')" 
+                    class="w-110 h-43 border rounded-3xl p-10 transition hover:bg-[#AFFA01]"
+                    [ngClass]="selectedGoal === 'gain' ? 'bg-[#AFFA01] border-[#7EB303]' : 'bg-[#D9D9D9] border-[#B9B9B9]'">
+                    <h2 class="text-2xl font-medium pt-3">Weight Gain</h2>
+                    <p class="text[#404040]">Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
+                </div>
+                <div (click)="selectGoal('loss')"
+                    class="w-110 h-43 border rounded-3xl p-10 transition hover:bg-[#AFFA01]"
+                    [ngClass]="selectedGoal === 'loss' ? 'bg-[#AFFA01] border-[#7EB303]' : 'bg-[#D9D9D9] border-[#B9B9B9]'">
+                    <h2 class="text-2xl font-medium pt-3">Weight Loss</h2>
+                    <p class="text[#404040]">Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-center">
+            <button class="items-center w-130 h-15 rounded-lg mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
+            [disabled]="!canContinue()">
+            <div class="flex justify-center font-[540] text-center text-2xl">
+                Continue
+            </div>
+            </button>
+        </div>
+    </section>
+
+    <section class="pt-10" *ngIf="currentStep === 2">
+        <div>
+            <div class="grid justify-center">
+                <h2 class="grid justify-center text-[3.5rem] font-bold">About Your Schedule</h2>
+                <span class="text-center max-w-3xl text-[1.4rem]">We already have workout recommendation for you, now for your personalize we need to know about your duration workout</span>
+            </div>
+
+            <div class="grid justify-center pt-20">
+                <span class="text-[#676767]">Workout Duration</span>
+                <div class="flex justify-center gap-2">
+                    <input type="number" min="15" max="150" class="border-[1.5px] border-[#B9B9B9] bg-[#E3E3E3] w-90 h-15 rounded-md pl-4"
+                    [(ngModel)]="formData.workoutDuration">
+                    <div class="border-[1.5px] border-[#A9E816] bg-[#AFFA01] text-[#404040] w-70 h-15 rounded-md flex items-center justify-center">Minutes ( per 1 Day )</div>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-center">
+            <button class="items-center w-130 h-15 rounded-lg mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
+            [disabled]="!canContinue()">
+            <div class="flex justify-center font-[540] text-center text-2xl">
+                Create Your Plan
+            </div>
+            </button>
+        </div>
+    </section>
+
+    <section class="pt-8" *ngIf="currentStep === 3">
+        <div>
+            <div class="grid justify-center">
+                <h2 class="grid justify-center text-[3.5rem] font-bold">About Your Schedule</h2>
+                <span class="text-center max-w-3xl text-[1.4rem]">We already have workout recommendation for you, now for your personalize we need to know about your workout day</span>
+            </div>
+
+            <div class="grid justify-center pt-8 gap-3">
+                <button
+                    *ngFor="let day of workoutDays"
+                    (click)="selectDay(day)"
+                    class="w-110 h-12 rounded-lg text-lg border text-[#808080] transition
+                            hover:bg-[#AFFA01] flex flex-col justify-center"
+                    [ngClass]="selectedDay.includes(day) ? 'bg-[#AFFA01]' : 'bg-white'">
+                    {{ day | titlecase }}
+                </button>
+            </div>
+        </div>
+        <div class="flex justify-center pb-12">
+            <button class="items-center w-130 h-15 rounded-lg mt-15 flex justify-center bg-[#AFFA01]" (click)="next()"
+            [disabled]="!canContinue()">
+            <div class="flex justify-center font-[540] text-center text-2xl">
+                Continue
+            </div>
+            </button>
+        </div>
+    </section>
+</div>
