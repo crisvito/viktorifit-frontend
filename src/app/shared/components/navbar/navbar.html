@@ -4,21 +4,57 @@
       class="bg-black/45 backdrop-blur-md border border-[#626262]/75 shadow-lg rounded-full px-12 py-5 flex items-center justify-between text-white w-full"
     >
       <div>viktorifit</div>
+
       <div class="flex gap-8">
-        <a routerLink="/" class="hover:text-(--main-color) transition font-semibold"> Home </a>
-        <a routerLink="/programs" class="hover:text-(--main-color) transition font-semibold">
+        <a
+          routerLink="/"
+          routerLinkActive="text-(--main-color)"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="hover:text-(--main-color) transition font-semibold"
+        >
+          Home
+        </a>
+
+        <a
+          routerLink="/programs"
+          routerLinkActive="text-(--main-color)"
+          class="hover:text-(--main-color) transition font-semibold"
+        >
           Programs
         </a>
-        <a routerLink="/pricing" class="hover:text-(--main-color) transition font-semibold">
+
+        <a
+          routerLink="/pricing"
+          routerLinkActive="text-(--main-color)"
+          class="hover:text-(--main-color) transition font-semibold"
+        >
           Pricing
         </a>
-        <a routerLink="/about" class="hover:text-(--main-color) transition font-semibold">About</a>
+
         <a
-          routerLink="login"
-          class="hover:text-(--main-color) transition font-semibold cursor-pointer" 
-          type="button"
-          >Login</a
+          routerLink="/about"
+          routerLinkActive="text-(--main-color)"
+          class="hover:text-(--main-color) transition font-semibold"
         >
+          About
+        </a>
+
+        <a
+          routerLink="/support"
+          routerLinkActive="text-(--main-color)"
+          class="hover:text-(--main-color) transition font-semibold"
+        >
+          Support
+        </a>
+
+        <a
+          routerLink="/login"
+          routerLinkActive="text-(--main-color)"
+          class="hover:text-(--main-color) transition font-semibold cursor-pointer"
+          type="button"
+        >
+          Login
+        </a>
       </div>
     </div>
   </div>
