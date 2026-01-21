@@ -1,0 +1,527 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,900&family=Raleway:wght@400;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Raleway', sans-serif;
+  background-color: #000;
+  color: #F2F2F2;
+}
+
+/* Header & Hero Section */
+.hero-section {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
+  background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/assets/support/support-image.png');
+  background-size: cover;
+  background-position: center;
+  padding-top: 120px;
+}
+
+.hero-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 3.5rem;
+  font-style: italic;
+  font-weight: 900;
+  color: #AFFA01;
+  margin-bottom: 2rem;
+  line-height: 1;
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.25rem;
+  width: 20px;
+  height: 20px;
+  z-index: 1;
+  opacity: 0.5;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem 1.5rem 1rem 3rem;
+  border-radius: 12px 0 0 12px;
+  background-color: #F2F2F2;
+  color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  outline: none;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+}
+
+.search-button {
+  background-color: #000;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0 12px 12px 0;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-left: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-family: 'Raleway', sans-serif;
+}
+
+.search-button:hover {
+  background-color: #1a1a1a;
+}
+
+/* FAQ Section */
+.faq-section {
+  padding: 4rem 24px;
+  background-color: #fff;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.faq-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.faq-item {
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+  border: 1px solid #e0e0e0;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: 'Raleway', sans-serif;
+  transition: all 0.3s;
+  color: #000;
+  background-color: #f5f5f5;
+}
+
+.faq-question:hover {
+  background-color: #ebebeb;
+}
+
+.faq-toggle {
+  color: #000;
+  font-size: 1.8rem;
+  font-weight: 300;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.faq-toggle.active-icon {
+  color: #000;
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-family: 'Raleway', sans-serif;
+  color: #333;
+  background-color: #fff;
+  opacity: 0;
+}
+
+.faq-item.active .faq-answer {
+  max-height: 300px;
+  padding: 1rem 1.5rem 1.5rem;
+  opacity: 1;
+}
+
+.faq-item.active .faq-question {
+  background-color: #AFFA01;
+  color: #000;
+}
+
+/* Contact Section */
+.contact-section {
+  padding: 4rem 24px;
+  background-color: #fff;
+}
+
+.contact-card {
+  background: linear-gradient(180deg, #000000 0%, #0d1400 30%, #1a2600 50%, #2d4000 75%, #395100 100%);
+  border-radius: 40px;
+  padding: 80px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-inline: 55px;
+}
+
+.contact-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .contact-content {
+    flex-direction: row;
+    gap: 4rem;
+    align-items: center;
+  }
+}
+
+.contact-info {
+  flex: 1;
+}
+
+.help-text {
+  font-family: 'Raleway', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #F2F2F2;
+  margin-bottom: 10px;
+}
+
+.discuss-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 40px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1.1;
+  color: #AFFA01;
+  margin-bottom: 20px;
+}
+
+.text-white {
+  color: #F2F2F2;
+}
+
+.contact-desc {
+  font-family: 'Raleway', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #F2F2F2;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.email-info {
+  font-family: 'Raleway', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #AFFA01;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Contact Form dengan border card */
+.contact-form {
+  flex: 1;
+  width: 100%;
+}
+
+.form-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(175, 250, 1, 0.3);
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-label {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #F2F2F2;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.input-card {
+  background-color: #2D2D2D;
+  border-radius: 10px;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+}
+
+.textbox-input {
+  background-color: transparent;
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  color: #F2F2F2;
+  font-family: 'Raleway', sans-serif;
+  width: 100%;
+  font-size: 1rem;
+  transition: outline 0.3s;
+}
+
+.textbox-input::placeholder {
+  color: #666;
+}
+
+.textbox-input:focus {
+  outline: 2px solid #AFFA01;
+}
+
+textarea.textbox-input {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.char-count {
+  text-align: right;
+  color: #F2F2F2;
+  opacity: 0.5;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  font-family: 'Raleway', sans-serif;
+}
+
+.send-btn {
+  background-color: #AFFA01;
+  color: #000;
+  width: 100%;
+  padding: 15px;
+  border-radius: 10px;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.icon-img-btn {
+  width: 18px;
+  height: 18px;
+}
+
+.send-btn:hover {
+  background-color: #d4ff00;
+  transform: translateY(-2px);
+}
+
+/* Error Message */
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: block;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 600;
+}
+
+/* Style untuk input yang error */
+.input-card.error {
+  border: 1px solid #ff6b6b;
+}
+
+.textbox-input.ng-invalid.ng-touched,
+.textbox-input.ng-invalid.ng-dirty {
+  border-color: #ff6b6b;
+}
+
+/* Footer */
+footer {
+  background-color: #000;
+  color: white;
+  padding: 3rem 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-top: 1px solid #333;
+}
+
+.footer-logo {
+  margin-bottom: 2rem;
+}
+
+.logo-img {
+  height: 50px;
+  width: auto;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-link {
+  font-family: 'Raleway', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #F2F2F2;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-link:hover {
+  color: #AFFA01;
+}
+
+.footer-link.active {
+  color: #AFFA01;
+}
+
+.footer-copyright {
+  text-align: center;
+  color: #F2F2F2;
+  opacity: 0.5;
+  font-size: 0.875rem;
+  max-width: 600px;
+  border-top: 1px solid #333;
+  padding-top: 2rem;
+  font-family: 'Raleway', sans-serif;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* Sesuai dengan 'Gap 10px' di Figma, tapi 15px lebih proporsional untuk visual */
+  margin-top: 2rem;
+}
+
+.social-icon {
+  /* Ukuran lingkaran luar (Besar) */
+  width: 60px; 
+  height: 60px;
+  background-color: #1a1a1a; /* Warna lingkaran gelap di desain */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.social-icon img {
+  /* Ukuran ikon di dalam (Terang & Jelas) */
+  width: 28px; 
+  height: 28px;
+  object-fit: contain;
+  /* Memastikan warna putih ikon terlihat sangat kontras */
+  filter: brightness(0) invert(1); 
+}
+
+.social-icon:hover {
+  background-color: #252525;
+  transform: scale(1.1);
+}
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .contact-card {
+    padding: 2rem;
+    border-radius: 20px;
+    margin-inline: 24px;
+  }
+  
+  .form-card {
+    padding: 20px;
+  }
+  
+  .discuss-title {
+    font-size: 2rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .faq-question {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .faq-answer {
+    padding: 0 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .faq-item.active .faq-answer {
+    padding: 1rem 1.5rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-card {
+    margin-inline: 16px;
+    padding: 1.5rem;
+  }
+  
+  .form-card {
+    padding: 15px;
+  }
+  
+  .faq-question {
+    padding: 1rem;
+  }
+  
+  .faq-answer {
+    padding: 0 1.2rem;
+  }
+  
+  .faq-item.active .faq-answer {
+    padding: 1rem 1.2rem 1.5rem;
+  }
+}
