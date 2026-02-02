@@ -1,18 +1,22 @@
 <section class="relative h-[125vh] w-full bg-black overflow-hidden px-20 flex items-center">
   <div class="absolute right-0 top-0 w-2/3 h-full">
-    <img src="assets/home/banner.png" alt="Banner" class="w-full h-full object-cover" />
+    <img src="/home/banner.png" alt="Banner" class="w-full h-full object-cover" />
     <!-- <div class="absolute inset-0 bg-linear-to-r from-black via-black/60 to-transparent"></div> -->
   </div>
 
   <div class="h-fit container relative z-10">
     <div class="max-w-4/5">
-      <h1 class="text-(--main-color) text-[110px] leading-[110px] font-bold mb-4 italic">
+      <h1
+        class="text-(--main-color) text-[90px] leading-[85px] font-bold mb-4 italic tracking-tight"
+      >
         RAISE YOUR POTENTIAL
       </h1>
-      <p class="text-slate-300 w-3/4 text-[30px] leading-[35px]">
+      <p class="text-white w-1/2 text-19px] tracking-wide leading-[27px]">
         Planning your workout and get the best recommendation with ViktoriFit!
       </p>
-      <app-button ariaLabel="Klik untuk memulai pendaftaran"> Start Now </app-button>
+      <app-button ariaLabel="Klik untuk memulai pendaftaran" extraClass="!text-[20px] !font-[540]">
+        Start Now
+      </app-button>
     </div>
   </div>
 </section>
@@ -23,53 +27,142 @@
       class="absolute bottom-7 left-7 w-100 h-full bg-(--main-color) rounded-3xl shadow-md"
     ></div>
     <div class="relative">
-      <img src="/assets/home/image1.png" alt="" class="w-[400px]" />
+      <img src="/home/image1.png" alt="" class="w-[400px]" />
     </div>
   </div>
 
   <div class="flex-1">
     <h2 class="text-7xl leading-[90px] font-bold mb-4 text-[#557A00] italic">PLAN YOUR WORKOUT</h2>
-    <p class="text-[24px]">
+    <p class="text-[18px]">
       Viktorifit hadir sebagai personal workout trainer berbasis Machine Learning yang akan membantu
       mu menjadwalkan olahraga dan olahraga apa yang cocok dengan kondisi mu saat ini!
     </p>
-    <app-button ariaLabel="Klik untuk mempelajari lebih lanjut"> Learn More </app-button>
+    <app-button ariaLabel="Klik untuk mempelajari lebih lanjut" extraClass="!text-[18px]">
+      Try Recomendation
+    </app-button>
   </div>
 </section>
 
-<section class="h-fit px-20 py-20 flex flex-col gap-10 bg-[#CFED89]">
+<section class="our-services -fit px-20 py-15 flex flex-col gap-10 bg-[#CFED89]">
   <div class="flex-1">
-    <h2 class="text-7xl leading-[90px] font-bold text-[#557A00] italic">OUR BENEFITS</h2>
-    <p class="text-[24px] w-3/4">
+    <h2 class="text-[72px] leading-[90px] font-bold text-[#557A00] italic text-center">
+      OUR SERVICES
+    </h2>
+    <p class="text-[18px] text-center">
       Melalui layanan kami, kamu bisa mendapatkan berbagai benefit tanpa mengeluarkan biaya sama
       sekali!
     </p>
   </div>
 
-  <div class="flex-1 flex justify-between gap-5">
-    <div class="bg-white rounded-xl flex-1 p-10 flex flex-col items-center justify-center">
-      <img src="/assets/home/image2.png" alt="" class="w-[195px]" />
-      <h3 class="text-[30px] font-bold text-[#82BA00] mb-4">Free</h3>
-      <p class="text-center">Semua fitur dapat diakses tanpa terbatas dan gratis</p>
-    </div>
-    <div class="bg-white rounded-xl flex-1 p-10 flex flex-col items-center justify-center">
-      <img src="/assets/home/image3.png" alt="" class="w-[195px]" />
-      <h3 class="text-[30px] font-bold text-[#82BA00] mb-4">Machine Learning</h3>
-      <p class="text-center">Sistem rekomendasi berbasis machine learning</p>
-    </div>
-    <div class="bg-white rounded-xl flex-1 p-10 flex flex-col items-center justify-center">
-      <img src="/assets/home/image4.png" alt="" class="w-[195px]" />
-      <h3 class="text-[30px] font-bold text-[#82BA00] mb-4">Scheduling</h3>
-      <p class="text-center">Personalisasi jadwal berdasarkan waktu luangmu</p>
+  <div class="w-full flex"> 
+    <div class="flex flex-wrap justify-center gap-6">
+      <div
+        class="bg-white rounded-xl p-8 flex flex-col items-start justify-center flex-[0_1_30%] min-w-[300px]"
+      >
+        <img src="/home/ourServices/calender.png" alt="" class="w-[70px]" />
+        <h3 class="text-[24px] font-bold text-[#557A00] mb-1 mt-3">Workout Calender</h3>
+        <p>
+          Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam
+          berolahraga.
+        </p>
+      </div>
+      <div
+        class="bg-white rounded-xl p-8 flex flex-col items-start justify-center flex-[0_1_30%] min-w-[300px]"
+      >
+        <img src="/home/ourServices/recomendation.png" alt="" class="w-[70px]" />
+        <h3 class="text-[24px] font-bold text-[#557A00] mb-1 mt-3">Recommendation</h3>
+        <p>
+          Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam
+          berolahraga.
+        </p>
+      </div>
+      <div
+        class="bg-white rounded-xl p-8 flex flex-col items-start justify-center flex-[0_1_30%] min-w-[300px]"
+      >
+        <img src="/home/ourServices/tracker.png" alt="" class="w-[70px]" />
+        <h3 class="text-[24px] font-bold text-[#557A00] mb-1 mt-3">Body Tracker</h3>
+        <p>
+          Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam
+          berolahraga.
+        </p>
+      </div>
+      <div
+        class="bg-white rounded-xl p-8 flex flex-col items-start justify-center flex-[0_1_30%] min-w-[300px]"
+      >
+        <img src="/home/ourServices/history.png" alt="" class="w-[70px]" />
+        <h3 class="text-[24px] font-bold text-[#557A00] mb-1 mt-3">Activiy History</h3>
+        <p>
+          Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam
+          berolahraga.
+        </p>
+      </div>
+      <div
+        class="bg-white rounded-xl p-8 flex flex-col items-start justify-center flex-[0_1_30%] min-w-[300px]"
+      >
+        <img src="/home/ourServices/tutorial.png" alt="" class="w-[70px]" />
+        <h3 class="text-[24px] font-bold text-[#557A00] mb-1 mt-3">Tutorials</h3>
+        <p>
+          Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam
+          berolahraga.
+        </p>
+      </div>
     </div>
   </div>
+</section>
 
-  <div class="flex justify-end">
-    <app-button
-      ariaLabel="Klik untuk melihat rekomendasi"
-      extraClass="bg-black text-white !mt-0 w-auto"
-    >
-      Try Recommendation
-    </app-button>
+<section class="px-20 py-32 flex flex-row-reverse items-center gap-20">
+  <img src="/home/image1.png" alt="" class="w-[519px]" />
+
+  <div class="flex flex-col gap-5">
+    <div>
+      <h2 class="text-[64px] leading-[60px] font-bold mb-4 text-[#557A00] italic">THE BENEFITS</h2>
+      <p class="text-[18px] w-5/6">
+        Melalui layanan kami, kamu bisa mendapatkan berbagai benefit tanpa mengeluarkan biaya sama
+        sekali!
+      </p>
+    </div>
+    <div class="flex flex-col gap-3">
+      <div class="flex px-5 py-3 bg-[#EDEDED] rounded-2xl items-center gap-3">
+        <div class="w-28">
+          <img src="/home/image2.png" alt="" class="w-[100px]" />
+        </div>
+        <div>
+          <h3 class="text-[#82BA00] text-[22px] font-semibold">Free</h3>
+          <p>Semua fitur dapat diakses tanpa terbatas dan gratis</p>
+        </div>
+      </div>
+      <div class="flex px-5 py-3 bg-[#EDEDED] rounded-2xl items-center gap-3">
+        <div class="w-28">
+          <img src="/home/image3.png" alt="" class="w-[100px]" />
+        </div>
+        <div>
+          <h3 class="text-[#82BA00] text-[22px] font-semibold">Machine Learning</h3>
+          <p>Semua fitur dapat diakses tanpa terbatas dan gratis</p>
+        </div>
+      </div>
+      <div class="flex px-5 py-3 bg-[#EDEDED] rounded-2xl items-center gap-3">
+        <div class="w-28">
+          <img src="/home/image4.png" alt="" class="w-[100px]" />
+        </div>
+        <div>
+          <h3 class="text-[#82BA00] text-[22px] font-semibold">Personalize Your Schedule</h3>
+          <p>Personalisasi jadwal berdasarkan waktu luangmu</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="px-20 py-10">
+  <div class="bg-black w-full rounded-3xl overflow-hidden text-white flex items-center">
+    <img src="/home/image5.png" alt="" class="w-[519px]" />
+    <div class="pe-15 flex flex-col gap-5">
+      <h2 class="text-[50px] font-semibold leading-[60px] italic">PERSONALIZE YOUR WORKOUT NOW!</h2>
+      <p>
+        Daftar dan buat akun di Viktorifit sekarang! Buat jadwal olahraga mu yang fleksibel dan
+        sesuai dengan kebutuhan mu sekarang.
+      </p>
+      <app-button extraClass="!mt-7 text-black !text-[18px]"> Start Now </app-button>
+    </div>
   </div>
 </section>

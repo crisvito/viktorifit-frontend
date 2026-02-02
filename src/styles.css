@@ -3,14 +3,28 @@
 
 @font-face {
   font-family: 'Poppins';
-  src: url('/assets/fonts/Poppins-Regular.ttf') format('truetype');
+  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('/assets/fonts/Poppins-Bold.ttf') format('truetype');
+  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/static/Raleway-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('/fonts/static/Raleway-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
 }
@@ -20,7 +34,7 @@
   --main-color: #AFFA01; 
   
   /* font */
-  --font-family: 'Poppins', sans-serif;
+  --font-family-poppins: 'Poppins', sans-serif;
 
   /* text */
   --banner-title: 128px;  
@@ -37,7 +51,7 @@ body {
   -ms-overflow-style: none; 
   */
   
-  font-family: var(--font-family);
+  font-family: var(--font-family-poppins);
 }
 
 body::-webkit-scrollbar {
