@@ -1,0 +1,355 @@
+
+<section class="relative h-[110vh] w-full bg-black overflow-hidden px-20 flex items-center">
+  <div class="absolute right-0 top-0 h-full">
+    <img src="assets/suggestion/suggestionFirst.png" alt="Banner" class="w-full h-full object-cover" />
+    <div class="absolute inset-0 bg-linear-to-t from-black via-black/80 to-transparent"></div>
+  </div>
+
+  <div class="h-fit container relative z-10 justify-items-center">
+    <div class="max-w-4/5 text-center">
+      <h1 class="text-(--main-color) text-[72px] leading-[110px] font-bold mb-4 italic">
+        GET YOUR WORKOUT!
+      </h1>
+      <p class="text-slate-300 w-2/3 mx-auto text-[20px] leading-[25px]">
+        Hanya dalam waktu 10 menit, dapatkan penjelasan “yang begitu akurat“ 
+        tentang diri Anda dan alasan yang mendasari cara Anda dalam bertindak.
+      </p>
+      <app-button ariaLabel="Klik untuk memulai pendaftaran"> Try Now </app-button>
+    </div>
+  </div>
+</section>
+
+<!-- DIFFERENT PAGES(ini page after user ngisi personal data) -->
+
+<!-- Workout Type Section -->
+<section class="relative h-screen px-20 flex justify-between overflow-hidden">
+  <div class="w-1/2 h-full flex flex-col justify-center pr-10 z-10">
+      <p class="text-slate-300 text-[20px] mb-2">
+        Your workout type is :
+      </p>
+      <h2 class="text-7xl font-bold mb-6 text-[#A3E635] italic"> Cardio Fitness
+      </h2>
+      <p class="text-slate-300 text-[18px] leading-relaxed max-w-lg">
+        Workout jenis ini merupakan workout yang berfokus pada bagian jantung. 
+        Secara umum, cardio fitness digunakan untuk menurunkan berat badan.
+      </p>
+    </div>
+
+    <div class="w-1/2 h-full flex items-end justify-end z-10 pb-0">
+      <img 
+        src="assets/suggestion/cardio.png" 
+        alt="Cardio Runner" 
+        class="object-contain max-h-[80vh]" 
+      />
+    </div>
+
+    <div class="absolute bottom-0 left-0 w-full z-9">
+      <img 
+        src="assets/suggestion/city.png" 
+        alt="City Background" 
+        class="w-full h-auto object-cover" 
+      />
+    </div>
+
+    <div class="absolute h-[94vh] inset-0 bg-black z-0"></div>
+
+</section>
+
+<!-- Body Condition Section -->
+<section class="h-screen px-20 flex items-center justify-between">
+  
+  <div class="w-full max-w-6xl grid grid-cols-7 gap-10 items-start">
+    <div class="col-span-4 pr-20">
+      <div class="flex-1 mb-10">
+          <h2 class="text-[32px] font-bold text-black mb-1">
+            Body Condition
+        </h2>
+          <h1 class="text-6xl font-bold italic text-[#6A9700] leading-[1.15]">
+            Here your body information
+          </h1>
+      </div>
+
+      <div>
+        
+        <div class="grid grid-cols-2 gap-6 mb-5">
+          
+          <div>
+            <span class="block text-gray-500 font-semibold mb-2">Age</span>
+            <div class="w-full bg-gray-100 text-gray-700 rounded-xl px-4 py-6">
+              {{inputUser.age}}
+            </div>
+          </div>
+
+          <div>
+            <span class="block text-gray-500 font-semibold mb-2">Gender</span>
+            <div class="flex items-center gap-10 h-[48px]"> 
+              <div class="flex items-center gap-5">
+                <div class="w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center">
+                </div>
+                <span class="text-gray-600 font-medium">Female</span>
+              </div>
+
+              <div class="flex items-center gap-5">
+                <div class="w-5 h-5 rounded-full border-2 border-gray-400 flex items-center justify-center">
+                </div>
+                <span class="text-gray-600 font-medium">Male</span>
+              </div>
+            
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+          
+        <div>
+          <span class="block text-gray-500 font-semibold mb-2">Height</span>
+          <div class="flex gap-2">
+            <div class="w-full bg-gray-100 text-gray-700 rounded-xl px-4 py-6">
+              {{inputUser.height}}
+            </div>
+            <div class="bg-lime-400 rounded-xl px-7 flex items-center justify-center font-bold text-lime-900 shadow-sm">
+              cm
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <span class="block text-gray-500 font-semibold mb-2">Weight</span>
+          <div class="flex gap-2">
+            <div class="w-full bg-gray-100 text-gray-700 rounded-xl px-4 py-6">
+              {{inputUser.weight}}
+            </div>
+            <div class="bg-lime-400 rounded-xl px-7 flex items-center justify-center font-bold text-lime-900 shadow-sm">
+              kg
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div>
+        <span class="block text-gray-500 font-semibold mb-2">Symptoms</span>
+        <div class="w-full bg-gray-100 text-gray-700 rounded-xl px-4 py-4 min-h-[100px] select-none">
+          {{inputUser.symptoms}}
+        </div>
+      </div>
+
+    </div>
+
+      <div class="hidden lg:block h-full col-span-3"> 
+        <div class="w-full h-full min-h-[500px] flex items-center justify-center text-gray-400">
+          <app-bmi-gauge 
+            [bmiScore]="resultData ? resultData.bmiScore : 0"
+            class="block w-full h-full items-center justify-center">
+        </app-bmi-gauge>
+        </div>
+      </div>
+    </div>
+
+
+
+</section>
+
+<!-- Goal Section & workout suggestion -->
+<section class="h-fit px-20 py-20 rounded-xl flex flex-col bg-[#CFED89] m-20 gap-20">
+
+  <div class="flex gap-30">
+    <div class="w-[300px] h-full flex items-end justify-end z-10">
+        <img 
+          src="assets/suggestion/cardio.png" 
+          alt="Cardio Runner" 
+          class="object-cover max-h-full" 
+        />
+    </div>
+
+    <div class="flex-1 gap-10">
+        <div class="flex-1 mb-10">
+          <h2 class="text-[32px] font-bold text-black mb-1">
+              Your Goal
+          </h2>
+          <h1 class="text-6xl font-bold italic text-[#6A9700] mb-10 w-2/3 leading-[1.15]">
+              Your Goal is {{resultData.goal}}!
+          </h1>
+          <p class="text-[20px] w-7/8 leading-[1.5]">
+              Workout jenis ini merupakan workout yang berfokus pada bagian jantung, Secara umum, cardio fitness digunakan untuk menurunkan berat badan.
+          </p>
+        </div>
+
+        <div class="flex-1 flex justify-between gap-5">
+    
+          <div class="bg-white rounded-xl flex-1 p-8 flex gap-2 flex-col">
+            <div>
+                <span class="inline-flex items-center justify-center rounded-xl bg-[#AFFA01] p-3">
+                    <img src="/assets/suggestion/target.png" alt="" class="h-10  w-10" />
+                </span>
+            </div>
+            <h4 class="text-[24px] font-bold">Target</h4>
+            <p class="text-[16px] leading-[1.75]">Workout jenis ini merupakan workout yang berfokus pada bagian jantung
+            </p>
+          </div>
+
+          <div class="bg-white rounded-xl flex-1 p-8 flex gap-2 flex-col">
+            <div>
+                <span class="inline-flex items-center justify-center rounded-xl bg-[#AFFA01] p-3">
+                    <img src="/assets/suggestion/warning.png" alt="" class="h-10  w-10" />
+                </span>
+            </div>
+            <h4 class="text-[24px] font-bold">Side Effects</h4>
+            <p class="text-[16px] leading-[1.75]">Workout jenis ini merupakan workout yang berfokus pada bagian jantung
+            </p>
+          </div>
+          
+        </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="h-fit flex flex-col gap-20">
+    <div class="flex-1 items-center mx-auto">
+      <h2 class="text-center text-[32px] leading-[72px] font-bold text-[#557A00] italic">Workout suggestion</h2>
+      <p class="text-[20px] text-center w-3/4 mx-auto">
+        Workout jenis ini merupakan workout yang berfokus pada bagian jantung, Secara umum, 
+        cardio fitness digunakan untuk menurunkan berat badan.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-3 gap-8">
+
+      <div class="bg-[#F2F2F2] flex gap-5 items-center rounded-[12px] outline outline-[#B9B9B9] justify-center p-5">
+        <div class="bg-[#AFFA01] p-3 rounded-[8px]">
+            <img src="/assets/suggestion/target.png" alt="" class="h-12 w-12" />
+        </div>
+
+        <div class="flex-1 text-black">
+            <h3 class="text-[20px] font-bold">Running</h3>
+            <p class="text-[16px]">60 minutes/day</p>
+        </div>
+
+      </div>
+
+      <!-- kalau udah diconnect ke database trus pake *ngFor, bagian ini dihapus -->
+      <div class="bg-[#F2F2F2] flex gap-5 items-center rounded-[12px] outline outline-[#B9B9B9] justify-center p-5">
+        <div class="bg-[#AFFA01] p-3 rounded-[8px]">
+            <img src="/assets/suggestion/target.png" alt="" class="h-12 w-12" />
+        </div>
+
+        <div class="flex-1 text-black">
+            <h3 class="text-[20px] font-bold">Running</h3>
+            <p class="text-[16px]">60 minutes/day</p>
+        </div>
+
+      </div>
+
+      <div class="bg-[#F2F2F2] flex gap-5 items-center rounded-[12px] outline outline-[#B9B9B9] justify-center p-5">
+        <div class="bg-[#AFFA01] p-3 rounded-[8px]">
+            <img src="/assets/suggestion/target.png" alt="" class="h-12 w-12" />
+        </div>
+
+        <div class="flex-1 text-black">
+            <h3 class="text-[20px] font-bold">Running</h3>
+            <p class="text-[16px]">60 minutes/day</p>
+        </div>
+
+      </div>
+      <!-- sampai sini -->
+
+    </div>
+  </div>
+
+
+</section>
+
+<!-- Diet Plans Section -->
+<section class="h-fit mx-20 mb-30 flex flex-col gap-10">
+  <div>
+    
+    <!-- About Diet Plan -->
+    <div class="flex gap-10 mb-10 items-center ">
+      
+      <div class = "flex-1 w-1/2">
+        <h2 class="text-[32px] font-bold text-black mb-1">
+            Diet Plan
+        </h2>
+        <h1 class="text-6xl font-bold italic text-[#6A9700] mb-10 leading-[1.15]">
+            We've Prepared You Diet Plan
+        </h1>
+      </div>
+
+      <p class="text-[20px] w-1/2 leading-[1.5]">
+            Kami memberikan beberapa rekomendasi makanan yang bisa mendukung Workout-mu mencapai tujuan mu! Rekomendasi 
+            makanan ini dibedakan berdasarkan 3 bagian penting serta disesuaikan dengan kebutuhan anda
+      </p>
+
+    </div>
+
+    <!-- Content -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+      <div class="relative mt-12 bg-gray-50 rounded-2xl p-8 border border-gray-200 text-center shadow-sm">
+        
+        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-[#FFB0A4] rounded-xl flex items-center justify-center border-2 border-[#F60C0C] shadow-sm">
+          <svg class="w-10 h-10 text-[#F60C0C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        </div>
+
+        <h3 class="mt-8 text-2xl font-bold text-red-500 mb-4">Meat</h3>
+        <p class="text-lg text-gray-600 leading-relaxed">
+          Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam berolahraga.
+        </p>
+      </div>
+
+      <div class="relative mt-12 bg-gray-50 rounded-2xl p-10 border border-gray-200 text-center shadow-sm">
+        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-lime-300 rounded-xl flex items-center justify-center border-2 border-lime-500 shadow-sm">
+          <svg class="w-10 h-10 text-lime-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+        </div>
+        
+        <h3 class="mt-8 text-2xl font-bold text-[#557A00] mb-4">Vegetables</h3>
+        <p class="text-lg text-gray-600 leading-relaxed">
+          Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam berolahraga.
+        </p>
+      </div>
+
+      <div class="relative mt-12 bg-gray-50 rounded-2xl p-8 border border-gray-200 text-center shadow-sm">
+        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-yellow-200 rounded-xl flex items-center justify-center border-2 border-yellow-500 shadow-sm">
+          <svg class="w-10 h-10 text-yellow-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        </div>
+
+        <h3 class="mt-8 text-2xl font-bold text-yellow-600 mb-4">Juice</h3>
+        <p class="text-lg text-gray-600 leading-relaxed">
+          Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam berolahraga.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="h-fit px-20 py-20 rounded-2xl flex flex-col bg-[#131313] m-20 gap-20">
+
+  <div class="flex gap-20 items-center justify-center">
+    
+    <div class = "flex-1 w-3/4">
+      <h1 class="text-6xl font-bold italic text-white mb-5 leading-[1.15] w-3/4">
+        CONTINUE YOUR PLAN NOW!
+      </h1>
+
+      <p class="text-lg text-white leading-[1.5] w-3/4">
+        Lengkapi data mu dan buat jadwal olahraga mu menjadi lebih fleksibel dengan ViktoriFit!
+      </p>
+    </div>
+
+    <app-button class="">
+      Continue
+    </app-button>
+    
+  </div>
+
+</section>
+
