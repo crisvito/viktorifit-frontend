@@ -1,0 +1,206 @@
+<section class="hero-section">
+  <h1 class="hero-title">HOW CAN WE HELP?</h1>
+
+  <div class="search-container">
+    <img src="/support/search-icon.svg" alt="Search" class="search-icon" />
+    <input
+      type="text"
+      placeholder="Search Question"
+      class="search-input"
+      (input)="searchFAQ($event)"
+    />
+    <button class="search-button">Search</button>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+  <h2 class="section-title">Frequently Asked Question</h2>
+
+  <div class="faq-container">
+    <!-- FAQ Item 1 -->
+    <div class="faq-item" [class.active]="activeIndex === 0">
+      <div class="faq-question" (click)="toggle(0)">
+        <span>Do I need gym equipment to follow the training programs?</span>
+        <span class="faq-toggle" [class.active-icon]="activeIndex === 0">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          No. Viktorifit provides both home-based and gym-based programs. You can choose according
+          to your available equipment.
+        </p>
+      </div>
+    </div>
+
+    <!-- FAQ Item 2 -->
+    <div class="faq-item" [class.active]="activeIndex === 1">
+      <div class="faq-question" (click)="toggle(1)">
+        <span>How does Viktorifit's workout recommendation system work?</span>
+        <span class="faq-toggle" [class.active-icon]="activeIndex === 1">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          Viktorifit uses your profile data, goals, and activity history to recommend workouts that
+          match your fitness level.
+        </p>
+      </div>
+    </div>
+
+    <!-- FAQ Item 3 -->
+    <div class="faq-item" [class.active]="activeIndex === 2">
+      <div class="faq-question" (click)="toggle(2)">
+        <span>What happens if I miss a scheduled workout?</span>
+        <span class="faq-toggle" [class.active-icon]="activeIndex === 2">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          You can reschedule or continue your program without penalties. Viktorifit adapts to your
+          progress, not perfection.
+        </p>
+      </div>
+    </div>
+
+    <!-- FAQ Item 4 -->
+    <div class="faq-item" [class.active]="activeIndex === 3">
+      <div class="faq-question" (click)="toggle(3)">
+        <span>Is my workout and progress data secure?</span>
+        <span class="faq-toggle" [class.active-icon]="activeIndex === 3">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          Yes. We prioritize user privacy and ensure your data is securely stored and protected.
+        </p>
+      </div>
+    </div>
+
+    <!-- FAQ Item 5 -->
+    <div class="faq-item" [class.active]="activeIndex === 4">
+      <div class="faq-question" (click)="toggle(4)">
+        <span>Can beginners use Viktorifit?</span>
+        <span class="faq-toggle" [class.active-icon]="activeIndex === 4">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>Absolutely. Viktorifit is designed for all levels, from beginners to advanced users.</p>
+      </div>
+    </div>
+
+    <!-- FAQ Item 6 -->
+    <div class="faq-item" [class.active]="activeIndex === 5">
+      <div class="faq-question" (click)="toggle(5)">
+        <span>Is Viktorifit free to use?</span>
+        <span class="faq-toggle" [class.active-icon]="activeIndex === 5">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          Viktorifit offers free features, with optional premium plans for advanced programs and
+          personalized recommendations.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section class="contact-section">
+  <div class="contact-card">
+    <div class="contact-content">
+      <div class="contact-info">
+        <p class="help-text">We're here to help you!</p>
+        <h2 class="discuss-title">
+          LETS DISCUSS<br />
+          <span class="text-white">Your Problem's<br />Solution Now!</span>
+        </h2>
+        <p class="contact-desc">
+          Hello! If you still have any question or problem you can tell us here, or contact us to
+          our social media. Thank you!
+        </p>
+        <div class="email-info">
+          <img src="/support/Inbox.svg" alt="Email" class="icon-img" />
+          viktorifit@gmail.com
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <div class="form-card">
+          <form (ngSubmit)="submitForm(contactForm)" #contactForm="ngForm">
+            <div class="form-group">
+              <label for="name" class="input-label">Name</label>
+              <div class="input-card">
+                <input
+                  type="text"
+                  id="name"
+                  placeholder="e.g John Green"
+                  class="textbox-input"
+                  [(ngModel)]="contactData.name"
+                  name="name"
+                  #nameInput="ngModel"
+                  required
+                />
+              </div>
+              <div
+                class="error-message"
+                *ngIf="nameInput.invalid && (nameInput.touched || contactForm.submitted)"
+              >
+                This field is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email" class="input-label">Email</label>
+              <div class="input-card">
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="e.g johngreen@gmail.com"
+                  class="textbox-input"
+                  [(ngModel)]="contactData.email"
+                  name="email"
+                  #emailInput="ngModel"
+                  required
+                  email
+                />
+              </div>
+              <div
+                class="error-message"
+                *ngIf="emailInput.invalid && (emailInput.touched || contactForm.submitted)"
+              >
+                <span *ngIf="emailInput.errors?.['required']">This field is required</span>
+                <span *ngIf="emailInput.errors?.['email']">Please enter a valid email address</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="description" class="input-label">Description</label>
+              <div class="input-card">
+                <textarea
+                  id="description"
+                  rows="4"
+                  placeholder="Write your question or problem here..."
+                  class="textbox-input"
+                  [(ngModel)]="contactData.description"
+                  name="description"
+                  #descInput="ngModel"
+                  required
+                  maxlength="200"
+                ></textarea>
+              </div>
+              <div class="flex flex-row-reverse justify-between items-center">
+                <div class="char-count">{{ contactData.description.length }}/200</div>
+                <div
+                  class="error-message"
+                  *ngIf="descInput.invalid && (descInput.touched || contactForm.submitted)"
+                >
+                  This field is required
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="send-btn">
+              <img src="/support/Send.svg" alt="Send" class="icon-img-btn" /> Send
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

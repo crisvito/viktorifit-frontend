@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layouts/main-layout/main-layout';
-import { HomePage, LoginPage, RegisterPage } from './pages';
+import { HomePage, LoginPage, RegisterPage, SupportPage } from './pages';
 import { BlankLayout } from './layouts/blank-layout/blank-layout';
 export const routes: Routes = [
   {
@@ -9,6 +9,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: HomePage },
       // { path: 'login', component: LoginPage },
+      { path: 'support', component: SupportPage}
     ]
   },
   {

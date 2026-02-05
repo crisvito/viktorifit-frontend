@@ -1,59 +1,75 @@
 /* You can add global styles to this file, and also import other style files */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @font-face {
   font-family: 'Poppins';
-  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+  src: url('/fonts/Poppins/Poppins-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+  src: url('/fonts/Poppins/Poppins-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Raleway';
-  src: url('/fonts/static/Raleway-Regular.ttf') format('truetype');
+  src: url('/fonts/Raleway/static/Raleway-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Raleway';
-  src: url('/fonts/static/Raleway-Bold.ttf') format('truetype');
+  src: url('/fonts/Raleway/static/Raleway-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
 }
 
 :root {
   /* color */
-  --main-color: #AFFA01; 
-  
+  --main-color: #affa01;
+
   /* font */
   --font-family-poppins: 'Poppins', sans-serif;
 
   /* text */
-  --banner-title: 128px;  
-  --banner-sub: 32px;  
+  --banner-title: 128px;
+  --banner-sub: 32px;
 
   /* line-height */
-  --lh-tight: 100px;             
+  --lh-tight: 100px;
   --lh-relaxed: 120px;
-  
 }
 
-body {
+* {
   /* scrollbar-width: none; 
   -ms-overflow-style: none; 
   */
-  
   font-family: var(--font-family-poppins);
 }
 
 body::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge */
+}
+
+/* Menghilangkan ikon mata bawaan Microsoft Edge */
+input::-ms-reveal {
+  display: none;
+}
+
+/* Menghilangkan tombol clear (tanda silang) bawaan Microsoft Edge/IE */
+input::-ms-clear {
+  display: none;
+}
+
+/* Untuk browser berbasis Webkit (Chrome/Safari) jika muncul ikon serupa */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
 }
