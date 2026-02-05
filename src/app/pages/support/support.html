@@ -18,84 +18,25 @@
   <h2 class="section-title">Frequently Asked Question</h2>
 
   <div class="faq-container">
-    <!-- FAQ Item 1 -->
-    <div class="faq-item" [class.active]="activeIndex === 0">
-      <div class="faq-question" (click)="toggle(0)">
-        <span>Do I need gym equipment to follow the training programs?</span>
-        <span class="faq-toggle" [class.active-icon]="activeIndex === 0">+</span>
+    <div *ngIf="isLoading" class="text-center py-5">
+      <p>Loading questions...</p>
+    </div>
+    <div
+      *ngFor="let item of faqs; let i = index"
+      class="faq-item"
+      [class.active]="activeIndex === i"
+    >
+      <div class="faq-question" (click)="toggle(i)">
+        <span>{{ item.question }}</span>
+        <span class="faq-toggle" [class.active-icon]="activeIndex === i">+</span>
       </div>
+
       <div class="faq-answer">
-        <p>
-          No. Viktorifit provides both home-based and gym-based programs. You can choose according
-          to your available equipment.
-        </p>
+        <p>{{ item.answer }}</p>
       </div>
     </div>
-
-    <!-- FAQ Item 2 -->
-    <div class="faq-item" [class.active]="activeIndex === 1">
-      <div class="faq-question" (click)="toggle(1)">
-        <span>How does Viktorifit's workout recommendation system work?</span>
-        <span class="faq-toggle" [class.active-icon]="activeIndex === 1">+</span>
-      </div>
-      <div class="faq-answer">
-        <p>
-          Viktorifit uses your profile data, goals, and activity history to recommend workouts that
-          match your fitness level.
-        </p>
-      </div>
-    </div>
-
-    <!-- FAQ Item 3 -->
-    <div class="faq-item" [class.active]="activeIndex === 2">
-      <div class="faq-question" (click)="toggle(2)">
-        <span>What happens if I miss a scheduled workout?</span>
-        <span class="faq-toggle" [class.active-icon]="activeIndex === 2">+</span>
-      </div>
-      <div class="faq-answer">
-        <p>
-          You can reschedule or continue your program without penalties. Viktorifit adapts to your
-          progress, not perfection.
-        </p>
-      </div>
-    </div>
-
-    <!-- FAQ Item 4 -->
-    <div class="faq-item" [class.active]="activeIndex === 3">
-      <div class="faq-question" (click)="toggle(3)">
-        <span>Is my workout and progress data secure?</span>
-        <span class="faq-toggle" [class.active-icon]="activeIndex === 3">+</span>
-      </div>
-      <div class="faq-answer">
-        <p>
-          Yes. We prioritize user privacy and ensure your data is securely stored and protected.
-        </p>
-      </div>
-    </div>
-
-    <!-- FAQ Item 5 -->
-    <div class="faq-item" [class.active]="activeIndex === 4">
-      <div class="faq-question" (click)="toggle(4)">
-        <span>Can beginners use Viktorifit?</span>
-        <span class="faq-toggle" [class.active-icon]="activeIndex === 4">+</span>
-      </div>
-      <div class="faq-answer">
-        <p>Absolutely. Viktorifit is designed for all levels, from beginners to advanced users.</p>
-      </div>
-    </div>
-
-    <!-- FAQ Item 6 -->
-    <div class="faq-item" [class.active]="activeIndex === 5">
-      <div class="faq-question" (click)="toggle(5)">
-        <span>Is Viktorifit free to use?</span>
-        <span class="faq-toggle" [class.active-icon]="activeIndex === 5">+</span>
-      </div>
-      <div class="faq-answer">
-        <p>
-          Viktorifit offers free features, with optional premium plans for advanced programs and
-          personalized recommendations.
-        </p>
-      </div>
+    <div *ngIf="!isLoading && faqs.length === 0" class="text-center py-10">
+      <p class="text-gray-400">No FAQ found.</p>
     </div>
   </div>
 </section>
