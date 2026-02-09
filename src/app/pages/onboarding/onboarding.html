@@ -1,64 +1,61 @@
-<div class="font-poppins">
-  <div class="flex justify-center space-x-2.5 pt-12">
-    <div *ngFor="let step of steps; let i = index" class="w-35 h-2 rounded-full transition-all duration-300"
-      [ngClass]="currentStep > i
-        ? 'bg-lime-400'
-        : 'bg-[#DFDFDF]'">
+<div class="font-poppins w-full overflow-x-hidden min-h-screen pb-10">
+  
+  <div class="flex justify-center space-x-1 md:space-x-2.5 pt-6 md:pt-12 px-4">
+    <div *ngFor="let step of steps; let i = index" 
+      class="flex-1 md:flex-none md:w-30 h-1.5 md:h-2 rounded-full transition-all duration-300"
+      [ngClass]="currentStep > i ? 'bg-lime-400' : 'bg-[#DFDFDF]'">
     </div>
   </div>
-  <section class="pt-9" *ngIf="currentStep === 1">
+
+  <section class="pt-6 md:pt-9" *ngIf="currentStep === 1">
     <div class="">
-      <div class="grid justify-center">
-        <h2 class="grid justify-center text-[3.5rem] font-bold">Tell Us About Yourself!</h2>
-        <span class="text-center max-w-3xl text-[1.4rem]">Hello! Now we need some of your information to create your
-          journey! First of all, what is your gender?</span>
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-[52px] font-bold leading-tight">Tell Us About Yourself!</h2>
+        <span class="text-center max-w-3xl text-base md:text-[22px] mt-4 md:mt-0 leading-relaxed">
+          Hello! Now we need some of your information to create your journey! First of all, <span class="font-bold">what is your gender?</span>
+        </span>
       </div>
 
-      <div class="flex justify-center space-x-4 pt-10">
+      <div class="flex flex-col md:flex-row justify-center items-center gap-6 md:space-x-4 pt-8 md:pt-10">
         <button (click)="selectGender('female')"
-          class="group relative w-62 h-62 rounded-full flex flex-col items-center justify-center transition-all duration-200 ease-in-out"
+          class="group relative w-40 h-40 md:w-62 md:h-62 rounded-full flex flex-col items-center justify-center transition-all duration-200 ease-in-out shrink-0"
           [ngClass]="selectedGender === 'female' ? 'bg-[#AFFA01]' : 'bg-[#F5F5F5] hover:bg-[#AFFA01]'">
-
-          <div class="relative w-40 h-40">
-            <img src="../../../assets/onboarding/Female.png" alt="female"
+          <div class="relative w-24 h-24 md:w-40 md:h-40">
+            <img src="/assets/onboarding/Female.png" alt="female"
               class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200 opacity-100 group-hover:opacity-0"
               [class.opacity-0]="selectedGender === 'female'">
-
-            <img src="../../../assets/onboarding/Female-hover.png" alt="female-hover"
+            <img src="/assets/onboarding/Female-hover.png" alt="female-hover"
               class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200 opacity-0 group-hover:opacity-100"
               [class.opacity-100]="selectedGender === 'female'">
           </div>
-
-          <span class="text-xl font-medium pt-3 transition-colors duration-200"
+          <span class="text-base md:text-xl font-medium pt-2 md:pt-3 transition-colors duration-200"
             [ngClass]="selectedGender === 'female' ? 'text-[#557A00]' : 'text-[#9A9A9A] group-hover:text-[#557A00]'">
             Female
           </span>
         </button>
 
         <button (click)="selectGender('male')"
-          class="group relative w-62 h-62 rounded-full flex flex-col items-center justify-center transition-all duration-200 ease-in-out"
+          class="group relative w-40 h-40 md:w-62 md:h-62 rounded-full flex flex-col items-center justify-center transition-all duration-200 ease-in-out shrink-0"
           [ngClass]="selectedGender === 'male' ? 'bg-[#AFFA01]' : 'bg-[#F5F5F5] hover:bg-[#AFFA01]'">
-
-          <div class="relative w-40 h-40">
-            <img src="../../../assets/onboarding/Male.png" alt="male"
+          <div class="relative w-24 h-24 md:w-40 md:h-40">
+            <img src="/assets/onboarding/Male.png" alt="male"
               class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200 opacity-100 group-hover:opacity-0"
               [class.opacity-0]="selectedGender === 'male'">
-
-            <img src="../../../assets/onboarding/Male-hover.png" alt="male-hover"
+            <img src="/assets/onboarding/Male-hover.png" alt="male-hover"
               class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200 opacity-0 group-hover:opacity-100"
               [class.opacity-100]="selectedGender === 'male'">
           </div>
-
-          <span class="text-xl font-medium pt-3 transition-colors duration-200"
+          <span class="text-base md:text-xl font-medium pt-2 md:pt-3 transition-colors duration-200"
             [ngClass]="selectedGender === 'male' ? 'text-[#557A00]' : 'text-[#9A9A9A] group-hover:text-[#557A00]'">
             Male
           </span>
         </button>
       </div>
-      <div class="flex justify-center">
-        <button class="items-center w-130 h-15 rounded-lg mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
+
+      <div class="flex justify-center w-full px-6 md:px-0">
+        <button class="items-center w-full md:w-130 h-15 rounded-lg mt-10 md:mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
           [disabled]="!canContinue()">
-          <div class="flex justify-center font-[540] text-center text-2xl">
+          <div class="flex justify-center font-medium text-center text-xl md:text-2xl">
             Continue
           </div>
         </button>
@@ -66,187 +63,238 @@
     </div>
   </section>
 
-  <section class="pt-17" *ngIf="currentStep === 2">
+  <section class="pt-6 md:pt-17" *ngIf="currentStep === 2">
     <div>
-      <div class="grid justify-center">
-        <h2 class="grid justify-center text-[3.5rem] font-bold">Tell Us About Yourself!</h2>
-        <span class="text-center max-w-3xl text-[1.4rem]">Next, we need to know your age. When is your Birthday?</span>
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-[52px] font-bold leading-tight">Tell Us About Yourself!</h2>
+        <span class="text-center max-w-3xl text-base md:text-[22px] mt-4 md:mt-0 leading-relaxed">
+          Next, we need to know your age. <span class="font-bold"> When is your Birthday?</span>
+        </span>
       </div>
 
-      <div class="flex justify-center pt-14">
-        <div class="flex items-center gap-4">
+      <div class="flex flex-col items-center justify-center pt-10 md:pt-14 px-4">
+        <div class="flex items-center gap-2 md:gap-4 flex-wrap justify-center">
+          <input #dayInput type="text" inputmode="numeric" pattern="[0-9]*" placeholder="DD" maxlength="2"
+            class="w-20 h-16 md:w-24 md:h-20 border rounded-xl text-center text-2xl md:text-3xl placeholder:text-center appearance-none p-0 outline-none focus:ring-2 focus:ring-[#AFFA01]"
+            [(ngModel)]="birthDay" (input)="validateDay($event)" (keyup)="onBirthKey($event, monthInput)" />
 
-          <!-- DAY -->
-          <input
-            #dayInput
-            type="text"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            placeholder="DD"
-            maxlength="2"
-            class="w-24 h-20 border rounded-xl
-                  text-center text-3xl
-                  placeholder:text-center
-                  appearance-none
-                  p-0"
-            [(ngModel)]="birthDay"
-            (input)="syncDate()"
-            (keyup)="onBirthKey($event, monthInput)"
-          />
+          <input #monthInput type="text" inputmode="numeric" pattern="[0-9]*" placeholder="MM" maxlength="2"
+            class="w-20 h-16 md:w-24 md:h-20 border rounded-xl text-center text-2xl md:text-3xl placeholder:text-center appearance-none p-0 outline-none focus:ring-2 focus:ring-[#AFFA01]"
+            [(ngModel)]="birthMonth" (input)="validateMonth($event)" (keyup)="onBirthKey($event, yearInput)" />
 
+          <input #yearInput type="text" inputmode="numeric" pattern="[0-9]*" placeholder="YYYY" maxlength="4"
+            class="w-24 h-16 md:w-24 md:h-20 border rounded-xl text-center text-2xl md:text-3xl placeholder:text-center appearance-none p-0 outline-none focus:ring-2 focus:ring-[#AFFA01]"
+            [(ngModel)]="birthYear" (input)="validateYear($event)" />
 
-          <!-- MONTH -->
-          <input
-            #monthInput
-            type="text"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            placeholder="MM"
-            maxlength="2"
-            class="w-24 h-20 border rounded-xl
-                  text-center text-3xl
-                  placeholder:text-center
-                  appearance-none
-                  p-0"
-            [(ngModel)]="birthMonth"
-            (input)="syncDate()"
-            (keyup)="onBirthKey($event, yearInput)"
-          />
-
-          <!-- YEAR -->
-          <input
-              #yearInput
-              type="text"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              placeholder="YYYY"
-              maxlength="4"
-              class="w-24 h-20 border rounded-xl
-                    text-center text-3xl
-                    placeholder:text-center
-                    appearance-none
-                    p-0"
-              [(ngModel)]="birthYear"
-              (input)="syncDate()"
-            />
-
-          <!-- CALENDAR -->
-          <label class="relative cursor-pointer">
-            <input
-              type="date"
-              class="absolute inset-0 opacity-0 cursor-pointer"
-              (change)="onCalendarChange($event)"
-            />
-            <svg xmlns="http://www.w3.org/2000/svg"
-              class="w-10 h-10"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
+          <label class="relative cursor-pointer ml-1 md:ml-3">
+            <input type="date" class="absolute inset-0 opacity-0 cursor-pointer" (change)="onCalendarChange($event)" />
+            <img src="/assets/onboarding/calendar.svg" alt="">
           </label>
-
         </div>
       </div>
-
     </div>
-    <div class="flex justify-center">
-      <button class="items-center w-130 h-15 rounded-lg mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
+    
+    <div class="flex justify-center w-full px-6 md:px-0">
+      <button class="items-center w-full md:w-130 h-15 rounded-lg mt-10 md:mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
         [disabled]="!canContinue()">
-        <div class="flex justify-center font-[540] text-center text-2xl">
+        <div class="flex justify-center font-medium text-center text-xl md:text-2xl">
+          Continue
+        </div>
+      </button>
+    </div>
+  </section>
+  
+  <section class="pt-6 md:pt-10" *ngIf="currentStep === 3">
+    <div>
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-[52px] font-bold leading-tight">How Are You?</h2>
+        <span class="text-center max-w-3xl text-base md:text-[22px] mt-4 md:mt-0 leading-relaxed">
+          Now we need information about your body physics, first <span class="font-bold"> what is your height and weight right now?</span>
+        </span>
+      </div>
+
+      <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-8 pt-8 md:pt-5 px-6">
+        <img src="/assets/onboarding/body.svg" alt="body" class="hidden md:block w-50 h-90">
+        
+        <div class="flex flex-col gap-6 justify-center w-full md:w-auto">
+          <div>
+            <label class="block text-xl font-medium mb-2">Height</label>
+            <div class="relative w-full md:w-90">
+              <input #heightInput type="number" min="50" max="250" placeholder=""
+                class="no-spinner w-full h-15 bg-[#F5F5F5] rounded-sm px-6 text-xl outline-none focus:ring-2 focus:ring-[#AFFA01]"
+                [(ngModel)]="formData.height" (keydown)="onBodyKey($event, weightInput)"/>
+              <div class="absolute flex items-center justify-center w-20 h-8 rounded-md bg-[#AFFA01] right-4 top-1/2 -translate-y-1/2 text-base font-medium text-black pointer-events-none">
+                cm
+              </div>
+            </div>
+            <p *ngIf="formData.height && (formData.height < 50 || formData.height > 250)" class="text-red-500 text-sm mt-2">
+              Height must be between 50–250 cm
+            </p>
+          </div>
+          <div>
+            <label class="block text-xl font-medium mb-2">Weight</label>
+            <div class="relative w-full md:w-90">
+              <input #weightInput type="number" min="30" max="250" [(ngModel)]="formData.weight" placeholder=""
+                class="no-spinner w-full h-15 px-6 rounded-lg bg-gray-100 text-xl focus:outline-none focus:ring-2 focus:ring-[#AFFA01]" (keydown)="onBodyKey($event, null)"/>
+              <div class="absolute flex items-center justify-center w-20 h-8 rounded-md bg-[#AFFA01] right-4 top-1/2 -translate-y-1/2 text-base font-medium text-black pointer-events-none">
+                kg
+              </div>
+            </div>
+            <p *ngIf="formData.weight && (formData.weight < 30 || formData.weight > 250)" class="text-red-500 text-sm mt-2">
+              Weight must be between 30–250 kg
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex justify-center w-full px-6 md:px-0">
+        <button class="items-center w-full md:w-130 h-15 rounded-lg mt-10 md:mt-6 flex justify-center bg-[#AFFA01]" (click)="next()"
+          [disabled]="!canContinue()">
+          <div class="flex justify-center font-medium text-center text-xl md:text-2xl">
+            Continue
+          </div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="pt-6 md:pt-10" *ngIf="currentStep === 4">
+    <div>
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-[52px] font-bold leading-tight">Do You Have Symptoms?</h2>
+        <span class="text-center max-w-3xl text-base md:text-[22px] mt-4 md:mt-0 leading-relaxed">
+          We need to know about your body condition, <span class="font-bold"> do you have any of the following symptoms?</span>
+        </span>
+      </div>
+
+      <div (keydown.enter)="$event.preventDefault()" class="flex flex-col items-center pt-8 md:pt-14 gap-4 w-full px-6 md:px-0">
+        <button type="button" (click)="selectCondition('diabetes')"
+          class="w-full md:w-100 h-15 rounded-lg text-xl border-[1.5px] text-[#808080] transition hover:bg-[#AFFA01]"
+          [ngClass]="selectedCondition.includes('diabetes') ? 'bg-[#AFFA01]' : 'bg-white'">Diabetes
+        </button>
+        <button type="button" (click)="selectCondition('hypertension')"
+          class="w-full md:w-100 h-15 rounded-lg text-xl border-[1.5px] text-[#808080] transition hover:bg-[#AFFA01]"
+          [ngClass]="selectedCondition.includes('hypertension') ? 'bg-[#AFFA01]' : 'bg-white'">Hypertension
+        </button>
+      </div>
+
+      <div class="flex justify-center w-full px-6 md:px-0">
+        <button class="items-center w-full md:w-130 h-15 rounded-lg mt-10 md:mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
+          [disabled]="!canContinue()">
+          <div class="flex justify-center font-medium text-center text-xl md:text-2xl">
+            Continue
+          </div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="pt-6 md:pt-17" *ngIf="currentStep === 5">
+    <div>
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-[52px] font-bold leading-tight">What is Your Goal?</h2>
+        <span class="text-center max-w-3xl text-base md:text-[22px] mt-4 md:mt-0 leading-relaxed">
+          Next, we need to know what is your purpose to join with us, so <span class="font-bold"> what things you want to reach?</span>
+        </span>
+      </div>
+
+      <div class="flex flex-col md:flex-row justify-center gap-4 pt-8 md:pt-12 items-center px-6 md:px-0">
+        <div (click)="selectGoal('gain')" 
+          class="w-full md:w-110 h-auto md:h-43 border rounded-3xl p-6 md:p-10 transition hover:bg-[#AFFA01]"
+          [ngClass]="selectedGoal === 'gain' ? 'bg-[#AFFA01] border-[#7EB303]' : 'bg-[#D9D9D9] border-[#B9B9B9]'">
+          <h2 class="text-xl md:text-2xl font-medium pt-0 md:pt-3">Weight Gain</h2>
+          <p class="text-[#404040] text-sm md:text-base mt-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
+        </div>
+        <div (click)="selectGoal('loss')"
+          class="w-full md:w-110 h-auto md:h-43 border rounded-3xl p-6 md:p-10 transition hover:bg-[#AFFA01]"
+          [ngClass]="selectedGoal === 'loss' ? 'bg-[#AFFA01] border-[#7EB303]' : 'bg-[#D9D9D9] border-[#B9B9B9]'">
+          <h2 class="text-xl md:text-2xl font-medium pt-0 md:pt-3">Weight Loss</h2>
+          <p class="text-[#404040] text-sm md:text-base mt-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-center w-full px-6 md:px-0">
+      <button class="items-center w-full md:w-130 h-15 rounded-lg mt-10 md:mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
+        [disabled]="!canContinue()">
+        <div class="flex justify-center font-medium text-center text-xl md:text-2xl">
           Continue
         </div>
       </button>
     </div>
   </section>
 
-  
-  <section class="pt-10" *ngIf="currentStep === 3">
+  <section class="pt-6 md:pt-10" *ngIf="currentStep === 6">
     <div>
-      <div class="grid justify-center">
-        <h2 class="grid justify-center text-[3.5rem] font-bold">How Are You?</h2>
-        <span class="text-center max-w-3xl text-[1.4rem]">Now we need information about your body physics, first what is
-          your height and weight right now?</span>
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-[52px] font-bold leading-tight">About Your Schedule</h2>
+        <span class="text-center max-w-3xl text-base md:text-[22px] mt-4 md:mt-0 leading-relaxed">
+          We already have workout recommendation for you, now for your personalize we need to know <span class="font-bold"> about your duration workout</span>
+        </span>
       </div>
 
-      <div class="flex justify-center gap-15 pt-5">
-        <img src="" alt="body" class="w-50 h-80 bg-black">
-        <div class="flex flex-col gap-6 justify-center">
-          <div>
-            <label class="block text-xl font-medium mb-2">Height</label>
-            <div class="relative w-90">
-              <input #heightInput type="number" min="50" max="250" placeholder=""
-                class="no-spinner w-90 h-15 bg-[#F5F5F5] rounded-sm px-6 text-xl outline-none focus:ring-2 focus:ring-[#AFFA01]"
-                [(ngModel)]="formData.height" 
-                (keydown)="onBodyKey($event, weightInput)"/>
-              <div
-                class="absolute flex items-center justify-center w-20 h-8 rounded-md bg-[#AFFA01] right-4 top-1/2 -translate-y-1/2 text-base font-medium text-black pointer-events-none">
-                cm</div>
-            </div>
-            <p
-              *ngIf="formData.height && (formData.height < 50 || formData.height > 250)"
-              class="text-red-500 text-sm mt-2">
-              Height must be between 50–250 cm
-            </p>
-          </div>
-          <div>
-            <label class="block text-xl font-medium mb-2">Weight</label>
-            <div class="relative w-90">
-              <input #weightInput type="number" min="30" max="250" [(ngModel)]="formData.weight" placeholder=""
-                class="no-spinner w-full h-15 px-6 rounded-lg bg-gray-100 text-xl focus:outline-none focus:ring-2 focus:ring-[#AFFA01]" (keydown)="onBodyKey($event, null)"/>
-              <div
-                class="absolute flex items-center justify-center w-20 h-8 rounded-md bg-[#AFFA01] right-4 top-1/2 -translate-y-1/2 text-base font-medium text-black pointer-events-none">
-                kg</div>
-            </div>
-            <p
-            *ngIf="formData.weight && (formData.weight < 30 || formData.weight > 250)"
-            class="text-red-500 text-sm mt-2">
-            Weight must be between 30–250 kg
-          </p>
+      <div class="grid justify-center pt-10 md:pt-20 px-6 md:px-0">
+        <span class="text-[#676767] mb-2 text-center md:text-left">Workout Duration</span>
+        
+        <div class="flex flex-col md:flex-row justify-center gap-2 w-full">
+          <input type="number" min="15" max="150" 
+            class="border-[1.5px] border-[#B9B9B9] bg-[#E3E3E3] w-full md:w-90 h-15 rounded-md pl-4 outline-none focus:border-[#AFFA01] transition-colors"
+            [(ngModel)]="formData.workoutDuration"
+            [class.border-red-500]="formData.workoutDuration && (formData.workoutDuration < 15 || formData.workoutDuration > 150)">
+          
+          <div class="border-[1.5px] border-[#A9E816] bg-[#AFFA01] text-[#404040] w-70 md:w-70 h-15 rounded-md flex items-center justify-center font-medium mt-2 md:mt-0">
+            Minutes ( per 1 Day )
           </div>
         </div>
+
+        <p *ngIf="formData.workoutDuration && (formData.workoutDuration < 15 || formData.workoutDuration > 150)" 
+          class="text-red-500 text-sm mt-2 text-center font-medium">
+            Duration must be between 15–150 minutes
+        </p>
       </div>
-      <div class="flex justify-center">
-        <button class="items-center w-130 h-15 rounded-lg mt-6 flex justify-center bg-[#AFFA01]" (click)="next()"
-          [disabled]="!canContinue()">
-          <div class="flex justify-center font-[540px] text-center text-2xl">
-            Continue
-          </div>
-        </button>
-      </div>
+    </div>
+    
+    <div class="flex justify-center w-full px-6 md:px-0">
+      <button class="items-center w-full md:w-130 h-15 rounded-lg mt-10 md:mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
+        [disabled]="!canContinue()">
+        <div class="flex justify-center font-medium text-center text-xl md:text-2xl">
+          Create Your Plan
+        </div>
+      </button>
     </div>
   </section>
 
-
-  <section class="pt-10" *ngIf="currentStep === 4">
+  <section class="pt-6 md:pt-8" *ngIf="currentStep === 7">
     <div>
-      <div class="grid justify-center">
-        <h2 class="grid justify-center text-[3.5rem] font-bold">Do You Have Symptoms?</h2>
-        <span class="text-center max-w-3xl text-[1.4rem]">We need to know about your body condition, do you have any of the following symptoms?</span>
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-[52px] font-bold leading-tight">About Your Schedule</h2>
+        <span class="text-center max-w-3xl text-base md:text-[22px] mt-4 md:mt-0 leading-relaxed">
+          Now for your personalize we need to know <span class="font-bold"> about your workout day</span>
+        </span>
       </div>
-      <div (keydown.enter)="$event.preventDefault()" class="grid justify-center pt-14 gap-4">
-        <button
-          type="button"
-          (click)="selectCondition('diabetes')"
-          class="w-100 h-15 rounded-lg text-xl border-[1.5px] text-[#808080] transition
-           hover:bg-[#AFFA01]"
-          [ngClass]="selectedCondition.includes('diabetes') ? 'bg-[#AFFA01]' : 'bg-white'">Diabetes
-        </button>
-        <button
-          type="button"
-          (click)="selectCondition('hypertension')"
-          class="w-100 h-15 rounded-lg text-xl border-[1.5px] text-[#808080] transition
-           hover:bg-[#AFFA01]"
-          [ngClass]="selectedCondition.includes('hypertension') ? 'bg-[#AFFA01]' : 'bg-white'">Hypertension
+
+      <div class="flex flex-col items-center pt-8 gap-3 w-full px-6 md:px-0">
+        <button *ngFor="let day of workoutDays" (click)="selectDay(day)"
+          class="w-full md:w-110 h-12 rounded-lg text-lg border text-[#808080] transition hover:bg-[#AFFA01] hover:text-black flex flex-col justify-center"
+          [ngClass]="selectedDay.includes(day) ? 'bg-[#AFFA01] text-black border-[#AFFA01]' : 'bg-white border-gray-200'">
+          {{ day | titlecase }}
         </button>
       </div>
-      <div class="flex justify-center gap-3">
-        <button class="items-center w-130 h-15 rounded-lg mt-20 flex justify-center bg-[#AFFA01]" (click)="next()"
-          [disabled]="!canContinue()">
-          <div class="flex justify-center font-[540] text-center text-2xl">
-            Continue
-          </div>
-        </button>
+
+      <div class="flex justify-center mt-4 h-6">
+        <p *ngIf="selectedDay.length === 0" class="text-red-500 text-sm font-medium animate-pulse">
+          * Please select at least 1 day
+        </p>
       </div>
+    </div>
+    
+    <div class="flex justify-center w-full pb-12 px-6 md:px-0">
+      <button class="items-center w-full md:w-130 h-15 rounded-lg mt-10 md:mt-15 flex justify-center bg-[#AFFA01]" (click)="next()"
+        [disabled]="!canContinue()">
+        <div class="flex justify-center font-medium text-center text-xl md:text-2xl">
+          Continue
+        </div>
+      </button>
     </div>
   </section>
 

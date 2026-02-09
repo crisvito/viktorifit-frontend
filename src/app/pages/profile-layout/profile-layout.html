@@ -1,0 +1,19 @@
+<div class="flex h-screen w-full bg-white font-poppins overflow-hidden shadow-md">
+
+    <div class="h-full flex-none z-50">
+        <app-profile-sidebar (logoutEvent)="handleLogout()"></app-profile-sidebar>
+    </div>
+
+    <div class="flex-1 h-full overflow-y-auto relative no-scrollbar bg-white">
+        
+        <button (click)="goBack()" 
+                class="absolute top-7 right-6 w-17 h-17 rounded-full bg-[#EDEDED] flex items-center justify-center shadow-md hover:bg-gray-200 transition z-40 cursor-pointer">
+            <img src="/assets/profile-layout/cross.svg" alt="">
+        </button>
+
+        <div class="p-6 md:p-10 max-w-4xl mx-8 mt-12 md:mt-0">
+            <router-outlet></router-outlet>
+        </div>
+
+    </div>
+</div>

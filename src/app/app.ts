@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Navigation } from './shared/services/navigation/navigation'; 
 
 @Component({
   selector: 'app-root',
@@ -10,4 +11,6 @@ import { RouterOutlet } from '@angular/router';
 
 export class App {
   protected readonly title = signal('viktorifit-frontend');
+
+  constructor(private navigationService: Navigation) {}
 }
