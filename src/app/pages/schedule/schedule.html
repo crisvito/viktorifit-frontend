@@ -50,14 +50,19 @@
                 <p class="text-gray-400 text-[14px]">Here are workouts that you could do at {{ selectedMode.toLowerCase() }}</p>
             </div>
 
-            <div class="flex items-center gap-3">
-                <h3 class="text-[28px] font-bold">Activity List</h3>
-                <button class="text-gray-400 hover:text-black hover:rotate-180 transition duration-300">
-                    <img src="/assets/calendar/activity-list.svg" alt="">
-                </button>
+            <div>
+                <div class="flex items-center gap-3 justify-between">
+                    <h3 class="text-[28px] font-bold">Activity List</h3>
+                </div>
+                
+                <div class="flex flex-row justify-between items-center mt-5">
+                    <p class="text-gray-500 font-medium text-[20px]">Wed, 10 Nov 2025</p>
+                    <button class="text-white rounded-3xl border-[1.25px] border-gray-500 hover:bg-[#AFFA01] flex flex-row p-1.5 px-6 gap-3 text-[16px] items-center hover:text-black transition duration-300">
+                        <img src="/assets/calendar/activity-list.svg" alt="" class="w-5 h-5">
+                        <h3 class="text-gray-500">History</h3>
+                    </button>
+                </div>
             </div>
-            
-            <p class="text-gray-500 font-medium text-[20px]">Wed, 10 Nov 2025</p>
 
             <div class="flex flex-col gap-5 -mt-5">
                 
@@ -117,7 +122,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-[#EDEDED] border-t border-[#D2D2D2] h-10">
+                    <div class="bg-[#EDEDED] border-t border-[#D2D2D2]">
                         
                         <div *ngIf="item.expanded" class="px-6 py-6 animate-in slide-in-from-top-2 duration-200">
                             
@@ -166,93 +171,7 @@
             </div>
         </div>
 
-        <div class="hidden lg:block space-y-8 -mt-16">
-            
-            <div class="bg-[#F4F4F4] rounded-[11px] border border-[#D2D2D2]">
-                
-                <div class="p-6">
-                    <h3 class="text-[28px] font-bold mb-6">Calendar</h3>
-                    <div class="flex items-center mb-6 gap-25">
-                        <div class="flex flex-row gap-4">
-                            <span class="text-[18px] font-medium text-gray-700">{{ displayMonthYear }}</span>
-                            <img src="/assets/calendar/calendar.svg" alt="">
-                        </div>
-                        <div class="flex gap-2">
-                            <button (click)="changeMonth(-1)" class="w-6 h-6 rounded-full bg-[#4E7000] flex items-center justify-center text-white hover:bg-black transition cursor-pointer">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                            </button>
-                            <button (click)="changeMonth(1)" class="w-6 h-6 rounded-full bg-[#4E7000] flex items-center justify-center text-white hover:bg-black transition cursor-pointer">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-7 text-center mb-4">
-                        <div *ngFor="let day of weekDays" class="text-[12px] font-bold text-[#5C8C00] uppercase">{{ day }}</div>
-                    </div>
-                    
-                    <div class="grid grid-cols-7 text-center gap-y-4">
-                        <ng-container *ngFor="let row of calendarDays">
-                            <div *ngFor="let date of row" class="flex justify-center items-center">
-                                <div *ngIf="date" 
-                                     (click)="toggleDate(date)"
-                                     class="w-8 h-8 flex items-center justify-center rounded-full text-[12px] font-medium transition cursor-pointer hover:bg-gray-200 select-none"
-                                     [class.bg-[#AFFA01]]="isDateSelected(date)"
-                                     [class.text-black]="isDateSelected(date)"
-                                     [class.text-gray-600]="!isDateSelected(date)">
-                                    {{ date }}
-                                </div>
-                            </div>
-                        </ng-container>
-                    </div>
-                </div>
-
-                <div class="h-px bg-[#D2D2D2] mx-6 mt-5"></div>
-
-                <div class="p-6 space-y-6">
-                    <h3 class="text-[18px] font-medium mb-7">Summary</h3>
-                    
-                    <div class="flex items-center gap-4">
-                        <div class="w-14.75 h-14.75 bg-[#EDE689] border border-[#DAD377] rounded-[7px] flex items-center justify-center text-black font-medium shrink-0">
-                            <img src="/assets/calendar/type.svg" alt="" class="w-6 h-6">
-                        </div>
-                        <div>
-                            <p class="text-[14px] font-medium">Workout Type</p>
-                            <p class="text-[12px] text-[#2D2D2D]">{{ selectedMode === 'Home' ? 'Cardio Fitness' : 'Strength Training' }}</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <div class="w-14.75 h-14.75 bg-[#C5D6FF] border border-[#9AB7FF] rounded-[7px] flex items-center justify-center text-black font-medium shrink-0">
-                            <img src="/assets/calendar/location.svg" alt="" class="w-6 h-6">
-                        </div>
-                        <div>
-                            <p class="text-[14px] font-medium">Workout Location</p>
-                            <p class="text-[12px] text-[#2D2D2D]">{{ selectedMode }} Workout</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <div class="w-14.75 h-14.75 bg-[#DBF3A3] border border-[#8AC500] rounded-[7px] flex items-center justify-center text-blackfont-medium shrink-0">
-                            <img src="/assets/calendar/summary-duration.svg" alt="" class="w-6 h-6">
-                        </div>
-                        <div>
-                            <p class="text-[14px] font-medium">Workout Duration</p>
-                            <p class="text-[12px] text-[#2D2D2D]">1 Hour 30 Mins</p> 
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <div class="w-14.75 h-14.75 bg-[#FFB0A4] border border-[#DB6755] rounded-[7px] flex items-center justify-center text-blackfont-medium shrink-0">
-                            <img src="/assets/calendar/summary-calories.svg" alt="" class="w-6 h-6">
-                        </div>
-                        <div>
-                            <p class="text-[14px] font-medium">Calories Burn By Workouts</p>
-                            <p class="text-[12px] text-[#2D2D2D]">1200 cal</p>
-                        </div>
-                    </div>
-                </div>
-        </div>
+       <app-calendar [selectedMode]="selectedMode"></app-calendar>
 
     </div>
 </div>
