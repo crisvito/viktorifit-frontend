@@ -12,6 +12,7 @@ import { MyAccount } from './pages/my-account/my-account';
 import { PersonalData } from './pages/personal-data/personal-data';
 import { Settings } from './pages/settings/settings';
 import { Schedule } from './pages/schedule/schedule';
+import { History } from './pages/history/history';
 
 
 export const routes: Routes = [
@@ -41,7 +42,8 @@ export const routes: Routes = [
       { path: 'workout-lists', component: WorkoutLists },
       { path: 'workout-detail/:id', component: WorkoutDetail },
       { path: 'dashboard', component: Dashboard },
-      { path: 'schedule', component: Schedule }
+      { path: 'schedule', component: Schedule },
+      { path: 'history', component: History }
     ]
   },
   {

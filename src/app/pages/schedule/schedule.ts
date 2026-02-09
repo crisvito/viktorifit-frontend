@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { RouterModule } from '@angular/router';
 import { CalendarComponent } from '../../shared/components/calendar.component/calendar.component'; 
 
 @Component({
   selector: 'app-schedule',
   standalone: true,
-  imports: [CommonModule, FormsModule, CalendarComponent], 
+  imports: [CommonModule, FormsModule, RouterModule, CalendarComponent], 
   templateUrl: './schedule.html',
 })
 export class Schedule implements OnInit {

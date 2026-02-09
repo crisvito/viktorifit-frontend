@@ -16,7 +16,6 @@ export class CalendarComponent implements OnInit {
 
   @Input() selectedMode: string = 'Home'; 
 
-  // Variables
   currentDate = new Date(); 
   displayMonthYear = '';    
   weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S']; 
