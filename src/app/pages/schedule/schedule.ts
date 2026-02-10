@@ -114,6 +114,7 @@ export class Schedule implements OnInit {
     this.activities = (mode === 'Home') ? this.homeData : this.gymData;
   }
 
+  currentDate: Date = new Date();
 
   getDefaultHomeData() {
     return [

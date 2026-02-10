@@ -15,6 +15,15 @@
   font-style: normal;
 }
 
+@theme {
+  /* This creates the `font-poppins` utility */
+  --font-poppins: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  /* OPTIONAL: To make Poppins the default for the whole app, 
+     override the built-in --font-sans variable instead */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
   /* color */
   --main-color: #AFFA01; 
