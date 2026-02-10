@@ -62,6 +62,10 @@ export class Sidebar {
       return currentUrl === '/dashboard' || currentUrl === '/';
     }
 
+    if (m.activeKey === 'schedule') {
+        return currentUrl.includes('schedule') || currentUrl.includes('history');
+    }
+
     return currentUrl.includes(m.activeKey);
   }
 }
