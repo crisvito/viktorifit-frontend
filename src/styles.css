@@ -3,16 +3,27 @@
 
 @font-face {
   font-family: 'Poppins';
-  src: url('/assets/fonts/Poppins-Regular.ttf') format('truetype');
+  src: url('/assets/font/Poppins/Poppins-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('/assets/fonts/Poppins-Bold.ttf') format('truetype');
+  src: url('/assets/font/Poppins/Poppins-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/assets/font/Poppins/Poppins-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@theme {
+  --font-poppins: "Poppins", ui-sans-serif, system-ui;
 }
 
 :root {
