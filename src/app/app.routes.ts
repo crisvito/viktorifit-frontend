@@ -13,6 +13,7 @@ import { PersonalData } from './pages/personal-data/personal-data';
 import { Settings } from './pages/settings/settings';
 import { Schedule } from './pages/schedule/schedule';
 import { History } from './pages/history/history';
+import { Statistic } from './pages/statistic/statistic'
 
 
 export const routes: Routes = [
@@ -43,7 +44,8 @@ export const routes: Routes = [
       { path: 'workout-detail/:id', component: WorkoutDetail },
       { path: 'dashboard', component: Dashboard },
       { path: 'schedule', component: Schedule },
-      { path: 'history', component: History }
+      { path: 'history', component: History },
+      { path: 'statistic', component: Statistic }
     ]
   },
   {

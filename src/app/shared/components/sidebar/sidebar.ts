@@ -19,10 +19,10 @@ export class Sidebar {
       activeKey: 'dashboard' 
     },
     { 
-      label: 'Statistics', 
-      icon: 'statistics', 
-      route: 'statistics', 
-      activeKey: 'statistics' 
+      label: 'Statistic', 
+      icon: 'statistic', 
+      route: 'statistic', 
+      activeKey: 'statistic' 
     },
     { 
       label: 'Workouts List', 

@@ -1,45 +1,43 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; 
-import { RouterModule, Router } from '@angular/router'; 
-import { CalendarComponent } from '../../shared/components/calendar.component/calendar.component'; 
+import { FormsModule } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
+import { CalendarComponent } from '../../shared/components/calendar.component/calendar.component';
 
 interface Activity {
+  id: number;
   title: string;
   description: string;
   tag: string;
   time: string;
   calories: string;
   progress: number;
-  status: 'active' | 'unfinished' | 'ongoing';
-  date: Date; 
-  logs: any[];
+  status: 'finished' | 'unfinished';
+  date: Date;
+  logs: { name: string; description: string; duration: string }[];
   expanded: boolean;
 }
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CalendarComponent], 
+  imports: [CommonModule, RouterModule, FormsModule, CalendarComponent],
   templateUrl: './history.html',
 })
 export class History implements OnInit {
-
   isModeOpen = false;
   selectedMode = 'Home';
 
-  isPeriodModalOpen = false; 
+  isPeriodModalOpen = false;
   selectedMonth: Date = new Date();
-  
-  tempMonthIndex: number = 0; 
+  tempMonthIndex: number = 0;
   tempYear: number = 2025;
 
   monthsList = [
-    'January', 'February', 'March', 'April', 'May', 'June', 
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
   ];
-  yearsList: number[] = []; 
-
+  yearsList: number[] = [];
   readonly ITEM_HEIGHT = 40;
 
   isLogModalOpen = false;
@@ -47,7 +45,7 @@ export class History implements OnInit {
   logForm = {
     name: '',
     description: '',
-    duration: ''
+    duration: '',
   };
 
   allActivities: Activity[] = [];
@@ -57,98 +55,96 @@ export class History implements OnInit {
 
   ngOnInit(): void {
     this.generateYearsList();
-    
-    this.tempMonthIndex = this.selectedMonth.getMonth();
-    this.tempYear = this.selectedMonth.getFullYear();
 
-    this.allActivities = this.generateMockData();
+    const now = new Date();
+    this.tempMonthIndex = now.getMonth();
+    this.tempYear = now.getFullYear();
+    this.selectedMonth = now;
 
+    this.allActivities = this.generateDynamicMockData();
     this.applyFilter();
   }
 
-  generateMockData(): Activity[] {
-    const today = new Date();
-    
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-    
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(today.getDate() - 2);
+  parseMinutes(timeStr: string): number {
+    if (!timeStr) return 0;
+    const lower = timeStr.toLowerCase();
+    const number = parseInt(lower.replace(/\D/g, '')) || 0;
 
-    const lastMonth = new Date();
-    lastMonth.setMonth(today.getMonth() - 1);
-    lastMonth.setDate(15); 
+    if (lower.includes('hour') || lower.includes('jam')) {
+      return number * 60;
+    }
+    return number;
+  }
 
-    return [
-      {
-        title: 'Running',
-        description: 'Lari pagi keliling kompleks biar sehat.',
-        tag: 'Cardio',
-        time: '60 minutes',
-        calories: '320 cal',
+  calculateStatus(activity: Activity) {
+    const targetMinutes = this.parseMinutes(activity.time);
+
+    const currentMinutes = activity.logs.reduce((total, log) => {
+      return total + this.parseMinutes(log.duration);
+    }, 0);
+
+    let progress = 0;
+    if (targetMinutes > 0) {
+      progress = Math.round((currentMinutes / targetMinutes) * 100);
+    }
+    activity.progress = Math.min(100, progress);
+
+    if (currentMinutes >= targetMinutes) {
+      activity.status = 'finished';
+    } else {
+      activity.status = 'unfinished';
+    }
+  }
+
+  generateDynamicMockData(): Activity[] {
+    const activities: Activity[] = [];
+    const titles = ['Running', 'Swimming', 'Cycling', 'Yoga', 'Gym Chest Day', 'Pilates', 'HIIT'];
+    const tags = ['Cardio', 'Strength', 'Flexibility', 'Endurance'];
+    const standardDurations = ['30 minutes', '45 minutes', '60 minutes', '90 minutes', '120 minutes', '15 minutes'];
+
+    const baseDate = new Date();
+    
+    for (let i = 0; i < 50; i++) {
+      const date = new Date(baseDate);
+      date.setDate(date.getDate() - (i % 20)); 
+
+      const targetTimeStr = standardDurations[i % standardDurations.length];
+
+      const newActivity: Activity = {
+        id: i,
+        title: titles[i % titles.length],
+        description: 'Workout session to maintain health.',
+        tag: tags[i % tags.length],
+        time: targetTimeStr,
+        calories: `${(i * 50) + 100} cal`,
         progress: 0,
-        status: 'active',
-        date: today,
-        logs: [],
-        expanded: false
-      },
-      {
-        title: 'Dancing',
-        description: 'Latihan koreografi baru.',
-        tag: 'Cardio',
-        time: '60 minutes',
-        calories: '250 cal',
-        progress: 50,
-        status: 'active',
-        date: today,
-        logs: [{ name: 'Sesi 1', description: 'Pemanasan', duration: '15 min' }],
-        expanded: false
-      },
-
-      {
-        title: 'Swimming',
-        description: 'Berenang gaya bebas.',
-        tag: 'Cardio',
-        time: '45 minutes',
-        calories: '200 cal',
-        progress: 10,
         status: 'unfinished',
-        date: yesterday,
+        date: date,
         logs: [],
-        expanded: false
-      },
+        expanded: false,
+      };
 
-      {
-        title: 'Gym Chest Day',
-        description: 'Angkat beban fokus otot dada.',
-        tag: 'Strength',
-        time: '90 minutes',
-        calories: '500 cal',
-        progress: 100,
-        status: 'active',
-        date: twoDaysAgo,
-        logs: [{ name: 'Set 1', description: 'Bench Press', duration: '15 min' }],
-        expanded: false
-      },
-
-      {
-        title: 'Marathon Training',
-        description: 'Latihan lari jarak jauh bulan lalu.',
-        tag: 'Endurance',
-        time: '120 minutes',
-        calories: '800 cal',
-        progress: 100,
-        status: 'active',
-        date: lastMonth,
-        logs: [],
-        expanded: false
+      if (i % 2 === 0) {
+        const durationVal = this.parseMinutes(targetTimeStr);
+        const logVal = (i % 3 === 0) ? durationVal : Math.floor(durationVal / 2);
+        
+        newActivity.logs.push({
+          name: 'Session 1',
+          description: 'Initial warmup',
+          duration: `${logVal} mins`,
+        });
       }
-    ];
+
+      this.calculateStatus(newActivity);
+      activities.push(newActivity);
+    }
+
+    return activities.sort((a, b) => b.date.getTime() - a.date.getTime());
   }
 
   generateYearsList() {
     const currentYear = new Date().getFullYear();
-    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+    for (let i = currentYear - 5; i <= currentYear + 2; i++) {
       this.yearsList.push(i);
     }
   }
@@ -156,7 +152,6 @@ export class History implements OnInit {
   onScrollMonth(event: any) {
     const scrollTop = event.target.scrollTop;
     const index = Math.round(scrollTop / this.ITEM_HEIGHT);
-    
     if (index >= 0 && index < this.monthsList.length) {
       this.tempMonthIndex = index;
     }
@@ -165,21 +160,18 @@ export class History implements OnInit {
   onScrollYear(event: any) {
     const scrollTop = event.target.scrollTop;
     const index = Math.round(scrollTop / this.ITEM_HEIGHT);
-
     if (index >= 0 && index < this.yearsList.length) {
       this.tempYear = this.yearsList[index];
     }
   }
 
-
   openPeriodModal() {
     this.tempMonthIndex = this.selectedMonth.getMonth();
     this.tempYear = this.selectedMonth.getFullYear();
     this.isPeriodModalOpen = true;
-
     setTimeout(() => {
-        this.scrollToActive();
-    }, 50); 
+      this.scrollToActive();
+    }, 50);
   }
 
   closePeriodModal() {
@@ -189,16 +181,10 @@ export class History implements OnInit {
   scrollToActive() {
     const monthContainer = document.getElementById('monthContainer');
     const yearContainer = document.getElementById('yearContainer');
-
-    if (monthContainer) {
-        monthContainer.scrollTop = this.tempMonthIndex * this.ITEM_HEIGHT;
-    }
-    
+    if (monthContainer) monthContainer.scrollTop = this.tempMonthIndex * this.ITEM_HEIGHT;
     if (yearContainer) {
-        const yearIndex = this.yearsList.indexOf(this.tempYear);
-        if (yearIndex !== -1) {
-            yearContainer.scrollTop = yearIndex * this.ITEM_HEIGHT;
-        }
+      const yearIndex = this.yearsList.indexOf(this.tempYear);
+      if (yearIndex !== -1) yearContainer.scrollTop = yearIndex * this.ITEM_HEIGHT;
     }
   }
 
@@ -207,44 +193,33 @@ export class History implements OnInit {
     newDate.setFullYear(this.tempYear);
     newDate.setMonth(this.tempMonthIndex);
     newDate.setDate(1);
-    
     this.selectedMonth = newDate;
-    
     this.applyFilter();
-    
     this.closePeriodModal();
   }
 
-
   applyFilter() {
-    const filteredData = this.allActivities.filter(item => {
-      return item.date.getMonth() === this.selectedMonth.getMonth() &&
-             item.date.getFullYear() === this.selectedMonth.getFullYear();
+    const filteredData = this.allActivities.filter((item) => {
+      return (
+        item.date.getMonth() === this.selectedMonth.getMonth() &&
+        item.date.getFullYear() === this.selectedMonth.getFullYear()
+      );
     });
-
     this.groupActivitiesByDate(filteredData);
   }
 
   groupActivitiesByDate(activities: Activity[]) {
     const groups: { [key: string]: Activity[] } = {};
-
-    activities.forEach(item => {
-      const dateKey = item.date.toDateString(); 
-      if (!groups[dateKey]) {
-        groups[dateKey] = [];
-      }
+    activities.forEach((item) => {
+      const dateKey = item.date.toDateString();
+      if (!groups[dateKey]) groups[dateKey] = [];
       groups[dateKey].push(item);
     });
-
-    const sortedKeys = Object.keys(groups).sort((a, b) => {
-      return new Date(b).getTime() - new Date(a).getTime();
-    });
-
-    // Map ke struktur array untuk HTML
-    this.activityGroups = sortedKeys.map(dateKey => {
+    const sortedKeys = Object.keys(groups).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    this.activityGroups = sortedKeys.map((dateKey) => {
       return {
         dateLabel: this.getRelativeLabel(new Date(dateKey)),
-        activities: groups[dateKey]
+        activities: groups[dateKey],
       };
     });
   }
@@ -253,31 +228,24 @@ export class History implements OnInit {
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
+    inputDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    yesterday.setHours(0, 0, 0, 0);
 
-    inputDate.setHours(0,0,0,0);
-    today.setHours(0,0,0,0);
-    yesterday.setHours(0,0,0,0);
-
-    if (inputDate.getTime() === today.getTime()) {
-      return 'Today';
-    } else if (inputDate.getTime() === yesterday.getTime()) {
-      return 'Yesterday';
-    } else {
-      // Format tanggal biasa: "Mon, 08 Nov 2025"
-      return inputDate.toLocaleDateString('en-GB', { 
-        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' 
+    if (inputDate.getTime() === today.getTime()) return 'Today';
+    else if (inputDate.getTime() === yesterday.getTime()) return 'Yesterday';
+    else
+      return inputDate.toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
       });
-    }
   }
 
   openLogModal(item: Activity) {
     this.selectedActivity = item;
-    // Reset form
-    this.logForm = {
-      name: '',
-      description: '',
-      duration: ''
-    };
+    this.logForm = { name: '', description: '', duration: '' };
     this.isLogModalOpen = true;
   }
 
@@ -288,21 +256,19 @@ export class History implements OnInit {
 
   saveNewLog() {
     if (this.selectedActivity) {
-        this.selectedActivity.logs.push({
-            name: this.logForm.name,
-            description: this.logForm.description,
-            duration: this.logForm.duration
-        });
-        
-        if(this.selectedActivity.progress < 100) {
-            this.selectedActivity.progress += 10;
-        }
+      this.selectedActivity.logs.push({
+        name: this.logForm.name,
+        description: this.logForm.description,
+        duration: this.logForm.duration,
+      });
+
+      this.calculateStatus(this.selectedActivity);
     }
     this.closeLogModal();
   }
 
   closeHistory() {
-    this.router.navigate(['/schedule']); 
+    this.router.navigate(['/schedule']);
   }
 
   toggleExpand(item: any) {
