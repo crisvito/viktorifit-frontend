@@ -1,121 +1,139 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-type WorkoutDay =
-  | 'monday'
-  | 'tuesday'
-  | 'wednesday'
-  | 'thursday'
-  | 'friday'
-  | 'saturday'
-  | 'sunday';
+type Gender = 'male' | 'female' | '';
+type Goal = 'Muscle Gain' | 'Weight Loss' | 'Maintain';
+type WorkoutDay = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+type Sport = 'badminton' | 'football' | 'basketball' | 'volley' | 'swim';
+
+interface Bodyfat {
+  label: string;
+  range: string;
+  value: number;
+  image: string;
+}
 
 @Component({
   selector: 'app-onboarding',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './onboarding.html',
-  styleUrl: './onboarding.css'
+  styleUrls: ['./onboarding.css']
 })
 export class OnboardingPage {
 
+  currentStep = 0;
+  isLoading = false;
+
   formData = {
-    gender: '',
-    birthDate: '' as string | null,
+    gender: '' as Gender,
+    birthDate: '',
     height: null as number | null,
     weight: null as number | null,
-    symptoms: {
-      diabetes: false,
-      hypertension: false
-    },
-    goal: '',
+    bodyFat: null as number | null,
+    frequency: null as number | null,
+    sports: [] as Sport[],
+    goal: '' as Goal,
     workoutDuration: null as number | null,
-    workoutDay: {
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false,
-      saturday: false,
-      sunday: false,
-    }
+    workoutDays: [] as WorkoutDay[]
   };
 
-
-  onBodyKey(event: KeyboardEvent, nextInput: HTMLInputElement | null) {
-    if (event.key !== 'Enter' && event.key !== 'ArrowRight') return;
-
-    event.preventDefault();
-
-    if (nextInput) {
-      nextInput.focus();
-      return;
-    }
-  }
-
-
-  steps = [
-    { id: 1, key: 'gender' },
-    { id: 2, key: 'birthdate' },
-    { id: 3, key: 'body' },
-    { id: 4, key: 'symptoms' },
-    { id: 5, key: 'goal' },
-    { id: 6, key: 'workoutDuration' },
-    { id: 7, key: 'workoutDay' }
-  ];
-
-  currentStep = 1;
-
-  get totalSteps(): number {
-    return this.steps.length;
-  }
-
-  selectedGender: 'male' | 'female' | null = null;
-
-
-  selectGender(gender: 'male' | 'female') {
-    this.selectedGender = gender;
-    this.formData.gender = gender;
-  }
-
-
-
-  prevStep() {
-    if (this.currentStep > 1) {
-      this.currentStep--;
-    }
-  }
-
-  submit() {
-    console.log(this.formData);
-  }
-
-// --- VARIABLES ---
   birthDay: number | null = null;
   birthMonth: number | null = null;
   birthYear: number | null = null;
 
-  isBirthDateValid = false;
+  workoutDaysList: WorkoutDay[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-  // --- HELPER: HITUNG MAX HARI ---
-  // Mengembalikan jumlah hari dalam bulan tertentu (28/29/30/31)
+  constructor(private router: Router) {}
+
+  canContinue(): boolean {
+    switch (this.currentStep) {
+      case 0:
+        return true;
+
+      case 1:
+        return this.formData.gender !== '';
+
+      case 2:
+        return this.isBirthDateValid();
+
+      case 3:
+        const h = this.formData.height;
+        const w = this.formData.weight;
+        return (h !== null && h >= 50 && h <= 250) && 
+               (w !== null && w >= 30 && w <= 250);
+
+      case 4:
+        return this.formData.bodyFat !== null; 
+
+      case 5:
+        return true;
+        
+      case 6:
+        const d = this.formData.workoutDuration;
+        return d !== null && d >= 15 && d <= 150;
+
+      case 7:
+        return true;
+
+      case 8:
+        return !!this.formData.goal;
+
+      case 9:
+        return this.formData.workoutDays.length > 0;
+
+      default:
+        return false;
+    }
+  }
+
+next() {
+    if (this.canContinue()) {
+      if (this.currentStep === 9) {
+        this.submit();
+      } else {
+        this.currentStep++;
+        window.scrollTo(0, 0);
+      }
+    }
+  }
+
+  previous() {
+    if (this.currentStep > 0) {
+      this.currentStep--;
+      window.scrollTo(0, 0);
+    }
+  }
+
+  nextStep() {
+    this.currentStep = 1;
+  }
   getMaxDays(month: number | null, year: number | null): number {
-    if (!month) return 31; // Default max 31 jika bulan belum diisi
-
-    // Jika tahun belum diisi, kita anggap tahun kabisat (2024).
-    // Kenapa? Supaya user BISA ngetik tanggal 29 Februari DULUAN sebelum ngetik tahunnya.
+    if (!month) return 31; 
     const y = year || 2024;
-
-    // Trik JS: Tanggal ke-0 bulan depan adalah tanggal terakhir bulan ini.
     return new Date(y, month, 0).getDate();
   }
 
-  // --- INPUT HANDLERS (VALIDASI) ---
+  isBirthDateValid(): boolean {
+    if (!this.birthDay || !this.birthMonth || !this.birthYear) return false;
+    
+    const d = this.birthDay;
+    const m = this.birthMonth;
+    const y = this.birthYear;
 
-// --- INPUT HANDLERS (SMART AUTO-ZERO) ---
+    const currentYear = new Date().getFullYear();
+    
+    if (y < 1900 || y > (currentYear - 5)) return false;
+    if (m < 1 || m > 12) return false;
 
-  // 1. Validasi Hari
+    const maxDay = this.getMaxDays(m, y);
+    if (d < 1 || d > maxDay) return false;
+
+    return true;
+  }
+
   validateDay(event: any) {
     const input = event.target;
     let val = input.value.replace(/[^0-9]/g, '');
@@ -124,23 +142,19 @@ export class OnboardingPage {
       let num = parseInt(val, 10);
       const maxDays = this.getMaxDays(this.birthMonth, this.birthYear);
 
-      // Cek digit pertama: Kalau ngetik 4, 5, 6, 7, 8, 9 -> Otomatis jadi 04, 05...
       if (val.length === 1 && num > 3) {
         val = '0' + val;
       }
 
-      // Cek Max Hari (30/31/28)
       if (parseInt(val, 10) > maxDays) {
-        val = val.slice(0, -1); // Batalkan ketikan terakhir jika kelebihan
+        val = val.slice(0, -1); 
       }
     }
 
     input.value = val;
     this.birthDay = val ? parseInt(val, 10) : null;
-    this.syncDate();
   }
 
-  // 2. Validasi Bulan
   validateMonth(event: any) {
     const input = event.target;
     let val = input.value.replace(/[^0-9]/g, '');
@@ -148,13 +162,10 @@ export class OnboardingPage {
     if (val) {
       let num = parseInt(val, 10);
 
-      // Cek digit pertama: Kalau ngetik 2 s/d 9 -> Otomatis jadi 02, 09...
-      // (Karena bulan gak mungkin 20, 30, dst. Jadi digit pertama > 1 pasti maksudnya 02-09)
       if (val.length === 1 && num > 1) {
         val = '0' + val;
       }
 
-      // Cek Max Bulan (12)
       if (parseInt(val, 10) > 12) {
         val = val.slice(0, -1);
       }
@@ -163,26 +174,21 @@ export class OnboardingPage {
     input.value = val;
     this.birthMonth = val ? parseInt(val, 10) : null;
 
-    // LOGIC PENYESUAIAN HARI (Agar tanggal 31 gak error pas pilih Feb)
     if (this.birthDay) {
       const maxDays = this.getMaxDays(this.birthMonth, this.birthYear);
       if (this.birthDay > maxDays) {
-        this.birthDay = maxDays; // Otomatis turunin tanggal (31 -> 29/28)
+        this.birthDay = maxDays; 
       }
     }
-
-    this.syncDate();
   }
-// 3. Validasi Tahun (Strict: 1900 - 2014)
+
   validateYear(event: any) {
     const input = event.target;
     let val = input.value.replace(/[^0-9]/g, '');
 
-    // Max 4 digit
     if (val.length > 4) val = val.slice(0, 4);
 
     if (val) {
-      // RULE 1: Digit Pertama cuma boleh '1' atau '2'
       if (val.length >= 1) {
         const d1 = val[0];
         if (d1 !== '1' && d1 !== '2') {
@@ -190,249 +196,195 @@ export class OnboardingPage {
         }
       }
 
-      // RULE 2: Digit Kedua (Century)
       if (val.length >= 2) {
         const d1 = val[0];
         const d2 = val[1];
 
-        // 19xx
         if (d1 === '1' && d2 !== '9') val = val.slice(0, -1);
-        
-        // 20xx
         if (d1 === '2' && d2 !== '0') val = val.slice(0, -1);
       }
 
-      // RULE 3: Digit Ketiga (Khusus tahun 20xx)
-      // Kita harus memblokir 202x, 203x, dst karena max 2014.
       if (val.length >= 3) {
         if (val.startsWith('20')) {
             const d3 = val[2];
-            // Digit ketiga cuma boleh '0' (200x) atau '1' (201x)
             if (d3 !== '0' && d3 !== '1') {
                 val = val.slice(0, -1);
             }
         }
       }
 
-      // RULE 4: Digit Keempat (Hard Limit 2015)
       if (val.length === 4) {
          const num = parseInt(val, 10);
-         // Jika >= 2015, hapus digit terakhir
          if (num >= 2015) {
              val = val.slice(0, -1);
          }
       }
     }
 
-    // Update Input
     input.value = val;
     this.birthYear = val ? parseInt(val, 10) : null;
 
-    // Logic Kabisat (Auto Adjust Day)
     if (this.birthDay && this.birthMonth === 2 && val.length === 4) {
        const maxDays = this.getMaxDays(this.birthMonth, this.birthYear);
        if (this.birthDay > maxDays) {
          this.birthDay = maxDays;
        }
     }
-
-    this.syncDate();
   }
 
-  // --- NAVIGATION (ARROW KEY & AUTO NEXT) ---
   onBirthKey(event: KeyboardEvent, nextInput?: HTMLInputElement) {
     const input = event.target as HTMLInputElement;
     const val = input.value;
 
-    // 1. Arrow Right -> Pindah Kanan
     if (event.key === 'ArrowRight' && nextInput) {
         nextInput.focus();
         return;
     }
 
-    // 2. Jika digit penuh (2 digit) -> Pindah Kanan Otomatis
-    // Kita cek key-nya bukan Backspace/Delete biar enak ngapusnya
     if (val.length === input.maxLength && nextInput && event.key !== 'Backspace') {
         nextInput.focus();
     }
   }
 
-  // --- FINAL CHECK (UNTUK TOMBOL CONTINUE) ---
-  syncDate() {
-    if (this.birthDay && this.birthMonth && this.birthYear) {
-      const d = String(this.birthDay).padStart(2, '0');
-      const m = String(this.birthMonth).padStart(2, '0');
-      this.formData.birthDate = `${this.birthYear}-${m}-${d}`;
-
-      // Validasi Range Tahun (1900 - 2015)
-      // Tombol Continue hanya nyala jika ini true
-      if (this.birthYear <= 1900 || this.birthYear >= 2015) {
-        this.isBirthDateValid = false;
-      } else {
-        this.isBirthDateValid = true;
-      }
-    } else {
-      this.isBirthDateValid = false;
-    }
+  selectGender(gender: Gender) {
+    this.formData.gender = gender;
   }
 
-
+  get selectedGender() {
+    return this.formData.gender;
+  }
 
   onCalendarChange(event: any) {
-    const value = event.target.value;
-    if (!value) return;
-
-    const date = new Date(value);
-    
-    this.birthDay = date.getDate();
-    this.birthMonth = date.getMonth() + 1;
-    this.birthYear = date.getFullYear();
-    
-    this.formData.birthDate = value;
-    this.validateBirthDate();
-  }
-
-  validateBirthDate() {
-    if (!this.birthDay || !this.birthMonth || !this.birthYear) {
-      this.isBirthDateValid = false;
-      return;
+    const val = event.target.value;
+    if (val) {
+      const [y, m, d] = val.split('-');
+      this.birthYear = parseInt(y, 10);
+      this.birthMonth = parseInt(m, 10);
+      this.birthDay = parseInt(d, 10);
     }
+  }
 
-    const day = Number(this.birthDay);
-    const month = Number(this.birthMonth);
-    const year = Number(this.birthYear);
-
-    const date = new Date(year, month - 1, day);
-    
-    if (
-      date.getFullYear() !== year ||
-      date.getMonth() !== month - 1 ||
-      date.getDate() !== day
-    ) {
-      this.isBirthDateValid = false;
-      return;
+  onBodyKey(event: KeyboardEvent, nextInput: HTMLInputElement | null) {
+    if (['e', 'E', '+', '-'].includes(event.key)) {
+      event.preventDefault();
     }
-
-    if (year <= 1900 || year >= 2015) {
-      this.isBirthDateValid = false;
-      return;
+    if (event.key === 'Enter' && nextInput) {
+      nextInput.focus();
     }
-
-    this.isBirthDateValid = true;
   }
 
-
-    get isHeightValid(): boolean {
-    return (
-      this.formData.height !== null &&
-      this.formData.height >= 50 &&
-      this.formData.height <= 250
-    );
-  }
-
-  get isWeightValid(): boolean {
-    return (
-      this.formData.weight !== null &&
-      this.formData.weight >= 20 &&
-      this.formData.weight <= 300
-    );
-  }
-
-  isBodyValid(): boolean {
-    const h = this.formData.height;
-    const w = this.formData.weight;
-
-    if (h === null || w === null) return false;
-    if (h < 50 || h > 250) return false;
-    if (w < 20 || w > 300) return false;
-
-    return true;
-  }
-
-  
-
-  get selectedCondition(): string[] {
-    return Object.keys(this.formData.symptoms)
-      .filter(key => this.formData.symptoms[key as 'diabetes' | 'hypertension']);
-  } 
-
-  selectCondition(condition: 'diabetes' | 'hypertension') {
-    this.formData.symptoms[condition] =
-      !this.formData.symptoms[condition];
-  }
-
-    workoutDays: WorkoutDay[] = [
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'sunday',
+  maleBodyFatOptions: Bodyfat[] = [
+    { label: 'Essential', range: '2-5%', value: 4, image: 'assets/onboarding/bodyfat/m-1.png' },
+    { label: 'Athlete', range: '6-13%', value: 10, image: 'assets/onboarding/bodyfat/m-2.png' },
+    { label: 'Fitness', range: '14-17%', value: 15, image: 'assets/onboarding/bodyfat/m-3.png' },
+    { label: 'Average', range: '18-24%', value: 21, image: 'assets/onboarding/bodyfat/m-4.png' },
+    { label: 'Obese', range: '25%+', value: 30, image: 'assets/onboarding/bodyfat/m-5.png' }
   ];
 
-  next() {
-    if (this.canContinue()) {
-      if (this.currentStep < this.totalSteps) {
-        this.currentStep++;
-      } else {
-        // Jika sudah di step 7, maka simpan data
-        this.submit();
-      }
+  femaleBodyFatOptions: Bodyfat[] = [
+    { label: 'Essential', range: '10-13%', value: 12, image: 'assets/onboarding/bodyfat/f-1.png' },
+    { label: 'Athlete', range: '14-20%', value: 17, image: 'assets/onboarding/bodyfat/f-2.png' },
+    { label: 'Fitness', range: '21-24%', value: 22, image: 'assets/onboarding/bodyfat/f-3.png' },
+    { label: 'Average', range: '25-31%', value: 28, image: 'assets/onboarding/bodyfat/f-4.png' },
+    { label: 'Obese', range: '32%+', value: 35, image: 'assets/onboarding/bodyfat/f-5.png' }
+  ];
+
+  get currentBodyFatOptions(): Bodyfat[] {
+    return this.formData.gender === 'female' ? this.femaleBodyFatOptions : this.maleBodyFatOptions;
+  }
+
+  selectBodyFat(option: Bodyfat) {
+    this.formData.bodyFat = option.value;
+  }
+
+  get selectedBodyFatImage(): string {
+    const options = this.currentBodyFatOptions;
+    const selected = options.find(opt => opt.value === this.formData.bodyFat);
+    return selected ? selected.image : '';
+  }
+
+  get selectedBodyFatLabel(): string {
+    const options = this.currentBodyFatOptions;
+    const selected = options.find(opt => opt.value === this.formData.bodyFat);
+    return selected ? selected.label : '-';
+  }
+
+  get bmiDisplay(): string {
+    const h = this.formData.height;
+    const w = this.formData.weight;
+    if (h && w) {
+      return (w / Math.pow(h / 100, 2)).toFixed(1);
+    }
+    return '-';
+  } 
+
+  sportsOptions: { id: Sport, label: string, icon: string }[] = [
+    { id: 'badminton', label: 'Badminton', icon: '🏸' },
+    { id: 'football', label: 'Football', icon: '⚽' },
+    { id: 'basketball', label: 'Basket', icon: '🏀' },
+    { id: 'volley', label: 'Volley', icon: '🏐' },
+    { id: 'swim', label: 'Swimming', icon: '🏊' }
+  ];
+
+  toggleSport(sport: Sport) {
+    const idx = this.formData.sports.indexOf(sport);
+    if (idx > -1) {
+      this.formData.sports.splice(idx, 1);
+    } else {
+      this.formData.sports.push(sport);
     }
   }
 
-  selectedGoal: 'gain' | 'loss' | null = null;
-
-  selectGoal(value: 'gain' | 'loss') {
-    this.selectedGoal = value;
-    this.formData.goal = value;
+  selectGoal(goal: Goal) {
+    this.formData.goal = goal;
   }
-
-  isWorkoutDurationValid(): boolean {
-    const duration = this.formData.workoutDuration;
-    return duration !== null && duration >= 15 && duration <= 150;
+  
+  get selectedGoal() {
+    return this.formData.goal;
   }
 
   selectDay(day: WorkoutDay) {
-    this.formData.workoutDay[day] =
-      !this.formData.workoutDay[day];
-  }
-
-  get selectedDay(): WorkoutDay[] {
-    return (Object.keys(this.formData.workoutDay) as WorkoutDay[])
-      .filter(day => this.formData.workoutDay[day]);
-  }
-
-  hasSelectedDay(): boolean {
-    return this.selectedDay.length > 0;
-  }
-
-
-  canContinue(): boolean {
-    switch (this.currentStep) {
-      case 1:
-        return this.selectedGender !== null;
-      case 2:
-        return this.isBirthDateValid;
-      case 3:
-        return this.isBodyValid();
-      case 4:
-        return true;
-      case 5:
-        return this.selectedGoal !== null;
-      case 6:
-        return this.isWorkoutDurationValid();
-      case 7:
-        return this.hasSelectedDay();
-      case 8:
-        return this.selectedGoal !== null;
-      case 9:
-        return this.isWorkoutDurationValid();   
-      case 10:
-        return this.hasSelectedDay();    
-      default:
-        return false;
+    const index = this.formData.workoutDays.indexOf(day);
+    if (index > -1) {
+      this.formData.workoutDays.splice(index, 1);
+    } else {
+      this.formData.workoutDays.push(day);
     }
+  }
+
+  get selectedDay() {
+    return this.formData.workoutDays;
+  }
+
+  submit() {
+    if (this.birthYear && this.birthMonth && this.birthDay) {
+      const y = this.birthYear.toString();
+      const m = this.birthMonth.toString().padStart(2, '0');
+      const d = this.birthDay.toString().padStart(2, '0');
+      this.formData.birthDate = `${y}-${m}-${d}`;
+    }
+    
+    console.log('FINAL PAYLOAD:', this.formData);
+    this.router.navigate(['/suggestion-result']);
+  }
+
+  loadingText = 'Menyimpan Data...';
+
+  startLoadingProcess() {
+    this.isLoading = true;
+    
+    this.loadingText = 'Menganalisa Kondisi Tubuh...';
+    
+    setTimeout(() => {
+        this.loadingText = 'Menghitung Kebutuhan Kalori & BMI...';
+    }, 1500);
+
+    setTimeout(() => {
+        this.loadingText = 'Menyusun Jadwal Latihan Personal...';
+    }, 3000);
+
+    setTimeout(() => {
+        this.submit(); 
+    }, 4500);
   }
 }
