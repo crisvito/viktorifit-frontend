@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BmiGauge } from './bmi-gauge';
+import { BmiCard } from './bmi-card';
 
-describe('BmiGauge', () => {
-  let component: BmiGauge;
-  let fixture: ComponentFixture<BmiGauge>;
+describe('BmiCard', () => {
+  let component: BmiCard;
+  let fixture: ComponentFixture<BmiCard>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BmiGauge]
+      imports: [BmiCard]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(BmiGauge);
+    fixture = TestBed.createComponent(BmiCard);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
