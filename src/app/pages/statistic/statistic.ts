@@ -4,37 +4,51 @@ import { RouterModule } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions, TooltipItem, ScriptableContext, Plugin } from 'chart.js';
 
-// --- PLUGIN CUSTOM: AXES & VERTICAL LINE ---
 const customChartEffectsPlugin: Plugin<'line'> = {
   id: 'customChartEffects',
-  afterDatasetsDraw(chart) {
+  // UBAH DISINI: Gunakan 'beforeDatasetsDraw' agar garis berada DI BELAKANG titik data
+  beforeDatasetsDraw(chart) {
     const { ctx, chartArea: { top, bottom, left, right } } = chart;
+
     ctx.save();
+
+    // 1. Gambar Sumbu X dan Y Custom
     ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#757575'; 
+    ctx.lineWidth = 0.7; // Tipiskan sedikit agar elegan
+    ctx.strokeStyle = '#9CA3AF'; 
     ctx.setLineDash([]); 
+
+    // Garis Vertikal Kiri (Y-Axis custom)
     ctx.moveTo(left, bottom);
     ctx.lineTo(left, top - 20); 
+
+    // Garis Horizontal Bawah (X-Axis custom)
     ctx.moveTo(left, bottom);
     ctx.lineTo(right + 20, bottom); 
+
     ctx.stroke();
 
+    // 2. Gambar Garis Vertikal Penunjuk Data Terakhir
     chart.data.datasets.forEach((dataset, datasetIndex) => {
+      // Hanya untuk dataset utama (index 0)
       if (datasetIndex === 0 && chart.isDatasetVisible(datasetIndex)) {
         const meta = chart.getDatasetMeta(datasetIndex);
         const lastDataPoint = meta.data[meta.data.length - 1];
+
         if (lastDataPoint) {
           ctx.beginPath();
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 1; // Samakan ketebalan
           ctx.strokeStyle = (dataset.borderColor as string) || '#757575';
-          ctx.setLineDash([]); 
+          ctx.setLineDash([]); // Garis solid lurus ke bawah
+          
           ctx.moveTo(lastDataPoint.x, lastDataPoint.y);
           ctx.lineTo(lastDataPoint.x, bottom);
+          
           ctx.stroke();
         }
       }
     });
+
     ctx.restore();
   }
 };
@@ -85,7 +99,6 @@ export class Statistic implements OnInit {
 
   topActivities: any[] = [];
   donutSegments: { dashArray: string, dashOffset: number }[] = [];
-  // SYNC: Gunakan radius 40 agar donat bolong tengahnya rapi
   readonly CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 40; 
   readonly SEGMENT_GAP = 2;
 
@@ -162,22 +175,18 @@ export class Statistic implements OnInit {
         return validItems.length ? Math.round(validItems.reduce((acc, item) => acc + item[key], 0) / validItems.length) : 0;
     };
 
-    // Duration
     const currDur = sum(currData, 'duration');
     const prevDur = sum(prevData, 'duration');
     this.updateCardValue('duration', `${currDur} mins`, currDur, prevDur);
 
-    // Calories
     const currCal = sum(currData, 'calories');
     const prevCal = sum(prevData, 'calories');
     this.updateCardValue('calories', `${currCal} cal`, currCal, prevCal);
 
-    // Weights
     const currW = avg(currData, 'weight');
     const prevW = avg(prevData, 'weight');
     this.updateCardValue('weights', `${currW} kg`, currW, prevW);
 
-    // Update Tema Grafik berdasarkan status kartu yang sedang dipilih
     const activeCard = this.statCards.find(c => c.id === this.selectedStat);
     if (activeCard) {
       this.currentTheme = activeCard.isPositive 
@@ -195,7 +204,6 @@ export class Statistic implements OnInit {
         else if (curr > 0) diff = 100;
         
         card.change = (diff >= 0 ? '+' : '') + Math.round(diff) + '%';
-        // LOGIC FIX: Naik (+) = Hijau, Turun (-) = Merah untuk SEMUA kartu
         card.isPositive = diff >= 0; 
     }
   }
@@ -255,10 +263,10 @@ export class Statistic implements OnInit {
                 const grad = canvasCtx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
                 grad.addColorStop(0.65, this.currentTheme.gradientStart); grad.addColorStop(1, 'rgba(255, 255, 255, 0)'); return grad;
               },
-              borderColor: this.currentTheme.color, borderWidth: 3, fill: true, pointBackgroundColor: this.currentTheme.color, pointBorderColor: '#fff', pointBorderWidth: 2, 
+              borderColor: this.currentTheme.color, borderWidth: 2, fill: true, pointBackgroundColor: this.currentTheme.color, pointBorderColor: '#fff', pointBorderWidth: 2, 
               pointRadius: dataset.map((_:any, i:number) => i === 3 ? 6 : 3), tension: 0 
             },
-            { data: [avgVal, avgVal, avgVal, avgVal], label: 'Target', borderColor: '#1f2937', borderWidth: 2, fill: false, pointRadius: 0, tension: 0 }
+            { data: [avgVal, avgVal, avgVal, avgVal], label: 'Target', borderDash: [5.5], borderColor: '#9CA3AF', borderWidth: 2, fill: false, pointRadius: 0, tension: 0 }
         ]
     };
   }

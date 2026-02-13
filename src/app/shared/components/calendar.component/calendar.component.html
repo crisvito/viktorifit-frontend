@@ -28,14 +28,26 @@
                 <ng-container *ngFor="let row of calendarDays">
                     <div *ngFor="let dateObj of row" class="flex justify-center items-center">
                         <div (click)="dateObj.isCurrentMonth && toggleDate(dateObj.day)"
-                             class="w-8 h-8 flex items-center justify-center rounded-full text-[12px] font-medium transition select-none"
+                             class="w-8 h-8 flex flex-col items-center justify-center rounded-full transition select-none"
                              [class.cursor-pointer]="dateObj.isCurrentMonth"
                              [class.hover:bg-gray-200]="dateObj.isCurrentMonth"
-                             [class.bg-[#AFFA01]]="dateObj.isCurrentMonth && isDateSelected(dateObj.day)"
-                             [class.text-black]="dateObj.isCurrentMonth && isDateSelected(dateObj.day)"
-                             [class.text-gray-600]="dateObj.isCurrentMonth && !isDateSelected(dateObj.day)"
+                             
+                             
+                             [class.bg-[#AFFA01]]="dateObj.isCurrentMonth && isToday(dateObj.day)"
+                             [class.text-black]="dateObj.isCurrentMonth && isToday(dateObj.day)"
+                             
+                             
+                             [class.text-gray-600]="dateObj.isCurrentMonth && !isToday(dateObj.day)"
                              [class.text-gray-300]="!dateObj.isCurrentMonth">
-                            {{ dateObj.day }}
+                            
+                            <span class="text-[12px] font-medium leading-none">{{ dateObj.day }}</span>
+
+                            <div *ngIf="dateObj.isCurrentMonth && hasActivity(dateObj.day)" 
+                                 class="w-1 h-1 rounded-full mt-0.5"
+                                 [class.bg-black]="isToday(dateObj.day)"
+                                 [class.bg-[#5C8C00]]="!isToday(dateObj.day)">
+                            </div>
+
                         </div>
                     </div>
                 </ng-container>

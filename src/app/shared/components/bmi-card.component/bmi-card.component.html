@@ -1,0 +1,83 @@
+<div class="w-full h-full flex flex-col gap-6 font-poppins">
+    
+  <div class="w-full bg-white p-6 rounded-2xl shadow-sm border border-slate-50 flex flex-col justify-between">
+
+    <h2 class="text-[20px] font-semibold text-slate-800 mb-8">Body Mass Index (BMI)</h2>
+
+    <div class="relative w-full h-22 select-none">
+      
+      <div class="absolute top-0 w-full h-full pointer-events-none z-0">
+        
+        <div class="absolute left-0 flex flex-col items-center">
+          <span class="text-[10px] text-slate-400 mb-1">15</span>
+          <div class="h-10 w-px bg-slate-200"></div> </div>
+        
+        <div class="absolute left-[14%] flex flex-col items-center -translate-x-1/2">
+          <span class="text-[10px] text-slate-400 mb-1">18.5</span>
+          <div class="h-10 w-px bg-slate-200"></div>
+        </div>
+        
+        <div class="absolute left-[40%] flex flex-col items-center -translate-x-1/2">
+          <span class="text-[10px] text-slate-400 mb-1">25</span>
+          <div class="h-10 w-px bg-slate-200"></div>
+        </div>
+        
+        <div class="absolute left-[60%] flex flex-col items-center -translate-x-1/2">
+          <span class="text-[10px] text-slate-400 mb-1">30</span>
+          <div class="h-10 w-px bg-slate-200"></div>
+        </div>
+        
+        <div class="absolute right-0 flex flex-col items-center">
+          <span class="text-[10px] text-slate-400 mb-1">40</span>
+          <div class="h-10 w-px bg-slate-200"></div>
+        </div>
+      </div>
+
+
+      <div class="absolute top-[35px] w-full h-4 rounded-full flex overflow-hidden z-10 shadow-inner">
+        <div class="bg-sky-300 h-full border-r border-white/50 relative" style="width: 14%"></div>
+        <div class="bg-[#6A9700] h-full border-r border-white/50 relative" style="width: 26%"></div>
+        <div class="bg-yellow-400 h-full border-r border-white/50 relative" style="width: 20%"></div>
+        <div class="bg-red-400 h-full relative" style="width: 40%"></div>
+      </div>
+
+
+      <div class="absolute top-0 bottom-0 z-30 flex flex-col items-center w-px transition-all duration-500 ease-out"
+           [style.left.%]="markerPosition">
+        
+        <div class="absolute top-[-25px] transform left-1/2 -translate-x-1/2">
+          <div class="bg-slate-900 text-white text-[12px] font-semibold px-3 py-1 rounded-lg whitespace-nowrap relative shadow-lg">
+            You - {{ bmi }}
+            <div class="w-2 h-2 bg-slate-900 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1"></div>
+          </div>
+        </div>
+        
+        <div class="absolute top-[33px] left-1/2 -translate-x-1/2 w-5 h-5 bg-white border-[3px] border-white rounded-full shadow-md z-40"></div>
+      </div>
+
+
+      <div class="absolute top-[60px] w-full flex text-[12px] text-slate-400 font-medium">
+        <span style="width: 14%" class="text-center" [class.font-bold]="bmi < 18.5" [class.text-sky-500]="bmi < 18.5">Under</span>
+        <span style="width: 26%" class="text-center" [class.font-bold]="bmi >= 18.5 && bmi < 25" [class.text-[#6A9700]]="bmi >= 18.5 && bmi < 25">Normal</span>
+        <span style="width: 20%" class="text-center" [class.font-bold]="bmi >= 25 && bmi < 30" [class.text-yellow-500]="bmi >= 25 && bmi < 30">Over</span>
+        <span style="width: 40%" class="text-center" [class.font-bold]="bmi >= 30" [class.text-red-500]="bmi >= 30">Obese</span>
+      </div>
+
+    </div>
+
+
+    <div [ngClass]="bmiBgClass"  
+          class="bg-bmiColor border border-[#8AC500]/30 flex flex-row gap-4 px-5 py-4 rounded-[10px] items-center mt-2">
+      <div class="w-12 h-12 bg-[#C3F74A] rounded-lg flex items-center justify-center text-2xl shadow-sm">💪</div>
+      <div>
+        <h4 [ngClass]="bmiColor"
+            class="font-semibold text-lime-900 mb-0.5 text-base">{{ bmiStatus }} BMI</h4>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          {{bmiDesc}}
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+</div>

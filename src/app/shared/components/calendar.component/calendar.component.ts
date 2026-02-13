@@ -16,11 +16,13 @@ export class CalendarComponent implements OnInit {
 
   @Input() selectedMode: string = 'Home'; 
 
-  currentDate = new Date(); 
+  currentDate = new Date(); // Untuk navigasi bulan (View)
+  realToday = new Date();   // Untuk validasi "Hari Ini" (Fixed)
+  
   displayMonthYear = '';    
   weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S']; 
   calendarDays: CalendarDate[][] = []; 
-  selectedDates: Set<string> = new Set(); 
+  selectedDates: Set<string> = new Set(); // Menyimpan tanggal yang ada "Activity"
 
   ngOnInit() {
     this.loadSelectedDates();
@@ -81,6 +83,32 @@ export class CalendarComponent implements OnInit {
     this.generateCalendar();
   }
 
+  // --- LOGIC BARU ---
+
+  // 1. Cek apakah tanggal ini adalah HARI INI (Real time)
+  // Digunakan untuk background Hijau
+  isToday(day: number): boolean {
+    const viewingYear = this.currentDate.getFullYear();
+    const viewingMonth = this.currentDate.getMonth();
+
+    const realYear = this.realToday.getFullYear();
+    const realMonth = this.realToday.getMonth();
+    const realDay = this.realToday.getDate();
+
+    return day === realDay && viewingMonth === realMonth && viewingYear === realYear;
+  }
+
+  // 2. Cek apakah tanggal ini memiliki ACTIVITY (Disimpan di localStorage)
+  // Digunakan untuk Titik Kecil
+  hasActivity(day: number): boolean {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth() + 1;
+    const dateKey = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    
+    return this.selectedDates.has(dateKey);
+  }
+
+  // Toggle Activity saat diklik
   toggleDate(day: any) {
     if (!day) return; 
     
@@ -96,11 +124,8 @@ export class CalendarComponent implements OnInit {
     this.saveSelectedDates();
   }
 
+  // Helper lama (bisa dihapus jika tidak dipakai lagi, atau biarkan saja)
   isDateSelected(day: any): boolean {
-    if (!day) return false;
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth() + 1;
-    const dateKey = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    return this.selectedDates.has(dateKey);
+    return this.hasActivity(day);
   }
 }

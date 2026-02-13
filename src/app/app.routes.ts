@@ -13,7 +13,10 @@ import { PersonalData } from './pages/personal-data/personal-data';
 import { Settings } from './pages/settings/settings';
 import { Schedule } from './pages/schedule/schedule';
 import { History } from './pages/history/history';
-import { Statistic } from './pages/statistic/statistic'
+import { Statistic } from './pages/statistic/statistic';
+import { Faq } from './pages/faq/faq';
+import { Feedback } from './pages/feedback/feedback';
+import { AdminLayout } from './layouts/admin-layout/admin-layout';
 
 
 export const routes: Routes = [
@@ -56,6 +59,16 @@ export const routes: Routes = [
       { path: 'my-account', component: MyAccount },
       { path: 'personal-data', component: PersonalData },
       { path: 'settings', component: Settings },
+    ]
+  },
+  {
+    path: 'admin',
+    component: AdminLayout,
+    children: [
+      { path: '', redirectTo: 'faq', pathMatch: 'full' },
+      { path: 'faq', component: Faq },
+      { path: 'feedback', component: Feedback }
+
     ]
   }
 

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BmiCardComponent } from '../../shared/components/bmi-card.component/bmi-card.component';
 
 type Gender = 'male' | 'female' | '';
 type Goal = 'Muscle Gain' | 'Weight Loss' | 'Maintain';
@@ -18,7 +19,7 @@ interface Bodyfat {
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BmiCardComponent], 
   templateUrl: './onboarding.html',
   styleUrls: ['./onboarding.css']
 })
@@ -26,6 +27,7 @@ export class OnboardingPage {
 
   currentStep = 0;
   isLoading = false;
+  loadingText = 'Menyimpan Data...';
 
   formData = {
     gender: '' as Gender,
@@ -50,49 +52,30 @@ export class OnboardingPage {
 
   canContinue(): boolean {
     switch (this.currentStep) {
-      case 0:
-        return true;
-
-      case 1:
-        return this.formData.gender !== '';
-
-      case 2:
-        return this.isBirthDateValid();
-
-      case 3:
+      case 0: return true;
+      case 1: return this.formData.gender !== '';
+      case 2: return this.isBirthDateValid();
+      case 3: 
         const h = this.formData.height;
         const w = this.formData.weight;
         return (h !== null && h >= 50 && h <= 250) && 
                (w !== null && w >= 30 && w <= 250);
-
-      case 4:
-        return this.formData.bodyFat !== null; 
-
-      case 5:
-        return true;
-        
-      case 6:
+      case 4: return this.formData.bodyFat !== null; 
+      case 5: return true; 
+      case 6: 
         const d = this.formData.workoutDuration;
         return d !== null && d >= 15 && d <= 150;
-
-      case 7:
-        return true;
-
-      case 8:
-        return !!this.formData.goal;
-
-      case 9:
-        return this.formData.workoutDays.length > 0;
-
-      default:
-        return false;
+      case 7: return true;
+      case 8: return !!this.formData.goal;
+      case 9: return this.formData.workoutDays.length > 0;
+      default: return false;
     }
   }
 
-next() {
+  next() {
     if (this.canContinue()) {
       if (this.currentStep === 9) {
-        this.submit();
+        this.startLoadingProcess();
       } else {
         this.currentStep++;
         window.scrollTo(0, 0);
@@ -110,6 +93,7 @@ next() {
   nextStep() {
     this.currentStep = 1;
   }
+  
   getMaxDays(month: number | null, year: number | null): number {
     if (!month) return 31; 
     const y = year || 2024;
@@ -118,39 +102,32 @@ next() {
 
   isBirthDateValid(): boolean {
     if (!this.birthDay || !this.birthMonth || !this.birthYear) return false;
-    
     const d = this.birthDay;
     const m = this.birthMonth;
     const y = this.birthYear;
-
     const currentYear = new Date().getFullYear();
     
-    if (y < 1900 || y > (currentYear - 5)) return false;
+    if (y < (currentYear - 70) || y > (currentYear - 13)) return false;
     if (m < 1 || m > 12) return false;
-
     const maxDay = this.getMaxDays(m, y);
     if (d < 1 || d > maxDay) return false;
-
     return true;
+  }
+
+  get age(): number {
+    const currentYear = new Date().getFullYear();
+    return this.birthYear ? (currentYear - this.birthYear) : 0;
   }
 
   validateDay(event: any) {
     const input = event.target;
     let val = input.value.replace(/[^0-9]/g, '');
-
     if (val) {
       let num = parseInt(val, 10);
       const maxDays = this.getMaxDays(this.birthMonth, this.birthYear);
-
-      if (val.length === 1 && num > 3) {
-        val = '0' + val;
-      }
-
-      if (parseInt(val, 10) > maxDays) {
-        val = val.slice(0, -1); 
-      }
+      if (val.length === 1 && num > 3) val = '0' + val;
+      if (parseInt(val, 10) > maxDays) val = val.slice(0, -1); 
     }
-
     input.value = val;
     this.birthDay = val ? parseInt(val, 10) : null;
   }
@@ -158,89 +135,37 @@ next() {
   validateMonth(event: any) {
     const input = event.target;
     let val = input.value.replace(/[^0-9]/g, '');
-
     if (val) {
-      let num = parseInt(val, 10);
-
-      if (val.length === 1 && num > 1) {
-        val = '0' + val;
-      }
-
-      if (parseInt(val, 10) > 12) {
-        val = val.slice(0, -1);
-      }
+      if (val.length === 1 && parseInt(val, 10) > 1) val = '0' + val;
+      if (parseInt(val, 10) > 12) val = val.slice(0, -1);
     }
-
     input.value = val;
     this.birthMonth = val ? parseInt(val, 10) : null;
-
     if (this.birthDay) {
       const maxDays = this.getMaxDays(this.birthMonth, this.birthYear);
-      if (this.birthDay > maxDays) {
-        this.birthDay = maxDays; 
-      }
+      if (this.birthDay > maxDays) this.birthDay = maxDays; 
     }
   }
 
   validateYear(event: any) {
     const input = event.target;
     let val = input.value.replace(/[^0-9]/g, '');
-
     if (val.length > 4) val = val.slice(0, 4);
-
-    if (val) {
-      if (val.length >= 1) {
-        const d1 = val[0];
-        if (d1 !== '1' && d1 !== '2') {
-           val = ''; 
-        }
-      }
-
-      if (val.length >= 2) {
-        const d1 = val[0];
-        const d2 = val[1];
-
-        if (d1 === '1' && d2 !== '9') val = val.slice(0, -1);
-        if (d1 === '2' && d2 !== '0') val = val.slice(0, -1);
-      }
-
-      if (val.length >= 3) {
-        if (val.startsWith('20')) {
-            const d3 = val[2];
-            if (d3 !== '0' && d3 !== '1') {
-                val = val.slice(0, -1);
-            }
-        }
-      }
-
-      if (val.length === 4) {
+    if (val.length === 4) {
          const num = parseInt(val, 10);
-         if (num >= 2015) {
-             val = val.slice(0, -1);
-         }
-      }
+         if (num >= 2015) val = val.slice(0, -1);
     }
-
     input.value = val;
     this.birthYear = val ? parseInt(val, 10) : null;
-
-    if (this.birthDay && this.birthMonth === 2 && val.length === 4) {
-       const maxDays = this.getMaxDays(this.birthMonth, this.birthYear);
-       if (this.birthDay > maxDays) {
-         this.birthDay = maxDays;
-       }
-    }
   }
 
   onBirthKey(event: KeyboardEvent, nextInput?: HTMLInputElement) {
     const input = event.target as HTMLInputElement;
     const val = input.value;
-
     if (event.key === 'ArrowRight' && nextInput) {
         nextInput.focus();
         return;
     }
-
     if (val.length === input.maxLength && nextInput && event.key !== 'Backspace') {
         nextInput.focus();
     }
@@ -265,12 +190,8 @@ next() {
   }
 
   onBodyKey(event: KeyboardEvent, nextInput: HTMLInputElement | null) {
-    if (['e', 'E', '+', '-'].includes(event.key)) {
-      event.preventDefault();
-    }
-    if (event.key === 'Enter' && nextInput) {
-      nextInput.focus();
-    }
+    if (['e', 'E', '+', '-'].includes(event.key)) event.preventDefault();
+    if (event.key === 'Enter' && nextInput) nextInput.focus();
   }
 
   maleBodyFatOptions: Bodyfat[] = [
@@ -297,25 +218,23 @@ next() {
     this.formData.bodyFat = option.value;
   }
 
-  get selectedBodyFatImage(): string {
-    const options = this.currentBodyFatOptions;
-    const selected = options.find(opt => opt.value === this.formData.bodyFat);
-    return selected ? selected.image : '';
+  get selectedBodyFatInfo(): Bodyfat {
+    const selected = this.currentBodyFatOptions.find(opt => opt.value === this.formData.bodyFat);
+    return selected ? selected : { image: '', label: '-', range: '', value: 0 };
   }
 
   get selectedBodyFatLabel(): string {
-    const options = this.currentBodyFatOptions;
-    const selected = options.find(opt => opt.value === this.formData.bodyFat);
-    return selected ? selected.label : '-';
+    return this.selectedBodyFatInfo.label;
   }
 
   get bmiDisplay(): string {
     const h = this.formData.height;
     const w = this.formData.weight;
-    if (h && w) {
-      return (w / Math.pow(h / 100, 2)).toFixed(1);
+    if (h && w && h > 0) {
+      const bmi = w / Math.pow(h / 100, 2);
+      return bmi.toFixed(1);
     }
-    return '-';
+    return '0.0';
   } 
 
   sportsOptions: { id: Sport, label: string, icon: string }[] = [
@@ -328,32 +247,30 @@ next() {
 
   toggleSport(sport: Sport) {
     const idx = this.formData.sports.indexOf(sport);
-    if (idx > -1) {
-      this.formData.sports.splice(idx, 1);
-    } else {
-      this.formData.sports.push(sport);
-    }
+    if (idx > -1) this.formData.sports.splice(idx, 1);
+    else this.formData.sports.push(sport);
   }
 
   selectGoal(goal: Goal) {
     this.formData.goal = goal;
   }
   
-  get selectedGoal() {
-    return this.formData.goal;
-  }
+  get selectedGoal() { return this.formData.goal; }
 
   selectDay(day: WorkoutDay) {
     const index = this.formData.workoutDays.indexOf(day);
-    if (index > -1) {
-      this.formData.workoutDays.splice(index, 1);
-    } else {
-      this.formData.workoutDays.push(day);
-    }
+    if (index > -1) this.formData.workoutDays.splice(index, 1);
+    else this.formData.workoutDays.push(day);
   }
 
-  get selectedDay() {
-    return this.formData.workoutDays;
+  get selectedDay() { return this.formData.workoutDays; }
+
+  startLoadingProcess() {
+    this.isLoading = true;
+    this.loadingText = 'Menganalisa Kondisi Tubuh...';
+    setTimeout(() => { this.loadingText = 'Menghitung Kebutuhan Kalori & BMI...'; }, 1500);
+    setTimeout(() => { this.loadingText = 'Menyusun Jadwal Latihan Personal...'; }, 3000);
+    setTimeout(() => { this.submit(); }, 4500);
   }
 
   submit() {
@@ -363,28 +280,7 @@ next() {
       const d = this.birthDay.toString().padStart(2, '0');
       this.formData.birthDate = `${y}-${m}-${d}`;
     }
-    
     console.log('FINAL PAYLOAD:', this.formData);
     this.router.navigate(['/suggestion-result']);
-  }
-
-  loadingText = 'Menyimpan Data...';
-
-  startLoadingProcess() {
-    this.isLoading = true;
-    
-    this.loadingText = 'Menganalisa Kondisi Tubuh...';
-    
-    setTimeout(() => {
-        this.loadingText = 'Menghitung Kebutuhan Kalori & BMI...';
-    }, 1500);
-
-    setTimeout(() => {
-        this.loadingText = 'Menyusun Jadwal Latihan Personal...';
-    }, 3000);
-
-    setTimeout(() => {
-        this.submit(); 
-    }, 4500);
   }
 }
