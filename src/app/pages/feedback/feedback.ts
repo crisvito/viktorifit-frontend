@@ -13,26 +13,21 @@ export class Feedback {
 
   constructor(private router: Router) {}
 
-  // --- STATE ---
   isProfileOpen = false;
   searchText: string = '';
   rowsDisplay: any = 5;
 
-  // --- MODAL STATE ---
   isModalOpen = false;
   isViewModalOpen = false;
   selectedFeedback: any = null;
 
-  // Form State
   newUser = '';
   newEmail = '';
   newMessage = '';
   newStatus = 'Pending';
 
-  // State untuk melacak dropdown status yang terbuka
   openDropdownIndex: number = -1; 
 
-  // --- ACTIONS ---
   toggleProfile() {
     this.isProfileOpen = !this.isProfileOpen;
   }
@@ -45,29 +40,25 @@ export class Feedback {
     this.rowsDisplay = count;
   }
 
-  // --- DROPDOWN STATUS LOGIC ---
-  
   toggleStatusDropdown(index: number, event: Event) {
-    event.stopPropagation(); // Mencegah klik tembus ke baris tabel
+    event.stopPropagation();
     
     if (this.openDropdownIndex === index) {
-      this.openDropdownIndex = -1; // Tutup jika sudah terbuka
+      this.openDropdownIndex = -1;
     } else {
-      this.openDropdownIndex = index; // Buka yang diklik
+      this.openDropdownIndex = index;
     }
   }
 
   updateStatus(item: any, newStatus: string) {
     item.status = newStatus;
-    this.openDropdownIndex = -1; // Tutup dropdown setelah memilih
+    this.openDropdownIndex = -1;
   }
 
-  // [FUNGSI INI YANG KURANG TADI]
   closeAllDropdowns() {
     this.openDropdownIndex = -1;
   }
 
-  // --- MODAL LOGIC ---
   openModal() {
     this.isModalOpen = true;
     this.newUser = '';
@@ -104,14 +95,55 @@ export class Feedback {
     this.selectedFeedback = null;
   }
   
-  // --- DATA DUMMY ---
   feedbackList = [
-    { user: 'Jonathan Maxwell', email: 'j.maxwell@example.com', message: 'The AI-generated workout plan is great...', status: 'Resolved' },
-    { user: 'Katherine Rosebud', email: 'katherine.r@example.com', message: 'Requesting a synchronization feature...', status: 'In Progress' },
-    { user: 'Leonard Richardson', email: 'leo.rich@example.com', message: 'Interface consistently lags...', status: 'In Progress' },
-    { user: 'Samantha Miller', email: 'sam.miller@example.com', message: 'Video tutorials missing audio...', status: 'Pending' },
-    { user: 'David Harrison', email: 'd.harrison@example.com', message: 'Dark mode UI contrast issues...', status: 'Resolved' },
-    { user: 'Emily Thompson', email: 'emily.t@example.com', message: 'Export progress reports as PDF...', status: 'Dismiss' },
+    { 
+      user: 'Jonathan Maxwell', 
+      email: 'j.maxwell_pro@vfit-agency.com', 
+      message: 'The AI-generated workout plan is great, but the rest timer sometimes freezes when I switch apps on my iPhone 14 Pro during the high-intensity interval training sessions.', 
+      status: 'Resolved' 
+    },
+    { 
+      user: 'Katherine Rosebud', 
+      email: 'katherine.rose@fit-member.org', 
+      message: 'Requesting a synchronization feature for MyFitnessPal and Apple Health. It would make tracking macros and calories much easier for users who use multiple apps.', 
+      status: 'In Progress' 
+    },
+    { 
+      user: 'Leonard Richardson', 
+      email: 'l.richardson@corporate-health.net', 
+      message: 'The application interface consistently lags and even crashes when loading the 3D body map visualization on Android devices with lower RAM.', 
+      status: 'In Progress' 
+    },
+    { 
+      user: 'Samantha Miller', 
+      email: 's.miller@globalfit.com', 
+      message: 'I noticed that some video tutorials for the advanced leg press machine are missing audio instructions, making it hard to understand the proper form.', 
+      status: 'Pending' 
+    },
+    { 
+      user: 'David Harrison', 
+      email: 'd.harrison@techlife.io', 
+      message: 'The dark mode UI has some contrast issues in the analytics tab, making the graph labels very hard to read when I am working out in a dimly lit gym.', 
+      status: 'Resolved' 
+    },
+    { 
+      user: 'Emily Thompson', 
+      email: 'emily.t@wellnesshub.net', 
+      message: 'It would be very helpful if we could export our monthly progress reports and body measurement statistics as PDF files to share with our personal trainers.', 
+      status: 'Dismiss' 
+    },
+    { 
+      user: 'Michael Chang', 
+      email: 'm.chang@startup.inc', 
+      message: 'Great app overall! Just wish there were more vegan meal options in the nutrition section, specifically high-protein breakfast ideas.', 
+      status: 'Resolved' 
+    },
+    { 
+      user: 'Sarah Jenkins', 
+      email: 'sarah.j@fitness-daily.com', 
+      message: 'Login via Google seems to be broken on the latest iOS update. It keeps redirecting me back to the welcome screen without logging me in.', 
+      status: 'Pending' 
+    }
   ];
 
   get filteredData() {
