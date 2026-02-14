@@ -1,27 +1,62 @@
-<nav class="fixed top-6 w-full z-50">
-  <div class="flex justify-center px-20">
-    <div
-      class="bg-black/45 backdrop-blur-md border border-[#626262]/75 shadow-lg rounded-full px-12 py-5 flex items-center justify-between text-white w-full"
-    >
-      <div>viktorifit</div>
-      <div class="flex gap-8">
-        <a routerLink="/" class="hover:text-(--main-color) transition font-semibold"> 
-          Home 
-        </a>
-        <a routerLink="/programs" class="hover:text-(--main-color) transition font-semibold">
-          Programs
-        </a>
-        <a routerLink="/suggestion" class="hover:text-(--main-color) transition font-semibold">
-          Suggestion
-        </a>
-        <!-- <a routerLink="/about" class="hover:text-(--main-color) transition font-semibold">About</a> -->
-        <a
-          routerLink="login"
-          class="hover:text-(--main-color) transition font-semibold cursor-pointer" 
-          type="button"
-          >Login</a
-        >
+<nav class="fixed top-6 w-full z-50 px-4 md:px-20">
+  
+  <div class="max-w-7xl mx-auto rounded-full p-4 flex items-center justify-between text-white relative transition-all duration-300 z-50"
+       [ngClass]="isScrolled ? 'bg-black/45 backdrop-blur-md border border-[#626262]/75 shadow-lg' : 'bg-transparent border border-transparent'">
+    
+    <a routerLink="/" class="text-xl font-poppins font-semibold italic tracking-wider uppercase transition-colors hover:text-(--main-color) cursor-pointer">
+      <img src="assets/logo/Viktorifit_Green.svg" 
+       alt="Viktorifit-Logo" 
+       class="w-auto h-6">
+    </a>
+
+    <div class="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2 font-poppins">
+      <a routerLink="/" 
+        class="text-sm hover:text-(--main-color) transition-colors"
+        routerLinkActive="text-(--main-color) border-b-2 border-(--main-color)"
+        [routerLinkActiveOptions]="{exact: true}">
+        Home
+      </a>
+      <a routerLink="/suggestion-intro" 
+        class="text-sm hover:text-(--main-color) transition-colors"
+        routerLinkActive="text-(--main-color) border-b-2 border-(--main-color)">
+        Suggestion
+      </a>
+      <a routerLink="/support" 
+        class="text-sm hover:text-(--main-color) transition-colors"
+        routerLinkActive="text-(--main-color) border-b-2 border-(--main-color)">
+        Support
+      </a>
+    </div>
+
+    <div class="hidden md:block">
+      <a routerLink="/login" class="bg-(--main-color) text-black text-sm font-semibold px-8 py-2 rounded-full hover:bg-black hover:text-white transition-all duration-300">Login</a>
+    </div>
+
+    <button (click)="toggleMenu()" class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5 focus:outline-none">
+      <div class="w-6 h-0.5 bg-white rounded-full transition-all duration-300 origin-center" [class.rotate-45]="isMenuOpen" [class.translate-y-2]="isMenuOpen"></div>
+      <div class="w-6 h-0.5 bg-white rounded-full transition-all duration-300" [class.opacity-0]="isMenuOpen"></div>
+      <div class="w-6 h-0.5 bg-white rounded-full transition-all duration-300 origin-center" [class.-rotate-45]="isMenuOpen" [class.-translate-y-2]="isMenuOpen"></div>
+    </button>
+
+  </div>
+
+  <div class="md:hidden w-full overflow-hidden transition-all duration-120 ease-in-out transform origin-top"
+       [class.max-h-0]="!isMenuOpen"
+       [class.opacity-0]="!isMenuOpen"
+       [class.max-h-[500px]]="isMenuOpen" 
+       [class.opacity-100]="isMenuOpen"
+       [class.mt-2]="isMenuOpen">
+       
+    <div class="bg-black/60 backdrop-blur-xl border border-[#626262]/75 shadow-2xl rounded-3xl p-6">
+      <div class="flex flex-col items-center gap-6 font-poppins">
+        <a (click)="toggleMenu()" routerLink="/" class="text-lg text-white hover:text-(--main-color)">Home</a>
+        <a (click)="toggleMenu()" routerLink="/suggestion-intro" class="text-lg text-white hover:text-(--main-color)">Suggestion</a>
+        <a (click)="toggleMenu()" routerLink="/support" class="text-lg text-white hover:text-(--main-color)">Support</a>
+        <div class="w-full h-[1px] bg-gray-700"></div>
+        <a (click)="toggleMenu()" routerLink="/login" class="w-full text-center bg-(--main-color) text-black text-lg font-bold py-3 rounded-full hover:bg-white transition-all duration-300">Login</a>
       </div>
     </div>
+    
   </div>
+
 </nav>
