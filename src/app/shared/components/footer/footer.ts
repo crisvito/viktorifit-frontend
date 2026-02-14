@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../core';
 
 @Component({
   selector: 'app-footer',
@@ -8,5 +9,23 @@ import { RouterModule } from '@angular/router';
   styleUrl: './footer.css',
 })
 export class FooterComponent {
+
+  constructor(public authService: AuthService) {}
+
+  isAuthenticated(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  isAdmin(): boolean {
+    return this.authService.getRole() === 'ADMIN';
+  }
+
+  isUser(): boolean {
+    return this.authService.getRole() === 'USER';
+  }
+
+  isGuest(): boolean {
+    return !this.isAuthenticated();
+  }
 
 }

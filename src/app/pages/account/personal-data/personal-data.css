@@ -1,0 +1,18 @@
+.focus-background {
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.focus-background-male {
+  -webkit-mask-image: url('/pages/onboarding/body.svg');
+  mask-image: url('/pages/onboarding/Male.png');
+}
+
+.focus-background-female {
+  -webkit-mask-image: url('/pages/onboarding/Female.png');
+  mask-image: url('/pages/onboarding/Female.png');
+}

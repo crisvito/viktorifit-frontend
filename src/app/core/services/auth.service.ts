@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environment/environment';
 
 export interface User {
   id: number;
-  fullname: string; 
+  fullname: string;
   username: string;
   email: string;
   role: string;
@@ -19,7 +19,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  user: User; 
+  user: User;
   token: string;
 }
 
@@ -30,36 +30,67 @@ export interface RegisterRequest {
   password: string;
 }
 
-
-@Injectable({
-  providedIn: 'root'
-})
-
+@Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private baseUrl = environment.apiUrl + "auth/";
+  private baseUrl = environment.apiUrl + 'auth';
 
-  constructor(private http: HttpClient) { }
+  private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
+  isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
-  login(data: LoginRequest): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/login`, data);
+  constructor(private http: HttpClient) {}
+
+  private hasToken(): boolean {
+    const token = localStorage.getItem('auth_token');
+    return token !== null && token !== '';
+  }
+
+  isLoggedIn(): boolean {
+    return this.hasToken();
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('auth_token');
+  }
+
+  login(data: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/login`, data).pipe(
+      tap(res => {
+        this.saveSession(res.token, res.user);
+        this.isLoggedInSubject.next(true);
+      })
+    );
   }
 
   register(data: RegisterRequest): Observable<any> {
     return this.http.post(`${this.baseUrl}/register`, data);
   }
 
-  saveSession(token: string, user: any) {
+  logout(): void {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    this.isLoggedInSubject.next(false);
+  }
+
+  saveSession(token: string, user: User): void {
     localStorage.setItem('auth_token', token);
     localStorage.setItem('auth_user', JSON.stringify(user));
   }
 
-  getToken() {
-    return localStorage.getItem('auth_token');
+  getUser(): User | null {
+    const userStr = localStorage.getItem('auth_user');
+    return userStr ? JSON.parse(userStr) : null;
   }
 
-  logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+  getRole(): string | null {
+    return this.getUser()?.role ?? null;
+  }
+
+  isAdmin(): boolean {
+  return this.getRole() === 'ADMIN';
+}
+
+  isUser(): boolean {
+    return this.getRole() === 'USER';
   }
 }

@@ -1,0 +1,105 @@
+<div class="font-poppins animate-in fade-in zoom-in-95 duration-300">
+  <h2 class="text-[28px] font-bold mb-1 text-black">My Account</h2>
+
+  <div class="flex items-center gap-2 text-black mt-7 mb-7">
+    <img src="/pages/profile/account-detail.svg" alt="" />
+    <span class="text-[20px] font-medium">Account Detail</span>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-10 text-gray-400">Loading data...</div>
+
+  <div *ngIf="!isLoading">
+    <div
+      class="w-full h-50 bg-[#8AC500] rounded-xl relative mb-8 flex items-center justify-center shadow-sm"
+    >
+      <div class="relative">
+        <div
+          class="w-35 h-35 rounded-full bg-[#CFED89] flex items-center justify-center overflow-hidden"
+        >
+          <img src="/pages/workout-lists/person.svg" alt="" class="w-92 h-92 mt-7" />
+        </div>
+        <button
+          class="absolute bottom-0 right-0 w-10 h-10 bg-[#D2F57F] rounded-full border-2 border-[#8AC500] flex items-center justify-center hover:scale-110 transition shadow-sm cursor-pointer text-[#4E7000]"
+          aria-label="button"
+        >
+          <img src="/pages/my-account/pencil.svg" alt="" />
+        </button>
+      </div>
+    </div>
+
+    <form (ngSubmit)="saveChanges()" class="space-y-5">
+      <div class="space-y-1.5">
+        <label class="text-[16px] font-medium text-[#676767] mb-1">Name</label>
+        <div
+          class="flex items-center bg-[#EBEBEB] rounded-[5px] px-4 h-12 border border-[#CCCCCC] focus-within:border-[#96D303] transition-all gap-8 mt-1"
+        >
+          <img src="/pages/my-account/user.svg" alt="" />
+          <input
+            title="username"
+            type="text"
+            [(ngModel)]="userData.name"
+            name="name"
+            class="bg-transparent w-full outline-none focus:ring-0 border-none text-[14px] text-[#313131] font-medium placeholder-gray-400"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-[16px] font-medium text-[#676767]">Email</label>
+        <div
+          class="flex items-center bg-[#EBEBEB] rounded-[5px] px-4 h-12 border border-[#CCCCCC] focus-within:border-[#96D303] transition-all gap-8 mt-1"
+        >
+          <img src="/pages/my-account/email.svg" alt="" />
+          <input
+            title="email"
+            type="email"
+            [(ngModel)]="userData.email"
+            name="email"
+            class="bg-transparent w-full outline-none focus:ring-0 border-none text-[14px] text-[#313131] font-medium placeholder-gray-400"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-[16px] font-medium text-[#676767] mb-1">Phone Number</label>
+        <div
+          class="flex items-center bg-[#EBEBEB] rounded-[5px] px-4 h-12 border border-[#CCCCCC] focus-within:border-[#96D303] transition-all gap-8 mt-1"
+        >
+          <img src="/pages/my-account/phone.svg" alt="" />
+          <input
+            type="tel"
+            [(ngModel)]="userData.phone"
+            name="phone"
+            placeholder="-"
+            class="bg-transparent w-full outline-none focus:ring-0 border-none text-[14px] text-[#313131] font-medium placeholder-gray-400"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-[16px] font-medium text-[#676767] mb-1">Date of Birth</label>
+        <div
+          class="flex items-center bg-[#EBEBEB] rounded-[5px] px-4 h-12 border border-[#CCCCCC] focus-within:border-[#96D303] transition-all gap-8 mt-1"
+        >
+          <img src="/pages/my-account/dob.svg" alt="" />
+          <input
+            title="dob"
+            type="text"
+            [(ngModel)]="userData.dob"
+            name="dob"
+            class="bg-transparent w-full outline-none focus:ring-0 border-none text-[14px] text-[#313131] font-medium placeholder-gray-400"
+          />
+        </div>
+      </div>
+
+      <div class="pt-15">
+        <button
+          type="submit"
+          class="w-full h-15 text-[20px] bg-[#AFFA01] hover:bg-[#b0e635] text-black font-medium rounded-[7px] shadow-sm transition transform active:scale-[0.99] border border-[#a4d42b]"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

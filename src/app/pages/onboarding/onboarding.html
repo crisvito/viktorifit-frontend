@@ -1,0 +1,614 @@
+<div class="font-poppins w-full overflow-x-hidden min-h-screen pb-10 bg-white">
+  <div
+    *ngIf="currentStep > 0 && currentStep <= 9"
+    class="w-full max-w-lg justify-center mx-auto px-4 md:px-8 py-6"
+  >
+    <div class="flex items-center justify-between relative">
+      <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 z-0 rounded"></div>
+
+      <div
+        class="absolute top-1/2 left-0 h-1 bg-[#8AC500] transition-all duration-500 ease-out"
+        [style.width.%]="(currentStep - 1) * (100 / 8)"
+      ></div>
+
+      <div
+        class="relative z-10 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-xs md:text-sm transition-all duration-300"
+        [ngClass]="
+          currentStep >= 1
+            ? 'bg-[#8AC500] text-white ring-4 ring-[#AFFA01]/50'
+            : 'bg-gray-300 text-gray-500'
+        "
+      >
+        1
+      </div>
+      <div
+        class="relative z-10 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-xs md:text-sm transition-all duration-300"
+        [ngClass]="
+          currentStep >= 5
+            ? 'bg-[#8AC500] text-white ring-4 ring-[#AFFA01]/50'
+            : 'bg-gray-300 text-gray-500'
+        "
+      >
+        2
+      </div>
+      <div
+        class="relative z-10 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-xs md:text-sm transition-all duration-300"
+        [ngClass]="
+          currentStep >= 9
+            ? 'bg-[#8AC500] text-white ring-4 ring-[#AFFA01]/50'
+            : 'bg-gray-300 text-gray-500'
+        "
+      >
+        3
+      </div>
+    </div>
+    <div class="relative mt-2 h-6 w-full font-semibold">
+      <div
+        class="absolute left-0 w-10 text-center text-xs md:text-sm transition-colors duration-300"
+        [ngClass]="currentStep >= 1 ? 'text-[#8AC500]' : 'text-gray-400'"
+      >
+        Body
+      </div>
+
+      <div
+        class="absolute left-1/2 -translate-x-1/2 w-10 text-center text-xs md:text-sm transition-colors duration-300"
+        [ngClass]="currentStep >= 5 ? 'text-[#8AC500]' : 'text-gray-400'"
+      >
+        Habit
+      </div>
+
+      <div
+        class="absolute right-0 w-10 text-center text-xs md:text-sm transition-colors duration-300"
+        [ngClass]="currentStep >= 9 ? 'text-[#8AC500]' : 'text-gray-400'"
+      >
+        Plan
+      </div>
+    </div>
+  </div>
+
+  <div class="w-full max-w-3xl mx-auto">
+    <div *ngIf="currentStep === 0" class="text-center py-12 md:py-20 px-6 animate-fade-in">
+      <div
+        class="w-20 h-20 md:w-24 md:h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 text-4xl md:text-5xl"
+      >
+        👋
+      </div>
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">
+        Selamat Datang di ViktoriFit!
+      </h1>
+      <p class="text-gray-600 mb-8 md:mb-10 text-base md:text-lg leading-relaxed max-w-md mx-auto">
+        Kami butuh sedikit data untuk merancang program latihan yang
+        <span class="font-bold text-green-600">spesifik untuk tubuhmu</span>. Hanya butuh 3 menit!
+      </p>
+      <button
+        type="button"
+        (click)="nextStep()"
+        class="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-2xl font-bold text-xl hover:bg-gray-800 transition transform active:scale-95 shadow-lg"
+      >
+        Mulai Sekarang
+      </button>
+    </div>
+
+    <section class="pt-6 md:pt-9 animate-fade-in" *ngIf="currentStep === 1">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          Tell Us About Yourself!
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+        >
+          Hello! First of all, <span class="font-semibold text-black">what is your gender?</span>
+        </span>
+      </div>
+
+      <div class="flex flex-row justify-center items-center gap-4 md:gap-8 pt-10 pb-10">
+        <button
+          (click)="selectGender('female')"
+          class="group relative w-36 h-36 md:w-48 md:h-48 lg:w-62 lg:h-62 rounded-full flex flex-col items-center justify-center transition-all duration-200 ease-in-out shrink-0"
+          [ngClass]="
+            selectedGender === 'female' ? 'bg-[#AFFA01]' : 'bg-[#F5F5F5] hover:bg-[#AFFA01]'
+          "
+        >
+          <div class="relative w-20 h-20 md:w-28 md:h-28 lg:w-40 lg:h-40">
+            <img
+              src="/pages/onboarding/Female.png"
+              alt="female"
+              class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200 opacity-100 group-hover:opacity-0"
+              [class.opacity-0]="selectedGender === 'female'"
+            />
+            <img
+              src="/pages/onboarding/Female-hover.png"
+              alt="female-hover"
+              class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+              [class.opacity-100]="selectedGender === 'female'"
+            />
+          </div>
+          <span
+            class="text-sm md:text-lg lg:text-xl font-medium pt-2 md:pt-3 transition-colors duration-200"
+            [ngClass]="
+              selectedGender === 'female'
+                ? 'text-[#557A00]'
+                : 'text-[#9A9A9A] group-hover:text-[#557A00]'
+            "
+          >
+            Female
+          </span>
+        </button>
+
+        <button
+          (click)="selectGender('male')"
+          class="group relative w-36 h-36 md:w-48 md:h-48 lg:w-62 lg:h-62 rounded-full flex flex-col items-center justify-center transition-all duration-200 ease-in-out shrink-0"
+          [ngClass]="selectedGender === 'male' ? 'bg-[#AFFA01]' : 'bg-[#F5F5F5] hover:bg-[#AFFA01]'"
+        >
+          <div class="relative w-20 h-20 md:w-28 md:h-28 lg:w-40 lg:h-40">
+            <img
+              src="/pages/onboarding/Male.png"
+              alt="male"
+              class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200 opacity-100 group-hover:opacity-0"
+              [class.opacity-0]="selectedGender === 'male'"
+            />
+            <img
+              src="/pages/onboarding/Male-hover.png"
+              alt="male-hover"
+              class="absolute inset-0 w-full h-full object-contain transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+              [class.opacity-100]="selectedGender === 'male'"
+            />
+          </div>
+          <span
+            class="text-sm md:text-lg lg:text-xl font-medium pt-2 md:pt-3 transition-colors duration-200"
+            [ngClass]="
+              selectedGender === 'male'
+                ? 'text-[#557A00]'
+                : 'text-[#9A9A9A] group-hover:text-[#557A00]'
+            "
+          >
+            Male
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-17 animate-fade-in" *ngIf="currentStep === 2">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <div class="grid justify-center text-center px-6 md:px-0">
+          <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+            Tell Us About Yourself!
+          </h2>
+          <span
+            class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+          >
+            Next, we need to know your age.
+            <span class="font-semibold text-black">When is your Birthday?</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center justify-center pt-10 md:pt-14 px-4 mb-10">
+        <div class="flex items-center gap-2 md:gap-4 flex-wrap justify-center">
+          <input
+            #dayInput
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            placeholder="DD"
+            maxlength="2"
+            class="w-20 h-16 md:w-24 md:h-20 border border-[#D2D2D2] rounded-xl text-center text-2xl md:text-3xl placeholder:text-center appearance-none p-0 outline-none focus:border-[#AFFA01] focus:border-2"
+            [(ngModel)]="birthDay"
+            (input)="validateDay($event)"
+            (keyup)="onBirthKey($event, monthInput)"
+          />
+
+          <input
+            #monthInput
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            placeholder="MM"
+            maxlength="2"
+            class="w-20 h-16 md:w-24 md:h-20 border border-[#D2D2D2] rounded-xl text-center text-2xl md:text-3xl placeholder:text-center appearance-none p-0 outline-none focus:border-[#AFFA01] focus:border-2"
+            [(ngModel)]="birthMonth"
+            (input)="validateMonth($event)"
+            (keyup)="onBirthKey($event, yearInput)"
+          />
+
+          <input
+            #yearInput
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            placeholder="YYYY"
+            maxlength="4"
+            class="w-24 h-16 md:w-32 md:h-20 border border-[#D2D2D2] rounded-xl text-center text-2xl md:text-3xl placeholder:text-center appearance-none p-0 outline-none focus:border-[#AFFA01] focus:border-2"
+            [(ngModel)]="birthYear"
+            (input)="validateYear($event)"
+          />
+
+          <label class="relative ml-1 md:ml-3">
+            <input
+              type="date"
+              class="absolute inset-0 opacity-0 cursor-pointer"
+              (change)="onCalendarChange($event)"
+            />
+            <img
+              src="/pages/onboarding/calendar.svg"
+              alt="calendar"
+              class="w-8 h-8 md:w-10 md:h-10"
+            />
+          </label>
+        </div>
+
+        <p
+          *ngIf="birthYear && birthYear.toString().length === 4 && (age < 17 || age > 55)"
+          class="text-red-500 text-sm mt-4 text-center font-medium"
+        >
+          Age must be between 17–55 years old
+        </p>
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 3">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          Tell Us About Yourself!
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+        >
+          What is your <span class="font-semibold text-black">height and weight</span> right now?
+        </span>
+      </div>
+
+      <div class="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-10 pt-10 px-6">
+        <div class="flex flex-col gap-6 justify-center w-full md:w-auto mb-10">
+          <div>
+            <label class="block text-xl font-medium mb-2">Height</label>
+            <div class="relative w-full md:w-72 lg:w-90">
+              <input
+                title="height"
+                #heightInput
+                type="number"
+                min="130"
+                max="250"
+                placeholder=""
+                class="no-spinner w-full h-15 bg-[#F5F5F5] rounded-sm px-6 text-xl outline-none focus:ring-2 focus:ring-[#AFFA01]"
+                [(ngModel)]="formData.height"
+                (keydown)="onBodyKey($event, weightInput)"
+              />
+              <div
+                class="absolute flex items-center justify-center w-20 h-8 rounded-md bg-[#AFFA01] right-4 top-1/2 -translate-y-1/2 text-base font-medium text-black pointer-events-none"
+              >
+                cm
+              </div>
+            </div>
+            <p
+              *ngIf="formData.height && (formData.height < 50 || formData.height > 250)"
+              class="text-red-500 text-sm mt-2"
+            >
+              Height must be between 130–250 cm
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-xl font-medium mb-2">Weight</label>
+            <div class="relative w-full md:w-72 lg:w-90">
+              <input
+                title="weight"
+                #weightInput
+                type="number"
+                min="40"
+                max="250"
+                [(ngModel)]="formData.weight"
+                placeholder=""
+                class="no-spinner w-full h-15 px-6 rounded-lg bg-gray-100 text-xl focus:outline-none focus:ring-2 focus:ring-[#AFFA01]"
+                (keydown)="onBodyKey($event, null)"
+              />
+              <div
+                class="absolute flex items-center justify-center w-20 h-8 rounded-md bg-[#AFFA01] right-4 top-1/2 -translate-y-1/2 text-base font-medium text-black pointer-events-none"
+              >
+                kg
+              </div>
+            </div>
+            <p
+              *ngIf="formData.weight && (formData.weight < 40 || formData.weight > 250)"
+              class="text-red-500 text-sm mt-2"
+            >
+              Weight must be between 40–250 kg
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 4">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          Tell Us About Yourself!
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+        >
+          Select the image that your
+          <span class="font-semibold text-black">most resembles</span> current body shape.
+        </span>
+      </div>
+      <div
+        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 pt-10 px-4 md:px-6 max-w-5xl mx-auto mb-10"
+      >
+        <button
+          *ngFor="let option of currentBodyFatOptions"
+          (click)="selectBodyFat(option)"
+          class="relative group flex flex-col items-center rounded-lg border-2 transition-all duration-200 overflow-hidden bg-white hover:shadow-lg"
+          [ngClass]="
+            formData.bodyFat === option.value
+              ? 'border-[#AFFA01] ring-2 ring-[#AFFA01] ring-opacity-50 bg-green-50'
+              : 'border-gray-200 hover:border-[#AFFA01]'
+          "
+        >
+          <div class="w-full aspect-4/5 overflow-hidden bg-gray-100 relative">
+            <img
+              alt="image"
+              [src]="option.image"
+              [alt]="option.label"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+
+            <div
+              *ngIf="formData.bodyFat === option.value"
+              class="absolute inset-0 bg-[#AFFA01] bg-opacity-20 flex items-center justify-center"
+            >
+              <div class="bg-[#AFFA01] rounded-full p-2"></div>
+            </div>
+          </div>
+
+          <div class="py-3 md:py-4 text-center w-full">
+            <p class="font-semibold text-gray-800 text-base md:text-lg">{{ option.range }}</p>
+            <p class="text-xs md:text-sm text-gray-500">{{ option.label }}</p>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 5">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          Your Wellness Summary!
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+        >
+          Here is the summary of your current condition.
+          <span class="font-semibold">Lets continue to step 2!</span>
+        </span>
+      </div>
+
+      <div class="flex justify-center pt-8 md:pt-10 px-4 md:px-6 mb-10">
+        <div class="w-full max-w-lg">
+          <app-bmi-card
+            [height]="formData.height || 0"
+            [weight]="formData.weight || 0"
+            [bmi]="+bmiDisplay"
+          >
+          </app-bmi-card>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 6">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          About Your Habit!
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+          >We wanna know about your habis when you're workout.<br /><span
+            class="font-semibold text-black"
+          >
+            How many minutes you spent per session?</span
+          >
+        </span>
+      </div>
+      <div
+        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 pt-10 px-4 md:px-6 max-w-5xl mx-auto mb-10"
+      >
+        <button
+          *ngFor="let option of workoutDuration"
+          (click)="selectDuration(option)"
+          class="relative group flex flex-col items-center rounded-lg border-2 transition-all duration-200 overflow-hidden bg-white hover:shadow-lg"
+          [ngClass]="
+            formData.workoutDuration === option.duration
+              ? 'border-[#AFFA01] ring-2 ring-[#AFFA01] ring-opacity-50 bg-green-50'
+              : 'border-gray-200 hover:border-[#AFFA01]'
+          "
+        >
+
+          <div class="py-3 md:py-4 text-center w-full">
+            <p class="font-semibold text-gray-800 text-base md:text-lg">{{ option.duration }} Minutes</p>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 7">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          About Your Habit!
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+        >
+          What sports do you enjoy?
+        </span>
+      </div>
+
+      <div
+        class="flex flex-wrap justify-center gap-3 md:gap-4 pt-10 px-4 md:px-20 max-w-2xl mx-auto"
+      >
+        <button
+          *ngFor="let sport of sportsOptions"
+          (click)="toggleSport(sport.id)"
+          class="relative h-28 w-28 md:h-32 md:w-32 rounded-[11px] border-2 flex flex-col items-center justify-center gap-2"
+          [ngClass]="
+            formData.sports.includes(sport.id)
+              ? 'bg-[#AFFA01] border-[#AFFA01] text-black'
+              : 'bg-white border-gray-200 text-gray-500 hover:border-[#AFFA01]'
+          "
+        >
+          <span class="text-3xl md:text-5xl">{{ sport.icon }}</span>
+          <span class="font-semibold text-xs md:text-base">{{ sport.label }}</span>
+        </button>
+      </div>
+
+      <div class="text-center mt-6 text-gray-400 text-sm italic px-4">
+        *You can skip this if you don't have a specific preference.
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 8">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          What is Your Plan?
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+        >
+          From to do workout, we need to know what you want to <br class="hidden md:block" />adjust
+          your plan.<span class="font-semibold text-black"> What is your goal?</span>
+        </span>
+      </div>
+
+      <div
+        class="flex flex-col md:flex-row flex-wrap lg:flex-nowrap justify-center gap-4 md:gap-6 pt-10 px-6 mb-10"
+      >
+        <div
+          (click)="selectGoal('Muscle Gain')"
+          class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
+          [ngClass]="
+            selectedGoal === 'Muscle Gain'
+              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              : 'bg-white border-gray-200 hover:border-[#AFFA01]'
+          "
+        >
+          <img
+            src=""
+            alt="muscle gain"
+            class="bg-gray-500 w-50 h-8 rounded-sm justify-center hidden"
+          />
+          <h2 class="text-xl md:text-2xl font-semibold mt-2 md:mt-8">Muscle Gain</h2>
+          <p class="text-sm mt-2 opacity-80 leading-relaxed">
+            Build muscle mass and increase your strength.
+          </p>
+        </div>
+        <div
+          (click)="selectGoal('Weight Loss')"
+          class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
+          [ngClass]="
+            selectedGoal === 'Weight Loss'
+              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              : 'bg-white border-gray-200 hover:border-[#AFFA01]'
+          "
+        >
+          <h2 class="text-xl md:text-2xl font-semibold mt-2 md:mt-8">Weight Loss</h2>
+          <p class="text-sm mt-2 opacity-80 leading-relaxed">
+            Burn fat and improve your cardiovascular health.
+          </p>
+        </div>
+        <div
+          (click)="selectGoal('Maintain')"
+          class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
+          [ngClass]="
+            selectedGoal === 'Maintain'
+              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              : 'bg-white border-gray-200 hover:border-[#AFFA01]'
+          "
+        >
+          <h2 class="text-xl md:text-2xl font-semibold mt-2 md:mt-8">Maintain</h2>
+          <p class="text-sm mt-2 opacity-80 leading-relaxed">
+            Burn fat and improve your cardiovascular health.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 9">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          What is Your Plan?
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+        >
+          To adjust your workout day.<span class="font-semibold text-black">
+            Which days are you available?</span
+          >
+        </span>
+      </div>
+
+      <div class="flex flex-col items-center pt-8 gap-3 w-full px-6 md:px-0">
+        <button
+          *ngFor="let day of workoutDaysList"
+          (click)="selectDay(day)"
+          class="w-full max-w-sm md:w-md h-13 rounded-lg text-lg border text-[#808080] transition hover:border-3 hover:border-[#AFFA01] hover:text-black flex flex-col justify-center"
+          [ngClass]="
+            selectedDay.includes(day)
+              ? 'bg-[#AFFA01] text-black border-[#AFFA01]'
+              : 'bg-white border-gray-200'
+          "
+        >
+          {{ day | titlecase }}
+        </button>
+      </div>
+
+      <div class="flex justify-center mt-4 h-6">
+        <p *ngIf="selectedDay.length === 0" class="text-red-500 text-sm font-medium animate-pulse">
+          * Please select at least 2 day
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div *ngIf="currentStep >= 1 && currentStep <= 9" class="w-full max-w-lg mx-auto px-6 py-6">
+    <div class="flex flex-row gap-3 w-full">
+      <button
+        (click)="previous()"
+        class="w-1/2 h-16 rounded-lg bg-[#F5F5F5] text-gray-500 font-bold text-sm md:text-lg shadow-sm hover:bg-gray-200 transition-all flex items-center justify-center gap-3 cursor-pointer"
+      >
+        <img
+          src="/pages/onboarding/back.svg"
+          alt="Back"
+          class="w-4 h-4 md:w-6 md:h-6 opacity-50 items-center mt-0.5"
+        />
+        <span>Back</span>
+      </button>
+
+      <button
+        (click)="next()"
+        [disabled]="!canContinue()"
+        class="w-1/2 h-16 rounded-lg bg-[#AFFA01] text-black font-bold text-sm md:text-xl shadow-lg hover:bg-[#9ED900] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-3 cursor-pointer"
+      >
+        <span class="items-center text-center">{{
+          currentStep === 9 ? 'Create Plan' : 'Continue'
+        }}</span>
+        <img
+          *ngIf="currentStep < 10"
+          src="/pages/onboarding/continue.svg"
+          alt="Next"
+          class="w-4 h-4 md:w-6 md:h-6 items-center mt-0.5"
+        />
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="isLoading"
+    class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center animate-fade-in"
+  >
+    <div class="relative w-32 h-32 mb-8">
+      <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+      <div
+        class="absolute inset-0 border-4 border-[#AFFA01] rounded-full border-t-transparent animate-spin"
+      ></div>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center px-4">{{ loadingText }}</h2>
+    <p class="text-gray-500 text-center text-sm">Please wait, do not close this page.</p>
+  </div>
+</div>

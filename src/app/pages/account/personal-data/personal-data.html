@@ -1,0 +1,211 @@
+<div class="font-poppins animate-in fade-in zoom-in-95 duration-300">
+  <div>
+    <h2 class="text-[32px] font-semibold">Personal Data</h2>
+
+    <div class="flex items-center text-black mt-5 gap-3">
+      <img src="/layout/profile/account-detail.svg" alt="" />
+      <h3 class="text-[20px] font-medium text-[#313131]">Body Information</h3>
+    </div>
+
+    <form (ngSubmit)="saveChanges()" class="space-y-5">
+      <div class="pt-5">
+        <span class="text-[#676767] text-[16px]">Gender</span>
+
+        <div class="flex flex-col md:flex-row mt-2 gap-4">
+          <div
+            (click)="selectGender('female')"
+            class="flex flex-row items-center gap-4 w-full h-14 border rounded-[5px] p-3 justify-center cursor-pointer transition-all duration-200"
+            [ngClass]="
+              userData.gender === 'female'
+                ? 'bg-[#AFFA01] border-[#A9E816] shadow-sm'
+                : 'bg-[#E3E3E3] border-[#B9B9B9] hover:bg-[#d4d4d4]'
+            "
+          >
+            <div
+              class="w-5 h-6 transition-colors duration-200 focus-background focus-background-female"
+              [ngClass]="userData.gender === 'female' ? 'bg-[#557A00]' : 'bg-[#787878]'"
+            ></div>
+
+            <span
+              class="text-[16px]"
+              [ngClass]="
+                userData.gender === 'female' ? 'text-[#557A00] font-medium' : 'text-[#787878]'
+              "
+            >
+              Female
+            </span>
+          </div>
+
+          <div
+            (click)="selectGender('male')"
+            class="flex flex-row items-center gap-4 w-full h-14 border rounded-[5px] p-3 justify-center cursor-pointer transition-all duration-200"
+            [ngClass]="
+              userData.gender === 'male'
+                ? 'bg-[#AFFA01] border-[#A9E816] shadow-sm'
+                : 'bg-[#E3E3E3] border-[#B9B9B9] hover:bg-[#d4d4d4]'
+            "
+          >
+            <div
+              class="w-6 h-6 transition-colors duration-200 focus-background focus-background-male"
+              [ngClass]="userData.gender === 'male' ? 'bg-[#557A00]' : 'bg-[#787878]'"
+            ></div>
+
+            <span
+              class="text-[16px]"
+              [ngClass]="
+                userData.gender === 'male' ? 'text-[#557A00] font-medium' : 'text-[#787878]'
+              "
+            >
+              Male
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <label class="text-[#676767] text-[16px] font-medium">Weight</label>
+          <div class="flex gap-3 mt-2">
+            <input
+              title="user-weight"
+              type="number"
+              name="weight"
+              [(ngModel)]="userData.weight"
+              class="w-full flex-1 bg-[#E3E3E3] border border-[#B9B9B9] rounded-[5px] h-14 pl-8 text-[#404040] outline-none focus:border-[#96D303] focus:ring-1 focus:ring-[#96D303] transition"
+            />
+            <div
+              class="w-24 bg-[#AFFA01] rounded-[5px] flex items-center justify-center h-14 border border-[#A9E816] text-[#404040] font-medium"
+            >
+              Kg
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-1">
+          <label class="text-[#676767] text-[16px] font-medium">Height</label>
+          <div class="flex gap-3 mt-2">
+            <input
+              title="user-height"
+              type="number"
+              name="height"
+              [(ngModel)]="userData.height"
+              class="w-full flex-1 bg-[#E3E3E3] border border-[#B9B9B9] rounded-[5px] h-14 pl-8 text-[#313131] outline-none focus:border-[#96D303] focus:ring-1 focus:ring-[#96D303] transition"
+            />
+            <div
+              class="w-24 bg-[#AFFA01] rounded-[5px] flex items-center justify-center h-14 border border-[#A9E816] text-[#404040] font-medium"
+            >
+              Cm
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <span class="text-[#676767] text-[16px]">Symptoms</span>
+
+        <div class="flex flex-col md:flex-row mt-2 gap-4">
+          <div
+            (click)="toggleHypertension()"
+            class="flex items-center justify-center w-full h-14 border rounded-[5px] cursor-pointer transition-all duration-200 px-4"
+            [ngClass]="
+              userData.isHypertension
+                ? 'bg-[#AFFA01] border-[#A9E816] shadow-sm'
+                : 'bg-[#E3E3E3] border-[#B9B9B9] hover:bg-[#d4d4d4]'
+            "
+          >
+            <span
+              class="text-[16px]"
+              [ngClass]="userData.isHypertension ? 'text-[#557A00] font-medium' : 'text-[#787878]'"
+            >
+              Hypertension
+            </span>
+          </div>
+
+          <div
+            (click)="toggleDiabetes()"
+            class="flex items-center justify-center w-full h-14 border rounded-[5px] cursor-pointer transition-all duration-200 px-4"
+            [ngClass]="
+              userData.isDiabetes
+                ? 'bg-[#AFFA01] border-[#A9E816] shadow-sm'
+                : 'bg-[#E3E3E3] border-[#B9B9B9] hover:bg-[#d4d4d4]'
+            "
+          >
+            <span
+              class="text-[16px]"
+              [ngClass]="userData.isDiabetes ? 'text-[#557A00] font-medium' : 'text-[#787878]'"
+            >
+              Diabetes
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-10">
+        <div class="flex items-center text-black mt-15 mb-5 gap-3">
+          <img src="/layout/profile/account-detail.svg" alt="" />
+          <h3 class="text-[20px] font-medium text-[#313131]">Schedule</h3>
+        </div>
+
+        <div class="flex-1">
+          <label class="text-[#676767] text-[16px] font-medium">Workout Duration</label>
+
+          <div class="flex flex-col md:flex-row gap-3 mt-2">
+            <input
+              title="workout-duration"
+              type="number"
+              name="workoutDuration"
+              [(ngModel)]="userData.workoutDuration"
+              class="w-full md:w-[65%] md:flex-1 bg-[#E3E3E3] border border-[#B9B9B9] rounded-[5px] h-14 pl-8 text-[#313131] outline-none focus:border-[#96D303] focus:ring-1 focus:ring-[#96D303] transition"
+            />
+            <div
+              class="w-full md:w-[35%] px-6 bg-[#AFFA01] rounded-[5px] flex items-center justify-center h-14 border border-[#A9E816] text-[#404040] font-medium text-[14px]"
+            >
+              Minutes (per 1 day)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 pb-5">
+        <span class="text-[#676767] text-[16px]">Workout Day</span>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+          <div
+            *ngFor="let day of daysOfWeek"
+            (click)="toggleDay(day)"
+            class="flex items-center justify-center w-full h-14 border rounded-[5px] cursor-pointer transition-all duration-200"
+            [ngClass]="
+              isDaySelected(day)
+                ? 'bg-[#AFFA01] border-[#A9E816] shadow-sm'
+                : 'bg-[#E3E3E3] border-[#B9B9B9] hover:bg-[#d4d4d4]'
+            "
+          >
+            <span
+              class="text-[16px]"
+              [ngClass]="isDaySelected(day) ? 'text-[#404040] font-medium' : 'text-[#787878]'"
+            >
+              {{ day }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-10 flex flex-col gap-4">
+        <button
+          type="submit"
+          class="w-full h-15 text-[20px] bg-[#AFFA01] hover:bg-[#b0e635] text-black font-medium rounded-[7px] shadow-sm transition transform active:scale-[0.99] border border-[#a4d42b]"
+        >
+          Save Changes
+        </button>
+
+        <button
+          type="button"
+          (click)="updateRecommendation()"
+          class="w-full h-15 text-[20px] bg-[#2C2C2C] hover:bg-[#000000] text-[#AFFA01] font-semibold rounded-[7px] shadow-sm transition transform active:scale-[0.99]"
+        >
+          Update Recommendation
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

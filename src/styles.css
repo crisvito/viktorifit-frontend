@@ -16,6 +16,13 @@
 }
 
 @font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins/Poppins-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
   font-family: 'Raleway';
   src: url('/fonts/Raleway/static/Raleway-Regular.ttf') format('truetype');
   font-weight: 400;

@@ -3,15 +3,19 @@ import { ButtonComponent } from '../../shared/components';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterModule, ButtonComponent, FormsModule],
+  imports: [RouterModule, ButtonComponent, FormsModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class LoginPage {
+  showActivationModal: boolean = false;
+  activationMessage: string = '';
   serverError: string = '';
+  showPassword: boolean = false;
   isLoading: boolean = false;
   dataLogin = {
       username: "",
@@ -24,12 +28,13 @@ export class LoginPage {
   ) {}
 
   getErrorMessage(control: NgModel, label: string): string {
-    if (this.serverError.includes('User not found')) {
+    if (this.serverError.includes('User not found') || this.serverError.includes('Invalid')) {
       return 'Invalid Email/Username or Password';
     }
 
     if (this.serverError.includes('Account is not activated yet')) {
-      return 'Please Activate Your Account First';
+      this.showActivationModal = true;
+      this.activationMessage = 'Your account is not activated yet. Please check your email to activate your account.';
     }
 
     if (!control || !control.invalid || !(control.touched || control.dirty)) {
@@ -40,7 +45,7 @@ export class LoginPage {
       return `${label} field is required`;
     }
 
-    return '';
+    return this.serverError;
   }
 
   onLogin(form: NgForm) {
@@ -57,8 +62,6 @@ export class LoginPage {
       next: (response) => {
   
         this.authService.saveSession(response.token, response.user);
-      
-        alert(`Selamat datang, ${response.user.fullname}!`);
         
         this.router.navigate(['/']); 
         
@@ -75,4 +78,12 @@ export class LoginPage {
     });
   }
 
+  closeActivationModal() {
+    this.showActivationModal = false;
+    this.serverError = '';
+  }
+  
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
 }

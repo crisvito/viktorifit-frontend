@@ -1,29 +1,67 @@
-<footer class="bg-black h-1/2 flex flex-col items-center justify-center py-20 gap-7">
-  <span class="logo text-[#AFFA01]">
-    <img src="" alt="" />
-    <h3>Viktorifit</h3>
+<footer
+  class="bg-black w-full h-auto flex flex-col items-center justify-center py-10 md:py-20 gap-8 md:gap-10 px-4 font-poppins border-t border-gray-800"
+>
+  <!-- LOGO -->
+  <span class="logo">
+    <img src="/global/logo/Viktorifit_Green.svg" alt="logo" class="w-48 md:w-60" />
   </span>
 
-  <div class="text-[#D8D8D8]">
-    <div class="flex gap-10">
-      <a routerLink="/">HOME</a>
-      <a routerLink="/">RECOMENDATION</a>
-      <a routerLink="/">SUPPORT</a>
+  <!-- MENU -->
+  <div class="text-[#D8D8D8] font-medium text-sm md:text-base">
+    <div class="flex flex-col md:flex-row items-center gap-4 md:gap-10">
+      <!-- HOME (Guest, User, Admin) -->
+      <a routerLink="/" class="hover:text-[#AFFA01] transition-colors duration-300 cursor-pointer">
+        HOME
+      </a>
+
+      <!-- RECOMMENDATION (Guest only) -->
+      <a
+        *ngIf="authService.isGuest()"
+        routerLink="/suggestion-intro"
+        class="hover:text-[#AFFA01] transition-colors duration-300 cursor-pointer"
+      >
+        RECOMMENDATION
+      </a>
+
+      <!-- SUPPORT (Guest + User) -->
+      <a
+        *ngIf="!authService.isAdmin()"
+        routerLink="/support"
+        class="hover:text-[#AFFA01] transition-colors duration-300 cursor-pointer"
+      >
+        SUPPORT
+      </a>
     </div>
   </div>
 
-  <div class="text-[#D8D8D8] text-[14px] text-center">
+  <!-- COPYRIGHT -->
+  <div class="text-[#888888] text-xs md:text-[14px] text-center leading-relaxed">
     <p>Copyright © 2026 ViktoriFit. Empowering your flexible fitness journey.</p>
     <p>Developed and managed by ViktoriFit Team. All rights reserved.</p>
   </div>
 
+  <!-- SOCIAL -->
   <div class="flex gap-5">
-    <div class="bg-[#1D1D1D] w-12 h-12 flex items-center justify-center rounded-full">
-      <img src="/navbar_footer/Instagram.png" alt="" class="w-6 h-6" />
-    </div>
+    <a
+      href="#"
+      class="group bg-[#1D1D1D] w-12 h-12 flex items-center justify-center rounded-full hover:bg-[#AFFA01] transition-all duration-300 hover:scale-110"
+    >
+      <img
+        src="/layout/navbar-footer/Instagram.png"
+        alt="IG"
+        class="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity"
+      />
+    </a>
 
-    <div class="bg-[#1D1D1D] w-12 h-12 flex items-center justify-center rounded-full">
-      <img src="/navbar_footer/Mail.png" alt="" class="w-6 h-6" />
-    </div>
+    <a
+      href="#"
+      class="group bg-[#1D1D1D] w-12 h-12 flex items-center justify-center rounded-full hover:bg-[#AFFA01] transition-all duration-300 hover:scale-110"
+    >
+      <img
+        src="/layout/navbar-footer/Mail.png"
+        alt="Email"
+        class="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity"
+      />
+    </a>
   </div>
 </footer>
