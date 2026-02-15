@@ -1,8 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../core';
+import { AuthService, inquiryService } from '../../../core'; 
+
+// ====== INTERFACES ======
+interface InquiryBackend {
+  id: number;
+  name: string;
+  email: string;
+  description: string;
+  isResolved: boolean; // Sesuai JSON Backend
+  createdAt: string;
+}
+
+export interface Feedback {
+  id: number;
+  user: string;
+  email: string;
+  message: string;
+  status: 'Resolved' | 'Not Resolved';
+}
 
 @Component({
   selector: 'app-feedback',
@@ -10,84 +28,237 @@ import { AuthService } from '../../../core';
   imports: [CommonModule, FormsModule],
   templateUrl: './feedback.html',
 })
-export class FeedbackPage {
+export class FeedbackPage implements OnInit {
 
-  isLogoutModalOpen = false;
-  constructor(private router: Router, private authService: AuthService) {}
+  // ====== DATA STATE ======
+  data: Feedback[] = [];
+  filteredData: Feedback[] = [];
+  selectedFeedback: Feedback | null = null;
+  isLoading = false;
 
-  isProfileOpen = false;
+  // ====== NOTIFICATION (Pengganti Alert) ======
+  notifMessage: string = '';
+  notifType: 'success' | 'error' | '' = '';
+  showNotif: boolean = false;
+
+  // ====== PAGINATION ======
+  currentPage: number = 1;
+  rowsDisplay: number | 'All' = 5;
+
+  // ====== UI STATE ======
   searchText: string = '';
-  rowsDisplay: any = 5;
-
-  isModalOpen = false;
   isViewModalOpen = false;
-  selectedFeedback: any = null;
+  isProfileOpen = false;
+  isLogoutModalOpen = false;
 
-  newUser = '';
-  newEmail = '';
-  newMessage = '';
-  newStatus = 'Pending';
+  // ====== DELETE STATE ======
+  isDeleteConfirmOpen = false;
+  deleteTarget: Feedback | null = null;
 
-  openDropdownIndex: number = -1; 
+  // ====== STATUS ACTIONS STATE ======
+  openDropdownIndex: number = -1;
+  isConfirmStatusOpen = false;
+  pendingStatus: Feedback['status'] | null = null;
+  pendingFeedback: Feedback | null = null;
 
-  toggleProfile() {
-    this.isProfileOpen = !this.isProfileOpen;
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private inquiryService: inquiryService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadFeedback();
   }
 
-  logout() {
-    this.router.navigate(['/login']);
+  // ====== LOAD DATA ======
+  loadFeedback() {
+    this.isLoading = true;
+    this.inquiryService.getInquiries().subscribe({
+      next: (res: any[]) => {
+        // Mapping Backend (isResolved) -> Frontend (Status String)
+        this.data = res.map((item: InquiryBackend) => ({
+          id: item.id,
+          user: item.name,
+          email: item.email,
+          message: item.description,
+          status: item.isResolved ? 'Resolved' : 'Not Resolved'
+        }));
+
+        this.applyFilter(); // Filter ulang & reset pagination
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.showNotification('Failed to load feedback data', 'error');
+        this.isLoading = false;
+      }
+    });
   }
 
-  setRows(count: number | 'All') {
-    this.rowsDisplay = count;
+  // ====== NOTIFICATION SYSTEM ======
+  showNotification(message: string, type: 'success' | 'error') {
+    this.notifMessage = message;
+    this.notifType = type;
+    this.showNotif = true;
+
+    setTimeout(() => {
+      this.showNotif = false;
+    }, 3000); // Hilang dalam 3 detik
   }
 
+  // ====== FILTER & SEARCH ======
+  applyFilter() {
+    const keyword = this.searchText.toLowerCase().trim();
+
+    if (!keyword) {
+      this.filteredData = [...this.data];
+    } else {
+      this.filteredData = this.data.filter(item =>
+        item.user.toLowerCase().includes(keyword) ||
+        item.email.toLowerCase().includes(keyword) ||
+        item.message.toLowerCase().includes(keyword)
+      );
+    }
+
+    this.currentPage = 1; // Reset ke halaman 1 setiap kali filter berubah
+  }
+
+  onSearchChange() {
+    this.applyFilter();
+  }
+
+  deleteFeedback(item: Feedback, event: Event) {
+    event.stopPropagation(); // Biar gak kebuka modal View Detail
+    this.deleteTarget = item;
+    this.isDeleteConfirmOpen = true;
+  }
+
+  closeDeleteModal() {
+    this.isDeleteConfirmOpen = false;
+    this.deleteTarget = null;
+  }
+
+  confirmDelete() {
+    if (!this.deleteTarget) return;
+
+    const id = this.deleteTarget.id;
+
+    this.inquiryService.removeInquiry(id).subscribe({
+      next: () => {
+        // Hapus dari UI Local biar cepat hilang tanpa reload
+        this.data = this.data.filter(item => item.id !== id);
+        this.applyFilter(); // Refresh pagination/filter
+        
+        this.closeDeleteModal();
+        this.showNotification('Inquiry deleted successfully', 'success');
+      },
+      error: (err) => {
+        console.error('Delete error:', err);
+        this.closeDeleteModal();
+        this.showNotification('Failed to delete inquiry', 'error');
+      }
+    });
+  }
+
+  // ====== PAGINATION LOGIC ======
+  get paginatedData(): Feedback[] {
+    if (this.rowsDisplay === 'All') {
+      return this.filteredData;
+    }
+
+    const start = (this.currentPage - 1) * this.rowsDisplay;
+    const end = start + this.rowsDisplay;
+
+    return this.filteredData.slice(start, end);
+  }
+
+  get totalPages(): number {
+    if (this.rowsDisplay === 'All') return 1;
+    return Math.ceil(this.filteredData.length / this.rowsDisplay);
+  }
+
+  setRows(value: number | 'All') {
+    this.rowsDisplay = value;
+    this.currentPage = 1;
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  // ====== STATUS UPDATE ACTIONS ======
+  
+  // 1. Toggle Dropdown
   toggleStatusDropdown(index: number, event: Event) {
     event.stopPropagation();
     
-    if (this.openDropdownIndex === index) {
-      this.openDropdownIndex = -1;
-    } else {
-      this.openDropdownIndex = index;
-    }
+    // Ambil item asli dari data yang sedang tampil
+    const actualItem = this.paginatedData[index];
+    
+    // Jika sudah resolved, jangan buka dropdown (Double protection)
+    if (actualItem && actualItem.status === 'Resolved') return;
+
+    this.openDropdownIndex = this.openDropdownIndex === index ? -1 : index;
   }
 
-  updateStatus(item: any, newStatus: string) {
-    item.status = newStatus;
-    this.openDropdownIndex = -1;
+  // 2. Klik Opsi Dropdown (Update Status)
+  updateStatus(item: Feedback, newStatus: Feedback['status']) {
+    this.openDropdownIndex = -1; // Tutup dropdown
+    if (item.status === newStatus) return; // Gak berubah
+    
+    // Buka Modal Konfirmasi lewat method helper
+    this.openConfirmStatus(item, newStatus);
   }
 
-  closeAllDropdowns() {
-    this.openDropdownIndex = -1;
+  // 3. Helper Buka Modal (INI YANG TADI HILANG)
+  openConfirmStatus(item: Feedback, status: Feedback['status']) {
+    this.pendingFeedback = item;
+    this.pendingStatus = status;
+    this.isConfirmStatusOpen = true;
   }
 
-  openModal() {
-    this.isModalOpen = true;
-    this.newUser = '';
-    this.newEmail = '';
-    this.newMessage = '';
-    this.newStatus = 'Pending';
+  // 4. Konfirmasi & Panggil API
+  confirmStatusChange() {
+    if (!this.pendingFeedback || !this.pendingStatus) return;
+
+    const id = this.pendingFeedback.id;
+    const isResolved = this.pendingStatus === 'Resolved';
+
+    this.inquiryService.resolveInquiry(id, isResolved).subscribe({
+      next: () => {
+        // Update lokal biar cepat
+        if (this.pendingFeedback) {
+          this.pendingFeedback.status = this.pendingStatus!;
+        }
+        
+        this.closeConfirmStatus();
+        this.showNotification('Status updated successfully', 'success');
+      },
+      error: (err) => {
+        console.error(err);
+        this.closeConfirmStatus();
+        this.showNotification('Failed to update status', 'error');
+      }
+    });
   }
 
-  closeModal() {
-    this.isModalOpen = false;
+  closeConfirmStatus() {
+    this.isConfirmStatusOpen = false;
+    this.pendingFeedback = null;
+    this.pendingStatus = null;
   }
 
-  saveFeedback() {
-    if (this.newUser.trim() && this.newEmail.trim() && this.newMessage.trim()) {
-      this.feedbackList.unshift({
-        user: this.newUser,
-        email: this.newEmail,
-        message: this.newMessage,
-        status: this.newStatus
-      });
-      this.closeModal();
-    } else {
-      alert("Please fill in all fields!");
-    }
-  }
-
-  viewFeedback(item: any) {
+  // ====== VIEW DETAILS ======
+  viewFeedback(item: Feedback) {
     this.selectedFeedback = item;
     this.isViewModalOpen = true;
   }
@@ -96,75 +267,20 @@ export class FeedbackPage {
     this.isViewModalOpen = false;
     this.selectedFeedback = null;
   }
-  
-  feedbackList = [
-    { 
-      user: 'Jonathan Maxwell', 
-      email: 'j.maxwell_pro@vfit-agency.com', 
-      message: 'The AI-generated workout plan is great, but the rest timer sometimes freezes when I switch apps on my iPhone 14 Pro during the high-intensity interval training sessions.', 
-      status: 'Resolved' 
-    },
-    { 
-      user: 'Katherine Rosebud', 
-      email: 'katherine.rose@fit-member.org', 
-      message: 'Requesting a synchronization feature for MyFitnessPal and Apple Health. It would make tracking macros and calories much easier for users who use multiple apps.', 
-      status: 'In Progress' 
-    },
-    { 
-      user: 'Leonard Richardson', 
-      email: 'l.richardson@corporate-health.net', 
-      message: 'The application interface consistently lags and even crashes when loading the 3D body map visualization on Android devices with lower RAM.', 
-      status: 'In Progress' 
-    },
-    { 
-      user: 'Samantha Miller', 
-      email: 's.miller@globalfit.com', 
-      message: 'I noticed that some video tutorials for the advanced leg press machine are missing audio instructions, making it hard to understand the proper form.', 
-      status: 'Pending' 
-    },
-    { 
-      user: 'David Harrison', 
-      email: 'd.harrison@techlife.io', 
-      message: 'The dark mode UI has some contrast issues in the analytics tab, making the graph labels very hard to read when I am working out in a dimly lit gym.', 
-      status: 'Resolved' 
-    },
-    { 
-      user: 'Emily Thompson', 
-      email: 'emily.t@wellnesshub.net', 
-      message: 'It would be very helpful if we could export our monthly progress reports and body measurement statistics as PDF files to share with our personal trainers.', 
-      status: 'Dismiss' 
-    },
-    { 
-      user: 'Michael Chang', 
-      email: 'm.chang@startup.inc', 
-      message: 'Great app overall! Just wish there were more vegan meal options in the nutrition section, specifically high-protein breakfast ideas.', 
-      status: 'Resolved' 
-    },
-    { 
-      user: 'Sarah Jenkins', 
-      email: 'sarah.j@fitness-daily.com', 
-      message: 'Login via Google seems to be broken on the latest iOS update. It keeps redirecting me back to the welcome screen without logging me in.', 
-      status: 'Pending' 
-    }
-  ];
 
-  get filteredData() {
-    let data = this.feedbackList.filter(item => {
-      const term = this.searchText.toLowerCase();
-      return item.user.toLowerCase().includes(term) || 
-             item.email.toLowerCase().includes(term) ||
-             item.message.toLowerCase().includes(term);
-    });
+  // ====== PROFILE & LOGOUT ======
+  toggleProfile() {
+    this.isProfileOpen = !this.isProfileOpen;
+  }
 
-    if (this.rowsDisplay === 'All') {
-      return data;
-    } else {
-      return data.slice(0, this.rowsDisplay);
-    }
+  closeAllDropdowns() {
+    this.openDropdownIndex = -1;
+    this.isProfileOpen = false;
   }
 
   openLogoutModal() {
     this.isLogoutModalOpen = true;
+    this.isProfileOpen = false;
   }
 
   closeLogoutModal() {
@@ -172,8 +288,7 @@ export class FeedbackPage {
   }
 
   confirmLogout() {
-    this.authService.logout(); 
-    this.closeLogoutModal();
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
-import { faqService, inquiryService } from '../../core';
+import { FaqService, inquiryService } from '../../core';
 
 @Component({
   selector: 'app-support',
@@ -18,7 +18,7 @@ export class SupportPage {
 
   constructor(
     private inquiryService: inquiryService,
-    private faqService: faqService
+    private faqService: FaqService
   ) {}
 
   ngOnInit() {

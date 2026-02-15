@@ -1,197 +1,137 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../core';
+import { FaqService, Faq } from '../../../core';
 
 @Component({
-  selector: 'app-faq',
+  selector: 'app-faq-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './faq.html',
   styleUrl: './faq.css'
 })
-export class FaqPage {
-  
-  isLogoutModalOpen = false;
-  constructor(private router: Router, private authService: AuthService) {}
+export class FaqPage implements OnInit {
 
-  // --- STATE ---
-  isProfileOpen = false;
-  searchText: string = '';
-  rowsDisplay: any = 5;
+  // ====== DATA ======
+  data: Faq[] = [];
+  filteredData: Faq[] = [];
 
-  // --- MODAL STATE ---
-  isModalOpen = false;
-  newQuestion = '';
-  newAnswer = '';
-  
-  // Variable baru untuk melacak index edit (-1 artinya Add Mode)
+  selectedFaq: Faq | null = null;
+
+  // ====== NOTIFICATION ======
+  notifMessage: string = '';
+  notifType: 'success' | 'error' | '' = '';
+  showNotif: boolean = false;
+
+  // ====== FORM ======
+  newQuestion: string = '';
+  newAnswer: string = '';
   editIndex: number = -1;
+  editId: number | null = null;
 
-  // --- MODAL VIEW DETAILS STATE ---
+  // ====== PAGINATION ======
+  currentPage: number = 1;
+  rowsDisplay: number | 'All' = 10;
+
+  // ====== UI STATE ======
+  searchText: string = '';
+
+  isModalOpen = false;
   isViewModalOpen = false;
-  selectedFaq: any = null;
+  isProfileOpen = false;
+  isLogoutModalOpen = false;
 
-  // --- ACTIONS ---
+  // delete confirmation
+  isDeleteConfirmOpen = false;
+  deleteTarget: Faq | null = null;
+
+  constructor(private faqService: FaqService) {}
+
+  ngOnInit(): void {
+    this.loadFaq();
+  }
+
+  // ====== LOAD ======
+  loadFaq() {
+    this.faqService.getFaqs().subscribe(res => {
+      this.data = res as Faq[];
+      this.filteredData = [...this.data];
+      this.currentPage = 1;
+    });
+  }
+
+  showNotification(message: string, type: 'success' | 'error') {
+    this.notifMessage = message;
+    this.notifType = type;
+    this.showNotif = true;
+
+    setTimeout(() => {
+      this.showNotif = false;
+      this.notifMessage = '';
+      this.notifType = '';
+    }, 3000); // 3 detik
+  }
+
+
+  // ====== FILTER ======
+  applyFilter() {
+    const keyword = this.searchText.toLowerCase().trim();
+
+    if (!keyword) {
+      this.filteredData = [...this.data];
+    } else {
+      this.filteredData = this.data.filter(faq =>
+        faq.question.toLowerCase().includes(keyword) ||
+        faq.answer.toLowerCase().includes(keyword)
+      );
+    }
+
+    this.currentPage = 1; // ⬅️ WAJIB
+  }
+
+  setRows(value: number | 'All') {
+    this.rowsDisplay = value;
+    this.currentPage = 1;
+  }
+
+  // ====== PAGINATED VIEW (AMAN, TIDAK MERUSAK) ======
+  get paginatedData(): Faq[] {
+    if (this.rowsDisplay === 'All') {
+      return this.filteredData;
+    }
+
+    const start = (this.currentPage - 1) * this.rowsDisplay;
+    const end = start + this.rowsDisplay;
+
+    return this.filteredData.slice(start, end);
+  }
+
+  get totalPages(): number {
+    if (this.rowsDisplay === 'All') return 1;
+    return Math.ceil(this.filteredData.length / this.rowsDisplay);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  // ====== PROFILE ======
   toggleProfile() {
     this.isProfileOpen = !this.isProfileOpen;
   }
 
-  logout() {
-    this.router.navigate(['/login']);
-  }
-
-  setRows(count: number | 'All') {
-    this.rowsDisplay = count;
-  }
-
-  // --- MODAL FORM LOGIC (ADD / EDIT) ---
-  
-  openModal() {
-    this.isModalOpen = true;
-    this.editIndex = -1; // Reset ke mode "Add New" setiap kali buka
-    this.newQuestion = '';
-    this.newAnswer = '';
-  }
-
-  closeModal() {
-    this.isModalOpen = false;
-    this.newQuestion = '';
-    this.newAnswer = '';
-    this.editIndex = -1;
-  }
-
-  // Fungsi Edit: Ambil data item, lalu masukkan ke form
-  editFaq(item: any) {
-    this.editIndex = this.faqList.indexOf(item); // Cari urutan ke berapa
-    this.newQuestion = item.question;
-    this.newAnswer = item.answer;
-    this.isModalOpen = true; // Buka modal
-  }
-
-  // Fungsi Delete: Konfirmasi lalu hapus dari list
-  deleteFaq(item: any) {
-    const confirmDelete = confirm('Are you sure you want to delete this FAQ?');
-    if (confirmDelete) {
-      this.faqList = this.faqList.filter(f => f !== item);
-    }
-  }
-
-  saveFaq() {
-    if (this.newQuestion.trim() && this.newAnswer.trim()) {
-      
-      if (this.editIndex > -1) {
-        // --- MODE UPDATE (Edit) ---
-        this.faqList[this.editIndex] = {
-          question: this.newQuestion,
-          answer: this.newAnswer
-        };
-      } else {
-        // --- MODE CREATE (Add New) ---
-        this.faqList.unshift({
-          question: this.newQuestion,
-          answer: this.newAnswer
-        });
-      }
-
-      this.closeModal();
-    } else {
-      alert("Please fill in both fields!");
-    }
-  }
-
-  // --- MODAL VIEW DETAILS LOGIC ---
-  viewFaq(item: any) {
-    this.selectedFaq = item;       
-    this.isViewModalOpen = true;   
-  }
-
-  closeViewModal() {
-    this.isViewModalOpen = false;  
-    this.selectedFaq = null;       
-  }
-  
-  // --- DATA DUMMY ---
-  faqList = [
-    { 
-      question: 'Do I need gym equipment to follow the training programs?', 
-      answer: 'No. Viktorifit provides both home-based and gym-based programs tailored to your available equipment.' 
-    },
-    { 
-      question: 'How does Viktorifit’s workout recommendation system work?', 
-      answer: 'Viktorifit uses your profile data, goals, and activity history to recommend the best plan for you.' 
-    },
-    { 
-      question: 'What happens if I miss a scheduled workout?', 
-      answer: 'You can reschedule or continue your program without penalty. Consistency is key!' 
-    },
-    { 
-      question: 'Is my workout and progress data secure?', 
-      answer: 'Yes. We prioritize user privacy and ensure your data is secure and encrypted.' 
-    },
-    { 
-      question: 'Can beginners use Viktorifit?', 
-      answer: 'Absolutely. Viktorifit is designed for all levels, from beginners to advanced athletes.' 
-    },
-    {
-      question: 'How do I cancel my subscription?',
-      answer: 'You can cancel anytime from your account settings. Access will remain until the billing cycle ends.'
-    },
-    {
-      question: 'Can I change my diet plan?',
-      answer: 'Yes, you can adjust your dietary preferences in the settings menu at any time.'
-    },
-    {
-      question: 'Is there a refund policy?',
-      answer: 'We offer a 7-day money-back guarantee for new subscribers if they are not satisfied.'
-    },
-    {
-      question: 'Can I use Viktorifit on multiple devices?',
-      answer: 'Yes, your account syncs across all your devices so you can train anywhere.'
-    },
-    {
-      question: 'How do I contact support?',
-      answer: 'You can reach out to our support team via the Feedback page or email support@viktorifit.com.'
-    },
-    {
-      question: 'Do you offer vegetarian or vegan meal plans?',
-      answer: 'Yes, our nutrition tracking includes options for vegetarian, vegan, keto, and paleo diets.'
-    },
-    {
-      question: 'Can I track my water intake in the app?',
-      answer: 'Yes, there is a dedicated hydration tracker on your daily dashboard.'
-    },
-    {
-      question: 'How do I reset my password?',
-      answer: 'Go to the login screen and click "Forgot Password". We will send you a reset link via email.'
-    },
-    {
-      question: 'Can I download workouts for offline use?',
-      answer: 'Premium members can download workout videos to use without an internet connection.'
-    },
-    {
-      question: 'Is there a community forum?',
-      answer: 'Yes, join the Viktorifit Community in the app to share progress and tips with other users.'
-    }
-  ];
-
-  get filteredData() {
-    let data = this.faqList.filter(item => {
-      const term = this.searchText.toLowerCase();
-      return item.question.toLowerCase().includes(term) || 
-             item.answer.toLowerCase().includes(term);
-    });
-
-    if (this.rowsDisplay === 'All') {
-      return data;
-    } else {
-      return data.slice(0, this.rowsDisplay);
-    }
-  }
-
+  // ====== LOGOUT ======
   openLogoutModal() {
     this.isLogoutModalOpen = true;
+    this.isProfileOpen = false;
   }
 
   closeLogoutModal() {
@@ -199,8 +139,103 @@ export class FaqPage {
   }
 
   confirmLogout() {
-    this.authService.logout(); 
-    this.closeLogoutModal();
-    this.router.navigate(['/login']);
+    localStorage.clear();
+    window.location.href = '/login';
+  }
+
+  // ====== MODAL ADD / EDIT ======
+  openModal() {
+    this.resetForm();
+    this.isModalOpen = true;
+  }
+
+  closeModal() {
+    this.isModalOpen = false;
+    this.resetForm();
+  }
+
+  editFaq(item: Faq) {
+    this.editIndex = this.data.indexOf(item);
+    this.editId = item.id!;
+    this.newQuestion = item.question;
+    this.newAnswer = item.answer;
+    this.isModalOpen = true;
+  }
+
+  saveFaq() {
+    if (!this.newQuestion || !this.newAnswer) return;
+
+    const payload = {
+      question: this.newQuestion,
+      answer: this.newAnswer
+    };
+
+    if (this.editId) {
+      this.faqService.updateFaq(this.editId, payload).subscribe({
+        next: () => {
+          this.loadFaq();
+          this.closeModal();
+          this.showNotification('successfully updated FAQ', 'success');
+        },
+        error: () =>{
+          this.showNotification('Failed remove FAQ', 'error');
+        }
+      });
+    } else {
+      this.faqService.createFaq(payload).subscribe({
+        next: () =>{
+          this.loadFaq();
+          this.closeModal();
+          this.showNotification('successfully created FAQ', 'success');
+        },
+        error: () =>{
+          this.showNotification('Failed create FAQ', 'error');
+        }
+      });
+    }
+  }
+
+  resetForm() {
+    this.newQuestion = '';
+    this.newAnswer = '';
+    this.editIndex = -1;
+    this.editId = null;
+  }
+
+  // ====== VIEW ======
+  viewFaq(item: Faq) {
+    this.selectedFaq = item;
+    this.isViewModalOpen = true;
+  }
+
+  closeViewModal() {
+    this.isViewModalOpen = false;
+    this.selectedFaq = null;
+  }
+
+  // ====== DELETE ======
+  deleteFaq(item: Faq) {
+    this.deleteTarget = item;
+    this.isDeleteConfirmOpen = true;
+  }
+
+  cancelDelete() {
+    this.deleteTarget = null;
+    this.isDeleteConfirmOpen = false;
+  }
+
+  confirmDelete() {
+    if (!this.deleteTarget) return;
+
+    this.faqService.deleteFaq(this.deleteTarget.id!).subscribe({
+      next: () => {
+        this.loadFaq();
+        this.cancelDelete();
+        this.showNotification('Successfully Removed FAQ', 'success');
+      },
+      error: () => {
+        this.showNotification('Failed removed FAQ', 'error');
+      }
+    });
   }
 }
