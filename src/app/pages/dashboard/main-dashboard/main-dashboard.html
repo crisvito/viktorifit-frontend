@@ -2,19 +2,24 @@
   <div class="relative mb-6 md:mb-8 overflow-hidden rounded-2xl bg-black text-white">
     <div class="absolute inset-0 -bottom-20 z-0 opacity-100">
       <img
-        src="pages/recommendation/city.png"
+        src="/pages/suggestion/city.png"
         alt="City Background"
         class="w-full h-full object-cover object-bottom grayscale"
       />
       <div class="absolute inset-0 bg-linear-to-r from-black via-black/50 to-transparent"></div>
     </div>
 
-    <div class="absolute right-0 bottom-0 top-0 z-10 h-full w-[40%] md:w-[35%]">
-      <img
-        [src]="workoutImage"
-        [alt]="workoutTitle"
-        class="h-full w-full object-contain object-bottom-right"
-      />
+    <div class="absolute right-0 bottom-0 z-10 h-full md:w-[35%] flex items-center">
+        <img
+          [src]="workoutImage"
+          [alt]="workoutTitle"
+          class="h-[200%] scale-[150%] righ w-auto max-w-none object-contain object-bottom-right"
+        />
+    </div>
+    
+    <div class=" z-10 absolute -top-30 -left-10 w-70 h-70 rounded-full pointer-events-none
+            [mask-image:radial-gradient(closest-side,transparent_70%,black_70%)]
+            bg-gradient-to-bl from-[#2C2C2C] to-transparent">
     </div>
 
     <div class="relative z-20 p-6 md:p-12 w-full max-w-[65%] md:max-w-[70%]">
@@ -109,11 +114,21 @@
 
     <!-- Todays Progress -->
     <section
-      class="lg:col-span-5 rounded-xl bg-linear-to-t from-[#A9EA13] to-[#D2F57F] p-6 md:p-8 flex flex-col shadow-lg text-gray-800"
+      class="relative overflow-hidden lg:col-span-5 rounded-xl bg-linear-to-t from-[#A9EA13] to-[#D2F57F] p-6 md:p-8 flex flex-col shadow-lg text-gray-800"
     >
-      <h2 class="mb-4 md:mb-7 text-[20px] md:text-[24px] font-semibold">Today's Progress</h2>
+      <h2 class="relative z-11 mb-4 md:mb-7 text-[20px] md:text-[24px] font-semibold">Today's Progress</h2>
 
-      <div class="flex flex-row md:flex-col items-center justify-between md:justify-center gap-4">
+      <div class=" z-10 absolute -top-30 -left-30 w-70 h-70 rounded-full pointer-events-none
+            [mask-image:radial-gradient(closest-side,transparent_70%,black_70%)]
+            bg-gradient-to-bl from-[#AFE338]/60 to-transparent">
+      </div>
+
+      <div class=" z-10 absolute -bottom-30 -right-30 w-70 h-70 rounded-full pointer-events-none
+            [mask-image:radial-gradient(closest-side,transparent_70%,black_70%)]
+            bg-gradient-to-br from-[#BDED50] to-transparent">
+      </div>
+
+      <div class="relative z-11 flex flex-row md:flex-col items-center justify-between md:justify-center gap-4">
         <div class="relative flex items-center justify-center shrink-0">
           <svg class="h-32 w-32 md:h-50 md:w-50 transform -rotate-90" viewBox="0 0 36 36">
             <defs>
@@ -180,7 +195,7 @@
     </section>
 
     <section
-      class="lg:col-span-5 rounded-xl bg-black p-4 md:p-6 text-white shadow-sm flex flex-col justify-between relative overflow-hidden min-h-[350px] md:min-h-[400px]"
+      class="lg:col-span-5 rounded-xl bg-black p-4 md:p-6 text-white shadow-sm flex flex-col relative overflow-hidden h-auto"
     >
       <div
         class="absolute bottom-0 right-0 h-48 w-48 md:h-64 md:w-64 rounded-full border-[20] md:border-[30] border-gray-800/50 translate-x-1/4 translate-y-1/4 pointer-events-none"
@@ -224,20 +239,14 @@
           </div>
         </div>
 
-        <div class="w-1/2 flex items-center justify-center relative">
-          <div
-            class="bg-lime-400/20 w-full h-full rounded-xl border-2 border-lime-400/50 flex items-center justify-center backdrop-blur-sm p-4"
-          >
-            <div class="text-lime-400 text-center">
-              <span class="text-3xl md:text-4xl">🧍</span>
-              <p
-                class="text-[8px] md:text-[10px] mt-2 uppercase tracking-widest opacity-70 leading-tight"
-              >
-                Body<br />Image
-              </p>
+        <div class="w-1/2 flex items-start justify-center relative h-[60%]">
+          <div class="w-full h-full flex items-start justify-center relative z-10">
+            <img
+              [src]="bodyCondition.bodyFatImage"
+              [alt]="bodyCondition.bodyFatCategory"
+              class="h-full w-auto object-contain object-top"
+            />
             </div>
-          </div>
-          <div class="absolute inset-0 bg-lime-500/10 blur-2xl rounded-full -z-10"></div>
         </div>
       </div>
 

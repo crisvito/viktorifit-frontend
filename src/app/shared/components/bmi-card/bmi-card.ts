@@ -19,6 +19,7 @@ export class BmiCardComponent implements OnChanges{
   bmiStatus: string = 'Normal';
   bmiColor: string = 'text-[#6A9700]'; 
   bmiBgClass: string = 'bg-[#E7F4C8] border-[#8AC500]';
+  bmiImage: string = '/global/bmi-category/normal.svg';
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['bmi'] || changes['height'] || changes['weight']) {
@@ -40,24 +41,29 @@ export class BmiCardComponent implements OnChanges{
       this.bmiColor = 'text-sky-600'; 
       this.bmiBgClass = 'bg-sky-100 border-sky-300';
       this.bmiDesc = 'You\'re Underweight. Focus on nutrient-dense foods.';
+      this.bmiImage = '/global/bmi-category/underweight.svg';
       
     } else if (this.bmi < 25) {
       this.bmiStatus = 'Healthy';
       this.bmiColor = 'text-[#4E7000]';
       this.bmiBgClass = 'bg-[#E7F4C8] border-[#8AC500]';
       this.bmiDesc = 'Good starting BMI to tone up and get your dream body.';
+      this.bmiImage = '/global/bmi-category/normal.svg';
 
     } else if (this.bmi < 30) {
       this.bmiStatus = 'Overweight';
       this.bmiColor = 'text-yellow-700'; 
       this.bmiBgClass = 'bg-yellow-100 border-yellow-400';
       this.bmiDesc = 'You\'re Overweight. A balanced diet and cardio can help.';
+      this.bmiImage = '/global/bmi-category/overweight.svg';
 
     } else {
       this.bmiStatus = 'Obese';
       this.bmiColor = 'text-red-600'; 
       this.bmiBgClass = 'bg-red-100 border-red-300';
       this.bmiDesc = 'High health risk. Please consult a doctor for a plan.';
+      this.bmiImage = '/global/bmi-category/obese.svg';
+
     }    
   }
 }

@@ -161,9 +161,9 @@ userProfile: UserWellnessProfile = {
     bodyFat: {
       percentage:'18-20%',
       category: 'Fitness',
-      image:'pages/recommendation/Athletic.png',
+      image:'/global/body-fat/male_average.svg',
     },
-    gender: 'Female',
+    gender: 'Male',
     program: {
       title: 'Weight Loss',
       description: 'Workout jenis ini merupakan workout yang berfokus pada bagian jantung. Secara umum, cardio fitness digunakan untuk menurunkan berat badan.',

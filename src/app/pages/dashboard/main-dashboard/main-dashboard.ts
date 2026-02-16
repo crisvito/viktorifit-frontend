@@ -46,7 +46,7 @@ export class MainDashboardPage {
   workoutDesc: string = "Today's workout will focus on strength on your leg. Please Focus!";
   
   // Path gambar ilustrasi (ini yang berubah-ubah sesuai workout)
-  workoutImage: string = 'pages/workoutType/weightLoss.png';
+  workoutImage: string = '/global/workout-type/weightLoss_transparent.svg';
 
    @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
@@ -161,8 +161,11 @@ export class MainDashboardPage {
     height: 170,
     weight: 80,
     bmiCategory: 'Overweight',
+    goal: 'Cardio Fitness',
+    gender:'male',
     bodyFat: 22,
-    goal: 'Cardio Fitness'
+    bodyFatCategory:'Average',
+    bodyFatImage:'/global/body-fat/male_average.svg'
   };
 
   workoutslist = [

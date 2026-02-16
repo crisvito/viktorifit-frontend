@@ -1,4 +1,4 @@
-<div
+  <div
   class="min-h-screen font-sans text-[#1E1E1E] px-4 md:px-0 pb-20 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
 >
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
@@ -18,7 +18,7 @@
         <img
           [src]="userProfile.bodyFat.image"
           [alt]="userProfile.bodyFat.category"
-          class="absolute inset-0 w-full h-[130%] object-cover object-top"
+          class="absolute inset-0 w-full h-[100%] object-cover object-top p-10"
         />
         <div
           class="absolute inset-0 bg-linear-to-t from-gray-900 from-10% via-gray-900/40 via-4% to-transparent"
@@ -177,7 +177,6 @@
             <div
               class="bg-[#C3F74A] px-2 py-1 md:px-4 md:py-1.5 rounded-full flex items-center gap-1 md:gap-2 shadow-sm"
             >
-              <span class="text-xs md:text-base">🏋️‍♂️</span>
               <span class="text-xs md:text-sm font-semibold text-[#6A9700] whitespace-nowrap">{{
                 WorkoutSchedule[selectedDayIndex].focus
               }}</span>

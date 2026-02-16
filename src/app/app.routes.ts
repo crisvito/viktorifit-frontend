@@ -29,8 +29,8 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardLayout,
-    canActivate: [AuthGuard],
-    canActivateChild: [AuthGuard],
+    // canActivate: [AuthGuard],
+    // canActivateChild: [AuthGuard],
     children: [
       { path: '', component: MainDashboardPage,data: { title: 'Dashboard' }},
       { path: 'workout-lists', component: WorkoutLists, data: { title: 'Workout Lists' } },
@@ -44,8 +44,8 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: ProfileLayout,
-    canActivate: [AuthGuard],
-    canActivateChild: [AuthGuard],
+    // canActivate: [AuthGuard],
+    // canActivateChild: [AuthGuard],
     children: [
       { path: 'my-account', component: MyAccount },
       { path: 'personal-data', component: PersonalData },
@@ -55,8 +55,8 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminLayout,
-    canActivate: [AdminGuard],
-    canActivateChild: [AdminGuard],
+    // canActivate: [AdminGuard],
+    // canActivateChild: [AdminGuard],
     children: [
     { path: '', redirectTo: 'faq', pathMatch: 'full'},
       { path: 'faq', component: FaqPage },
