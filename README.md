@@ -62,6 +62,12 @@ Panduan gerakan dalam bentuk gambar atau video agar pengguna dapat melakukan lat
 
 ---
 
+### ❓ FAQ (Frequently Asked Questions)
+
+Halaman FAQ menyediakan kumpulan pertanyaan yang sering diajukan pengguna beserta jawabannya untuk membantu memahami fitur aplikasi, penggunaan sistem, dan tips kebugaran. Fitur ini dirancang untuk meningkatkan self-service support dan pengalaman pengguna.
+
+---
+
 ### 🛠️ Admin Dashboard
 
 Panel kontrol khusus administrator yang mencakup:
@@ -100,7 +106,9 @@ Modul berbasis fitur dengan **lazy loading**:
 * User Dashboard
 * Workout Planner
 * Admin Panel
+* FAQ Page
 
+---
 
 ## Key Frontend Capabilities
 
@@ -131,7 +139,7 @@ Modul berbasis fitur dengan **lazy loading**:
 ```bash
 src/
 ├── app/
-│   ├── pages/       # Singleton services & interceptors
+│   ├── pages/       # Application pages (dashboard, FAQ, admin, etc.)
 │   ├── shared/      # Reusable UI components
 │   ├── features/    # Feature modules (lazy-loaded)
 │   └── app.routes.ts
@@ -200,6 +208,7 @@ Frontend berkomunikasi dengan backend melalui RESTful API:
 * `POST /auth/login` — Login & token retrieval
 * `GET /workouts/recommendations` — Data rencana latihan
 * `GET /admin/feedback` — Data feedback (Admin)
+* `GET /faq` — Mengambil daftar FAQ
 
 Backend berfungsi sebagai external data provider.
 
@@ -235,9 +244,3 @@ Kontribusi terbuka untuk perbaikan UI, optimasi performa, dan peningkatan pengal
 2. Buat branch fitur baru
 3. Commit perubahan
 4. Submit pull request
-
----
-
-## 📄 License
-
-Proyek ini dikembangkan untuk tujuan pembelajaran dan pengembangan aplikasi kebugaran modern.
