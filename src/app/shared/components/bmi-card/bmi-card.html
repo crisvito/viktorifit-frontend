@@ -94,9 +94,14 @@
       class="bg-bmiColor border border-[#8AC500]/30 flex flex-row gap-4 px-5 py-4 rounded-[10px] items-center mt-2"
     >
       <div
-        class="w-12 h-12 bg-[#C3F74A] rounded-lg flex items-center justify-center text-2xl shadow-sm"
+        class="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
       >
-        💪
+        <img 
+          *ngIf="bmiImage" 
+          [src]="bmiImage" 
+          [alt]="bmiStatus"
+          class="w-32 h-auto" 
+        />
       </div>
       <div>
         <h4 [ngClass]="bmiColor" class="font-semibold text-lime-900 mb-0.5 text-base">

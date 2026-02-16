@@ -110,7 +110,7 @@ export class SuggestionResultPage implements OnInit {
         bodyFat: {
           percentage:'18-20%',
           category: 'Fitness',
-          image:'pages/recommendation/Athletic.png',
+          image:'/global/body-fat/female_average.svg',
         },
         gender: 'Female',
         program: {

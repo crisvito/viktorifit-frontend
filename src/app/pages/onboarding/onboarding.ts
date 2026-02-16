@@ -199,19 +199,19 @@ export class OnboardingPage {
   }
 
   maleBodyFatOptions: Bodyfat[] = [
-    { label: 'Essential', range: '2-5%', value: 4, image: 'pages/onboarding/bodyfat/m-1.png' },
-    { label: 'Athlete', range: '6-13%', value: 10, image: 'pages/onboarding/bodyfat/m-2.png' },
-    { label: 'Fitness', range: '14-17%', value: 15, image: 'pages/onboarding/bodyfat/m-3.png' },
-    { label: 'Average', range: '18-24%', value: 21, image: 'pages/onboarding/bodyfat/m-4.png' },
-    { label: 'Obese', range: '25%+', value: 30, image: 'pages/onboarding/bodyfat/m-5.png' }
+    { label: 'Very Lean', range: '<10%', value: 4, image: 'global/body-fat/male_veryLean.svg' },
+    { label: 'Athlete', range: '10-18%', value: 10, image: 'global/body-fat/male_athletic.svg' },
+    { label: 'Average', range: '18-24%', value: 15, image: 'global/body-fat/male_average.svg' },
+    { label: 'Overweight', range: '24-30%', value: 21, image: 'global/body-fat/male_overweight.svg' },
+    { label: 'Obese', range: '>30%', value: 30, image: 'global/body-fat/male_obese.svg'  }
   ];
 
   femaleBodyFatOptions: Bodyfat[] = [
-    { label: 'Essential', range: '10-13%', value: 12, image: 'pages/onboarding/bodyfat/f-1.png' },
-    { label: 'Athlete', range: '14-20%', value: 17, image: 'pages/onboarding/bodyfat/f-2.png' },
-    { label: 'Fitness', range: '21-24%', value: 22, image: 'pages/onboarding/bodyfat/f-3.png' },
-    { label: 'Average', range: '25-31%', value: 28, image: 'pages/onboarding/bodyfat/f-4.png' },
-    { label: 'Obese', range: '32%+', value: 35, image: 'pages/onboarding/bodyfat/f-5.png' }
+    { label: 'Very Lean', range: '<10%', value: 4, image: 'global/body-fat/female_veryLean.svg' },
+    { label: 'Athlete', range: '10-18%', value: 10, image: 'global/body-fat/female_athletic.svg' },
+    { label: 'Average', range: '18-24%', value: 15, image: 'global/body-fat/female_average.svg' },
+    { label: 'Overweight', range: '24-30%', value: 21, image: 'global/body-fat/female_overweight.svg' },
+    { label: 'Obese', range: '>30%', value: 30, image: 'global/body-fat/female_obese.svg'  }
   ];
 
   get currentBodyFatOptions(): Bodyfat[] {
