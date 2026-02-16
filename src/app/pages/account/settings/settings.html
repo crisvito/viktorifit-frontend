@@ -1,1 +1,132 @@
-<p>settings works!</p>
+<div class="min-h-screen w-full bg-white text-gray-800 font-poppins flex flex-col">
+    
+    <h2 class="text-[32px] font-semibold">Settings</h2>
+
+    <div class="flex-1 w-full max-w-4xl mx-auto pb-10"> <div *ngFor="let group of menuGroups" class="mt-6">
+      
+        <div class="flex items-center text-black mt-5 gap-3">
+            <img src="/assets/profile-layout/account-detail.svg" alt="">
+            <h3 class="text-[18px] font-medium text-[#313131]">{{group.title}}</h3>
+        </div>
+
+        <div class="bg-white border-b border-gray-200 divide-y divide-gray-100">
+        
+            <div *ngFor="let item of group.items">
+
+            <div *ngIf="item.type === 'text'" class="px-5 py-6 bg-gray-50">
+                <p class="text-[14px] text-gray-400 leading-relaxed text-justify max-w-2xl">
+                {{ item.content }}
+                </p>
+            </div>
+
+            <div *ngIf="item.type === 'info'" class="flex items-center justify-between px-5 py-4">
+                <div class="flex items-center gap-4">
+                <div class="text-[#6A9700] bg-[#E7F4C8] p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                </div>
+                <span class="text-base font-medium text-gray-700">{{ item.label }}</span>
+                </div>
+                <span class="text-base font-semibold text-gray-900">{{ item.value }}</span>
+            </div>
+
+            <div *ngIf="['link', 'toggle', 'value'].includes(item.type)" 
+               (click)="item.type === 'link' ? handleAction(item) : null"
+               [ngClass]="item.type === 'link' ? 'cursor-pointer hover:bg-gray-50 active:bg-gray-100' : 'cursor-default'"
+               class="flex items-center justify-between px-5 py-5 transition-colors">
+                
+                <div class="flex items-center gap-4">
+                <div [ngClass]="item.danger ? 'text-red-500 bg-red-50' : 'text-[#6A9700] bg-[#E7F4C8]'" class="p-2 rounded-lg">
+                    <ng-container [ngSwitch]="item.icon">
+                    <svg *ngSwitchCase="'bell'" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                    <svg *ngSwitchCase="'globe'" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg *ngSwitchCase="'lock'" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    <svg *ngSwitchCase="'log-out'" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    <svg *ngSwitchCase="'trash'" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </ng-container>
+                </div>
+
+                <span [class.text-red-600]="item.danger" 
+                        class="text-base font-medium text-gray-700">
+                    {{ item.label }}
+                </span>
+                </div>
+
+                <div class="flex items-center">
+                <!-- <div *ngIf="item.type === 'toggle'" class="relative inline-block w-12 align-middle select-none">
+                    <input type="checkbox" [checked]="item.value" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 checked:right-0 checked:border-blue-600"/>
+                    <label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                </div> -->
+
+                <span *ngIf="item.type === 'value'" class="text-sm text-gray-400 font-medium px-2">
+                    {{ item.value }}
+                </span>
+
+                <svg *ngIf="item.type === 'link'" class="w-5 h-5 text-gray-300 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                </div>
+            </div>
+            
+            </div>
+      </div>
+    </div>
+
+    <div class="text-center py-8">
+      <p class="text-xs text-gray-400 font-medium tracking-wide">ViktoriFit v1.0.0 (Beta)</p>
+    </div>
+
+  </div>
+
+  <div *ngIf="showLogoutModal" class="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/50 backdrop-blur-sm p-4 animate-fade-in">
+      
+      <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden transform transition-all scale-100">
+        <div class="p-6 text-center">
+          <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-[#E7F4C8] mb-4">
+            <svg class="h-8 w-8 text-[#6A9700]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          </div>
+          
+          <h3 class="text-lg font-semibold text-gray-900">Log Out Account?</h3>
+          <p class="text-[14px] text-gray-500 mt-4">
+            Are You sure want to log out from your Viktorifit Account? You should login for access your workout data again.
+          </p>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 flex gap-3">
+          <button (click)="closeModals()" class="flex-1 p-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">
+            Cancel
+          </button>
+          <button (click)="confirmLogout()" class="flex-1 p-3 bg-[#8AC500] rounded-lg text-white font-semibold hover:bg-[#4E7000] transition">
+            Log Out
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/50 backdrop-blur-sm p-4 animate-fade-in">
+      
+      <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden">
+        <div class="p-6 text-center">
+          <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4 animate-pulse">
+            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+          
+          <h3 class="text-xl font-semibold text-gray-900">Delete Account Permanently?</h3>
+          <p class="text-[14px] text-gray-500 mt-4">
+            This action <span class="font-semibold text-red-600">can't be cancel!</span> All of your workout or personal data will be deleted permanently.
+          </p>
+
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 flex gap-3">
+          <button (click)="closeModals()" class="flex-1 p-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">
+            Cancel
+          </button>
+          <button (click)="confirmDelete()" class="flex-1 p-3 bg-red-600 rounded-lg text-white font-semibold hover:bg-red-700 transition">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+</div>

@@ -1,13 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface UserProfile {
-  name: string;
-  email: string;
-  phone: string;
-  dob: string;
-}
+import { AuthService } from '../../../core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environment/environment';
 
 @Component({
   selector: 'app-my-account',
@@ -16,36 +12,77 @@ interface UserProfile {
   templateUrl: './my-account.html',
 })
 export class MyAccount implements OnInit {
-
-  userData: UserProfile = {
+  userData = {
     name: '',
     email: '',
-    phone: '',
-    dob: ''
+    username: ''
   };
 
   isLoading = true;
+
+  constructor(
+    private authService: AuthService, 
+    private http: HttpClient
+  ) {}
 
   ngOnInit() {
     this.loadData();
   }
 
-  // Simulasi ambil data dari backend
   loadData() {
-    setTimeout(() => {
-      this.userData = {
-        name: 'Cris Vito',
-        email: 'cris@example.com',
-        phone: '08123456789',
-        dob: '2000-01-01'
-      };
-      this.isLoading = false;
-    }, 800); // delay biar keliatan loading
+    const user = this.authService.getUser();
+    if (user) {
+      this.userData.name = user.fullname;
+      this.userData.email = user.email;
+      this.userData.username = user.username;
+    }
+    this.isLoading = false;
   }
 
-  // Simulasi save ke backend
-  saveChanges() {
-    console.log('Saved data:', this.userData);
-    alert('Changes Saved!');
+  // Tambahkan variabel ini di dalam class
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
+
+  // Fungsi helper untuk memicu toast
+  triggerToast(message: string, type: 'success' | 'error' = 'success') {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+
+    // Sembunyikan setelah 3 detik
+    setTimeout(() => {
+      this.showToast = false;
+    }, 3000);
   }
+
+  // Update fungsi saveChanges kamu
+  saveChanges() {
+  this.isLoading = true;
+
+  const payload = {
+    fullname: this.userData.name,
+    username: this.userData.username,
+    email: this.userData.email 
+  };
+
+  this.http.put(`${environment.apiUrl}auth/update-account`, payload).subscribe({
+    next: (res: any) => {
+      // 1. Update ke Storage & Beritahu aplikasi (lewat Service)
+      this.authService.updateUserOnly(res);
+
+      // 2. PENTING: Update variabel lokal agar tampilan langsung berubah
+      this.userData.name = res.fullname;
+      this.userData.username = res.username;
+      
+      this.triggerToast('Changes saved and updated!', 'success');
+      this.isLoading = false;
+    },
+    error: (err) => {
+      this.triggerToast(err.error?.message || 'Update failed', 'error');
+      this.loadData();
+      this.isLoading = false;
+    }
+  });
+}
 }

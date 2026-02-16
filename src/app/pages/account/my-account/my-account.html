@@ -19,8 +19,8 @@
           <img src="/pages/workout-lists/person.svg" alt="" class="w-92 h-92 mt-7" />
         </div>
         <button
+          aria-label="pencil"
           class="absolute bottom-0 right-0 w-10 h-10 bg-[#D2F57F] rounded-full border-2 border-[#8AC500] flex items-center justify-center hover:scale-110 transition shadow-sm cursor-pointer text-[#4E7000]"
-          aria-label="button"
         >
           <img src="/pages/my-account/pencil.svg" alt="" />
         </button>
@@ -29,7 +29,23 @@
 
     <form (ngSubmit)="saveChanges()" class="space-y-5">
       <div class="space-y-1.5">
-        <label class="text-[16px] font-medium text-[#676767] mb-1">Name</label>
+        <label class="text-[16px] font-medium text-[#676767] mb-1">Full Name</label>
+        <div
+          class="flex items-center bg-[#EBEBEB] rounded-[5px] px-4 h-12 border border-[#CCCCCC] focus-within:border-[#96D303] transition-all gap-8 mt-1"
+        >
+          <img src="/pages/my-account/user.svg" alt="" />
+          <input
+            title="name"
+            type="text"
+            [(ngModel)]="userData.name"
+            name="name"
+            class="bg-transparent w-full outline-none border-none text-[14px] text-[#313131] font-medium"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-[16px] font-medium text-[#676767] mb-1">Username</label>
         <div
           class="flex items-center bg-[#EBEBEB] rounded-[5px] px-4 h-12 border border-[#CCCCCC] focus-within:border-[#96D303] transition-all gap-8 mt-1"
         >
@@ -37,9 +53,9 @@
           <input
             title="username"
             type="text"
-            [(ngModel)]="userData.name"
-            name="name"
-            class="bg-transparent w-full outline-none focus:ring-0 border-none text-[14px] text-[#313131] font-medium placeholder-gray-400"
+            [(ngModel)]="userData.username"
+            name="username"
+            class="bg-transparent w-full outline-none border-none text-[14px] text-[#313131] font-medium"
           />
         </div>
       </div>
@@ -53,41 +69,10 @@
           <input
             title="email"
             type="email"
+            readonly
             [(ngModel)]="userData.email"
             name="email"
-            class="bg-transparent w-full outline-none focus:ring-0 border-none text-[14px] text-[#313131] font-medium placeholder-gray-400"
-          />
-        </div>
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="text-[16px] font-medium text-[#676767] mb-1">Phone Number</label>
-        <div
-          class="flex items-center bg-[#EBEBEB] rounded-[5px] px-4 h-12 border border-[#CCCCCC] focus-within:border-[#96D303] transition-all gap-8 mt-1"
-        >
-          <img src="/pages/my-account/phone.svg" alt="" />
-          <input
-            type="tel"
-            [(ngModel)]="userData.phone"
-            name="phone"
-            placeholder="-"
-            class="bg-transparent w-full outline-none focus:ring-0 border-none text-[14px] text-[#313131] font-medium placeholder-gray-400"
-          />
-        </div>
-      </div>
-
-      <div class="space-y-1.5">
-        <label class="text-[16px] font-medium text-[#676767] mb-1">Date of Birth</label>
-        <div
-          class="flex items-center bg-[#EBEBEB] rounded-[5px] px-4 h-12 border border-[#CCCCCC] focus-within:border-[#96D303] transition-all gap-8 mt-1"
-        >
-          <img src="/pages/my-account/dob.svg" alt="" />
-          <input
-            title="dob"
-            type="text"
-            [(ngModel)]="userData.dob"
-            name="dob"
-            class="bg-transparent w-full outline-none focus:ring-0 border-none text-[14px] text-[#313131] font-medium placeholder-gray-400"
+            class="bg-transparent w-full outline-none border-none text-[14px] text-[#313131] font-medium"
           />
         </div>
       </div>
@@ -97,9 +82,51 @@
           type="submit"
           class="w-full h-15 text-[20px] bg-[#AFFA01] hover:bg-[#b0e635] text-black font-medium rounded-[7px] shadow-sm transition transform active:scale-[0.99] border border-[#a4d42b]"
         >
-          Save Changes
+          Save Account Changes
         </button>
       </div>
     </form>
+  </div>
+</div>
+<div
+  *ngIf="showToast"
+  class="fixed top-10 right-10 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300"
+>
+  <div
+    [ngClass]="{
+      'bg-[#AFFA01] text-black border-[#A9E816]': toastType === 'success',
+      'bg-red-500 text-white border-red-600': toastType === 'error',
+    }"
+    class="flex items-center gap-3 px-6 py-3 rounded-xl border shadow-lg font-medium"
+  >
+    <svg
+      *ngIf="toastType === 'success'"
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+        clip-rule="evenodd"
+      />
+    </svg>
+
+    <svg
+      *ngIf="toastType === 'error'"
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+        clip-rule="evenodd"
+      />
+    </svg>
+
+    <span>{{ toastMessage }}</span>
   </div>
 </div>

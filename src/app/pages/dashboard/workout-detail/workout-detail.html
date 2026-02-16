@@ -51,9 +51,14 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-6">
       <div
-        class="w-full aspect-video bg-black rounded-xl overflow-hidden relative group cursor-pointer shadow-lg"
+        class="w-full aspect-video bg-white rounded-xl overflow-hidden relative shadow-lg flex items-center justify-center"
       >
-        <div class="absolute inset-0 flex items-center justify-center"></div>
+        <img
+          *ngIf="workout.image"
+          [src]="workout.image"
+          alt="Workout Animation"
+          class="h-full w-auto object-contain"
+        />
       </div>
 
       <h2

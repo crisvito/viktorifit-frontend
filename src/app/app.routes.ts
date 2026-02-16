@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { MainLayout, BlankLayout, DashboardLayout, ProfileLayout, AdminLayout } from './layouts';
-import { HomePage, LoginPage, MainDashboardPage, MyAccount, PersonalData, RegisterPage, Schedule, Settings, SupportPage, WorkoutDetail, WorkoutLists, History, StatisticPage, RecommendationPage, SuggestionIntroPage, SuggestionResultPage } from './pages';
+import { HomePage, LoginPage, MainDashboardPage, MyAccount, PersonalData, RegisterPage, Schedule, Settings, SupportPage, WorkoutDetail, WorkoutLists, History, StatisticPage, RecommendationPage, SuggestionIntroPage, SuggestionResultPage, ChangePassword } from './pages';
 import { OnboardingPage } from './pages/onboarding/onboarding';
 import { FaqPage, FeedbackPage } from './pages/admin';
-import { AuthGuard, GuestGuard, AdminGuard, NotAdminGuard } from './core/guards';
+import { AuthGuard, GuestGuard, AdminGuard, NotAdminGuard, ProfileGuard} from './core/guards';
 
 export const routes: Routes = [
   {
@@ -29,8 +29,8 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardLayout,
-    canActivate: [AuthGuard],
-    canActivateChild: [AuthGuard],
+    canActivate: [AuthGuard, ProfileGuard],
+    canActivateChild: [AuthGuard, ProfileGuard],
     children: [
       { path: '', component: MainDashboardPage,data: { title: 'Dashboard' }},
       { path: 'workout-lists', component: WorkoutLists, data: { title: 'Workout Lists' } },
@@ -38,7 +38,7 @@ export const routes: Routes = [
       { path: 'statistics', component: StatisticPage,data: { title: 'Statistics' }},
       { path: 'schedule', component: Schedule, data: { title: 'Schedule' }},
       { path: 'history', component: History, data: { title: 'Schedule' }},
-      { path: 'recommendation', component: RecommendationPage, data: {title : 'Recommendation'}},
+      { path: 'recommendation', component: RecommendationPage, data: {title : 'Recommendation'}}
     ]
   },
   {
@@ -50,6 +50,7 @@ export const routes: Routes = [
       { path: 'my-account', component: MyAccount },
       { path: 'personal-data', component: PersonalData },
       { path: 'settings', component: Settings },
+      { path: 'change-password', component: ChangePassword, data: {title: 'Change Password'}}
     ]
   },
   {

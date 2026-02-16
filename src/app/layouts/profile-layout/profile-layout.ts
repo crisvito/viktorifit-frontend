@@ -18,7 +18,7 @@ export class ProfileLayout {
   ) {}
 
   goBack() {
-      this.location.back(); 
+      this.router.navigate(['/dashboard']); 
   }
 
   handleLogout() {

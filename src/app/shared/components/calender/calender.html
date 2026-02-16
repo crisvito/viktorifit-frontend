@@ -10,7 +10,7 @@
         </div>
         <div class="flex gap-2">
           <button
-            aria-label="change-month(-1)"
+            aria-label="button"
             (click)="changeMonth(-1)"
             class="w-6 h-6 rounded-full bg-[#4E7000] flex items-center justify-center text-white hover:bg-black transition cursor-pointer"
           >
@@ -24,7 +24,7 @@
             </svg>
           </button>
           <button
-            aria-label="change-month(1)"
+            aria-label="button"
             (click)="changeMonth(1)"
             class="w-6 h-6 rounded-full bg-[#4E7000] flex items-center justify-center text-white hover:bg-black transition cursor-pointer"
           >
@@ -50,13 +50,11 @@
         <ng-container *ngFor="let row of calendarDays">
           <div *ngFor="let dateObj of row" class="flex justify-center items-center">
             <div
-              (click)="dateObj.isCurrentMonth && toggleDate(dateObj.day)"
-              class="w-8 h-8 flex items-center justify-center rounded-full text-[12px] font-medium transition select-none"
-              [class.cursor-pointer]="dateObj.isCurrentMonth"
-              [class.hover:bg-gray-200]="dateObj.isCurrentMonth"
-              [class.bg-[#AFFA01]]="dateObj.isCurrentMonth && isDateSelected(dateObj.day)"
-              [class.text-black]="dateObj.isCurrentMonth && isDateSelected(dateObj.day)"
-              [class.text-gray-600]="dateObj.isCurrentMonth && !isDateSelected(dateObj.day)"
+              class="w-8 h-8 flex items-center justify-center rounded-full text-[12px] font-medium transition select-none cursor-default"
+              [class.bg-[#AFFA01]]="dateObj.isCurrentMonth && dateObj.isWorkout"
+              [class.text-black]="dateObj.isCurrentMonth && dateObj.isWorkout"
+              [class.font-bold]="dateObj.isCurrentMonth && dateObj.isWorkout"
+              [class.text-gray-600]="dateObj.isCurrentMonth && !dateObj.isWorkout"
               [class.text-gray-300]="!dateObj.isCurrentMonth"
             >
               {{ dateObj.day }}
@@ -68,56 +66,72 @@
 
     <div class="h-px bg-[#D2D2D2] mx-6 mt-5"></div>
 
-    <div class="p-6 space-y-6">
-      <h3 class="text-[18px] font-medium mb-7">Summary</h3>
+    <div class="p-6">
+      <h3 class="text-[18px] font-medium mb-6">Summary</h3>
 
-      <div class="flex items-center gap-4">
-        <div
-          class="w-14.75 h-14.75 bg-[#EDE689] border border-[#DAD377] rounded-[7px] flex items-center justify-center text-black font-medium shrink-0"
+      <div class="mb-8">
+        <h4
+          class="text-[14px] font-bold text-[#4E7000] mb-4 uppercase tracking-wider border-b border-gray-300 pb-2"
         >
-          <img src="/pages/calendar/type.svg" alt="" class="w-6 h-6" />
-        </div>
-        <div>
-          <p class="text-[14px] font-medium">Workout Type</p>
-          <p class="text-[12px] text-[#2D2D2D]">
-            {{ selectedMode === 'Home' ? 'Cardio Fitness' : 'Strength Training' }}
-          </p>
+          🏠 Home Routine
+        </h4>
+
+        <div class="space-y-4">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 bg-[#DBF3A3] border border-[#8AC500] rounded-[7px] flex items-center justify-center text-black shrink-0"
+            >
+              <img src="/pages/calendar/summary-duration.svg" alt="" class="w-5 h-5" />
+            </div>
+            <div>
+              <p class="text-[13px] font-medium text-gray-600">Avg. Duration</p>
+              <p class="text-[14px] font-bold text-[#1F1F1F]">{{ homeStats.duration }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 bg-[#FFB0A4] border border-[#DB6755] rounded-[7px] flex items-center justify-center text-black shrink-0"
+            >
+              <img src="/pages/calendar/summary-calories.svg" alt="" class="w-5 h-5" />
+            </div>
+            <div>
+              <p class="text-[13px] font-medium text-gray-600">Est. Calories</p>
+              <p class="text-[14px] font-bold text-[#1F1F1F]">{{ homeStats.calories }}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
-        <div
-          class="w-14.75 h-14.75 bg-[#C5D6FF] border border-[#9AB7FF] rounded-[7px] flex items-center justify-center text-black font-medium shrink-0"
+      <div>
+        <h4
+          class="text-[14px] font-bold text-[#1F4E79] mb-4 uppercase tracking-wider border-b border-gray-300 pb-2"
         >
-          <img src="/pages/calendar/location.svg" alt="" class="w-6 h-6" />
-        </div>
-        <div>
-          <p class="text-[14px] font-medium">Workout Location</p>
-          <p class="text-[12px] text-[#2D2D2D]">{{ selectedMode }} Workout</p>
-        </div>
-      </div>
+          💪 Gym Routine
+        </h4>
 
-      <div class="flex items-center gap-4">
-        <div
-          class="w-14.75 h-14.75 bg-[#DBF3A3] border border-[#8AC500] rounded-[7px] flex items-center justify-center text-blackfont-medium shrink-0"
-        >
-          <img src="/pages/calendar/summary-duration.svg" alt="" class="w-6 h-6" />
-        </div>
-        <div>
-          <p class="text-[14px] font-medium">Workout Duration</p>
-          <p class="text-[12px] text-[#2D2D2D]">1 Hour 30 Mins</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-4 mb-2">
-        <div
-          class="w-14.75 h-14.75 bg-[#FFB0A4] border border-[#DB6755] rounded-[7px] flex items-center justify-center text-blackfont-medium shrink-0"
-        >
-          <img src="/pages/calendar/summary-calories.svg" alt="" class="w-6 h-6" />
-        </div>
-        <div>
-          <p class="text-[14px] font-medium">Calories Burn By Workouts</p>
-          <p class="text-[12px] text-[#2D2D2D]">1200 cal</p>
+        <div class="space-y-4">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 bg-[#C5D6FF] border border-[#9AB7FF] rounded-[7px] flex items-center justify-center text-black shrink-0"
+            >
+              <img src="/pages/calendar/summary-duration.svg" alt="" class="w-5 h-5" />
+            </div>
+            <div>
+              <p class="text-[13px] font-medium text-gray-600">Avg. Duration</p>
+              <p class="text-[14px] font-bold text-[#1F1F1F]">{{ gymStats.duration }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 bg-[#E1C5FF] border border-[#B39AFF] rounded-[7px] flex items-center justify-center text-black shrink-0"
+            >
+              <img src="/pages/calendar/summary-calories.svg" alt="" class="w-5 h-5" />
+            </div>
+            <div>
+              <p class="text-[13px] font-medium text-gray-600">Est. Calories</p>
+              <p class="text-[14px] font-bold text-[#1F1F1F]">{{ gymStats.calories }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -31,17 +31,6 @@
     </div>
   </div>
 
-  <div class="flex flex-wrap items-center gap-3 mb-6">
-    <span class="text-gray-600 font-medium text-[14px] md:text-[16px]">Date : </span>
-    <button
-      (click)="openPeriodModal()"
-      class="flex items-center gap-2 bg-black px-4 md:px-6 py-2 rounded-full text-white text-[12px] md:text-[14px] font-medium hover:opacity-80 transition cursor-pointer"
-    >
-      {{ monthsList[selectedMonthIndex].substring(0, 3) }} {{ selectedYear }}
-      <img src="/pages/statistic/arrow-down.svg" alt="" class="w-3 h-3" />
-    </button>
-  </div>
-
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
     <div
       *ngFor="let card of statCards"
@@ -75,6 +64,7 @@
         <h3 class="text-[28px] md:text-[32px] font-semibold text-[#1F1F1F]">{{ card.value }}</h3>
         <div class="flex items-center gap-2 mt-1">
           <span
+            *ngIf="card.id === 'weights'"
             [class]="
               card.isPositive
                 ? 'bg-[#C3F74A] text-[#4E7000] px-3 py-0.5 rounded-[15px] text-[10px] md:text-[11px] font-medium'
@@ -103,12 +93,6 @@
             ></div>
             <span class="text-[11px] md:text-[12px] text-gray-600 font-medium"
               >Your {{ getStatLabel() }}</span
-            >
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-full bg-[#757575]"></div>
-            <span class="text-[11px] md:text-[12px] text-gray-600 font-medium"
-              >Target {{ getStatLabel() }}</span
             >
           </div>
         </div>

@@ -1,377 +1,400 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
-import { RouterLink } from '@angular/router';
+import { ChartConfiguration, ChartOptions } from 'chart.js';
+import { Router, RouterLink } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { switchMap, tap, catchError } from 'rxjs/operators';
+import { FormsModule } from '@angular/forms';
+import { AuthService, ExerciseService } from '../../../core'; 
+import { environment } from '../../../../environment/environment';
 
 type ChartCategory = 'weight' | 'calories' | 'duration';
 
-// Interface untuk data mingguan
-interface WeeklyData {
-  week: string;
-  cal: number;
-  dur: number;
-  weight: number;
-}
-
-// Interface untuk target
-interface Targets {
-  calories: number;
-  duration: number;
-  weight: number;
-}
-
-// Interface untuk aktivitas hari ini
-interface Activity {
-  id: number;
-  name: string;
-  category: string;
-  imageUrl: string;
-  duration: number;
-  progress: number;
-  status: 'Finished' | 'On Progress' | 'Not Started';
-}
-
 @Component({
   selector: 'app-main-dashboard',
-  imports: [CommonModule, BaseChartDirective, RouterLink],
+  standalone: true,
+  imports: [CommonModule, BaseChartDirective, RouterLink, FormsModule],
   templateUrl: './main-dashboard.html',
   styleUrl: './main-dashboard.css',
 })
+export class MainDashboardPage implements OnInit {
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
-export class MainDashboardPage {
-// Data ini ceritanya didapat dari database/service kamu nanti
-  userName: string = 'John';
-  workoutTitle: string = 'Leg Day';
-  workoutDesc: string = "Today's workout will focus on strength on your leg. Please Focus!";
+  isLoading = false;
+  loadingText = 'Menyiapkan Dashboard...';
+  userName: string = 'User';
+  workoutTitle: string = 'Rest Day';
+  workoutDesc: string = 'Your body needs time to recover.';
+  workoutImage: string = 'pages/workoutType/rest.png';
   
-  // Path gambar ilustrasi (ini yang berubah-ubah sesuai workout)
-  workoutImage: string = 'pages/workoutType/weightLoss.png';
+  public selectedEnvironment: 'home' | 'gym' = 'home';
+  private rawMLResult: any = null;
 
-   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
-
-  // --- 1. DATA AKTIVITAS HARI INI ---
-  todayActivities: Activity[] = [
-    {
-      id: 1,
-      name: 'Running',
-      category: 'Cardio',
-      imageUrl: 'pages/images/running-icon.png',
-      duration: 20,
-      progress: 100,
-      status: 'Finished'
-    },
-    {
-      id: 2,
-      name: 'Swimming',
-      category: 'Cardio',
-      imageUrl: 'pages/images/swimming-icon.png',
-      duration: 60,
-      progress: 50,
-      status: 'On Progress'
-    },
-    {
-      id: 3,
-      name: 'Yoga',
-      category: 'Flexibility',
-      imageUrl: 'pages/images/yoga-icon.png',
-      duration: 30,
-      progress: 0,
-      status: 'Not Started'
-    },
-    {
-      id: 3,
-      name: 'Yoga',
-      category: 'Flexibility',
-      imageUrl: 'pages/images/yoga-icon.png',
-      duration: 30,
-      progress: 0,
-      status: 'Not Started'
-    },
-    {
-      id: 3,
-      name: 'Yoga',
-      category: 'Flexibility',
-      imageUrl: 'pages/images/yoga-icon.png',
-      duration: 30,
-      progress: 0,
-      status: 'Not Started'
-    },
-  ];
-
-  // --- 2. LOGIKA HELPER (Progress Circle & Cards) ---
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Finished': return 'bg-lime-100 text-lime-600';
-      case 'On Progress': return 'bg-yellow-100 text-yellow-600';
-      case 'Not Started': return 'bg-red-100 text-red-600';
-      default: return 'bg-gray-100 text-gray-600';
-    }
-  }
-
-  get completedWorkouts(): number {
-    return this.todayActivities.filter(a => a.status === 'Finished').length;
-  }
-
-  get totalWorkouts(): number {
-    return this.todayActivities.length;
-  }
-
-  get currentDuration(): number {
-    return this.todayActivities
-      .filter(a => a.status === 'Finished')
-      .reduce((total, activity) => total + activity.duration, 0);
-  }
-
-  get targetDuration(): number {
-    return this.todayActivities.reduce((total, activity) => total + activity.duration, 0);
-  }
-
-  get progressPercentage(): number {
-    if (this.totalWorkouts === 0) return 0;
-    return (this.completedWorkouts / this.totalWorkouts) * 100;
-  }
-
-  get circleDashOffset(): number {
-    const circumference = 100;
-    return circumference - (this.progressPercentage / 100) * circumference;
-  }
-
-  // --- 3. DATA & LOGIKA GRAFIK MINGGUAN (CHART.JS) ---
+  todayActivities: any[] = [];
+  workoutslist: any[] = []; // Data Suggestions
+  bodyCondition: any = { height: 0, weight: 0, bmiCategory: '-', bodyFat: 0, goal: '-' };
   
-  // Target Mingguan (Untuk Normalisasi Persen)
-  targets: Targets = {
-    calories: 2500,
-    duration: 90,
-    weight: 75 // Target berat badan ideal
-  };
-
-  // Data Mentah Mingguan
-  rawWeeklyData: WeeklyData[] = [
-    { week: 'Week 1', cal: 1500, dur: 45, weight: 85 },
-    { week: 'Week 2', cal: 2000, dur: 60, weight: 83 },
-    { week: 'Week 3', cal: 2500, dur: 90, weight: 81 }, // Target tercapai
-    { week: 'Week 4', cal: 1800, dur: 50, weight: 80 },
-  ];
-
-  
-
-  // --- 4. DATA BODY CONDITION & WORKOUT LIST ---
-  public bodyCondition = {
-    height: 170,
-    weight: 80,
-    bmiCategory: 'Overweight',
-    bodyFat: 22,
-    goal: 'Cardio Fitness'
-  };
-
-  workoutslist = [
-    {
-      id: 1,
-      type:'Chest',
-      title: 'Morning Yoga Flow',
-      description: 'Rangkaian gerakan yoga lembut untuk membangunkan tubuh dan melatih pernapasan di pagi hari.',
-      image: 'pages/images/yoga-cover.jpg',
-      duration: '15',
-      difficulty: 'Beginner',
-      calories: 80,
-      steps: [
-        'Mulai dengan posisi Child Pose selama 2 menit.',
-        'Lakukan gerakan Cat-Cow untuk meregangkan punggung.',
-        'Angkat pinggul ke posisi Downward Facing Dog.',
-        'Langkahkan kaki ke depan untuk Warrior I.',
-        'Akhiri dengan Savasana (berbaring rileks).'
-      ]
-    },
-    {
-      id: 2,
-      type:'Chest',
-      title: 'Full Body HIIT',
-      description: 'Latihan intensitas tinggi tanpa alat untuk membakar lemak dengan cepat dan melatih jantung.',
-      image: 'pages/images/hiit-cover.jpg',
-      duration: '20',
-      difficulty: 'Intermediate',
-      calories: 250,
-      steps: [
-        'Pemanasan: Jumping Jacks (1 menit).',
-        'Set 1: Burpees (30 detik) + Istirahat (15 detik).',
-        'Set 2: Mountain Climbers (30 detik) + Istirahat (15 detik).',
-        'Set 3: High Knees (30 detik) + Istirahat (15 detik).',
-        'Pendinginan: Jalan di tempat dan peregangan.'
-      ]
-    },
-    {
-      id: 3,
-      type:'Chest',
-      title: 'Upper Body Strength',
-      description: 'Fokus membentuk otot lengan, dada, dan bahu. Bisa menggunakan dumbbell atau berat badan sendiri.',
-      image: 'pages/images/strength-cover.jpg',
-      duration: '30',
-      difficulty: 'Advanced',
-      calories: 180,
-      steps: [
-        'Push-up standar: 3 set x 12 repetisi.',
-        'Dumbbell Shoulder Press: 3 set x 10 repetisi.',
-        'Tricep Dips (pakai kursi): 3 set x 15 repetisi.',
-        'Bicep Curls: 3 set x 12 repetisi.',
-        'Plank tahan 1 menit untuk stabilitas.'
-      ]
-    }
-  ];
-
-  //STATISTIC
-  tabs = [
-    { id: 'weight', label: 'Current Weight', value: '80 kg', icon: '⚖️', color: 'blue' },
-    { id: 'calories', label: 'Calories Burn', value: '180 Kcal', icon: '🔥', color: 'red' },
-    { id: 'duration', label: 'Duration', value: '120 min', icon: '⏱️', color: 'green' }
-  ];
-
-  getActiveTab() {
-    return this.tabs.find(t => t.id === this.selectedChart);
-  }
-
-  getLabel(): string {
-  switch (this.selectedChart) {
-    case 'weight': return 'Weight';
-    case 'calories': return 'Calories';
-    case 'duration': return 'Duration';
-    default: return 'Actual';
-  }
-}
-  // 1. State Pilihan Chart (Default: Weight)
   public selectedChart: ChartCategory = 'weight';
-
-  // 2. Data Master (4 Minggu Saja)
-  // Target vs Actual untuk setiap kategori
-  private chartDataMaster = {
-    weight: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      actual: [85, 84.2, 83.5, 82.8],  // Berat turun (Bagus)
-      target: [85, 84.0, 83.0, 82.0],  // Target turun lebih cepat
-      color: '#3b82f6', // Blue
-      bg: 'rgba(59, 131, 246, 0.79)',
-      unit: 'kg'
-    },
-    calories: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      actual: [12000, 13500, 11000, 14200], // Total kalori seminggu
-      target: [12500, 12500, 12500, 12500], // Target stabil
-      color: '#ec8a00', // Orange
-      bg: 'rgba(233, 89, 0, 0.84)',
-      unit: 'kcal'
-    },
-    duration: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      actual: [180, 210, 150, 240], // Total menit seminggu
-      target: [200, 200, 200, 200], // Target 200 menit/minggu
-      color: '#84cc16', // Lime
-      bg: 'rgba(137, 228, 0, 0.96)',
-      unit: 'min'
-    }
+  private chartDataMaster: any = {
+    weight: { labels: [], actual: [], target: [], color: '#3b82f6', bg: 'rgba(59, 131, 246, 0.79)', unit: 'kg' },
+    calories: { labels: [], actual: [], target: [], color: '#ec8a00', bg: 'rgba(233, 89, 0, 0.84)', unit: 'kcal' },
+    duration: { labels: [], actual: [], target: [], color: '#84cc16', bg: 'rgba(137, 228, 0, 0.96)', unit: 'min' }
   };
 
-  // 3. Konfigurasi Data Chart Awal
-  public lineChartData: ChartConfiguration['data'] = {
-    labels: [],
-    datasets: []
-  };
-
-  // 4. Konfigurasi Options Chart
+  public lineChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public lineChartOptions: ChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    elements: {
-      line: { tension: 0.4 }, // Garis lengkung smooth
-      point: { radius: 4, hoverRadius: 6 }
-    },
+    elements: { line: { tension: 0.4 }, point: { radius: 4, hoverRadius: 6 } },
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
       tooltip: {
         mode: 'index',
         intersect: false,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        titleColor: '#1f2937',
-        bodyColor: '#4b5563',
-        borderColor: '#e5e7eb',
-        borderWidth: 1,
         callbacks: {
           label: (context) => {
-            let label = context.dataset.label || '';
-            let value = context.parsed.y;
-            // Ambil unit dari data master yang sedang aktif
-            let unit = this.chartDataMaster[this.selectedChart].unit; 
-            return ` ${label}: ${value} ${unit}`;
+            const unit = this.chartDataMaster[this.selectedChart].unit;
+            return ` ${context.dataset.label}: ${context.parsed.y} ${unit}`;
           }
         }
       }
     },
-    scales: {
-      x: { grid: { display: false } },
-      y: { 
-        beginAtZero: false, // Biar grafik weight ga gepeng
-        grid: { color: '#f3f4f6' } 
-      }
-    }
+    scales: { x: { grid: { display: false } }, y: { beginAtZero: false, grid: { color: '#f3f4f6' } } }
   };
 
-  constructor() {
-    // Load data awal saat komponen dibuat
+  tabs = [
+    { id: 'weight', label: 'Weight Target', value: '0 kg', icon: '⚖️', color: 'blue' },
+    { id: 'calories', label: 'Calories Plan', value: '0 Kcal', icon: '🔥', color: 'red' },
+    { id: 'duration', label: 'Duration', value: '0 min', icon: '⏱️', color: 'green' }
+  ];
+
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private http: HttpClient,
+    private exerciseService: ExerciseService // Service untuk ambil ID & GIF valid
+  ) {}
+
+  goToDetail(id: string) {
+    if (id) {
+      this.router.navigate(['/dashboard/workout-detail', id]);
+    }
+  }
+
+  ngOnInit() {
+    const localData = localStorage.getItem('ml_result');
+    if (localData) {
+      this.rawMLResult = JSON.parse(localData);
+      this.parseAndLoadData(this.rawMLResult);
+    } else {
+      this.fetchFreshRecommendations();
+    }
+  }
+
+  fetchFreshRecommendations() {
+    const user = this.authService.getUser();
+    const profile = user?.userProfileDTO;
+    if (!profile) return;
+
+    this.isLoading = true;
+    this.loadingText = 'Menganalisa Workout & Meal...';
+
+    const baseUrl = `${environment.apiUrl}ml`;
+    const age = this.calculateAge(profile.dob);
+
+    const basePayload = {
+      Age: age,
+      Gender: profile.gender === 'male' ? 'Male' : 'Female',
+      Height_cm: Number(profile.height),
+      Weight_kg: Number(profile.weight),
+      Body_Fat_Category: Number(profile.bodyFatCategory || 3),
+      Body_Fat_Percentage: Number(profile.bodyFatPercentage || 15.0),
+      Goal: profile.goal || "Muscle Gain",
+      Frequency: Number(profile.frequency || 3),
+      Duration: Number(profile.duration || 60),
+      Level: profile.level || 'Beginner',
+      Badminton: profile.badminton ? 1 : 0,
+      Football: profile.football ? 1 : 0,
+      Basketball: profile.basketball ? 1 : 0,
+      Volleyball: profile.volleyball ? 1 : 0,
+      Swim: profile.swim ? 1 : 0
+    };
+
+    forkJoin({
+      workoutHome: this.http.post(`${baseUrl}/workout-recommendation`, { ...basePayload, Environment: 'Home' }),
+      workoutGym: this.http.post(`${baseUrl}/workout-recommendation`, { ...basePayload, Environment: 'Gym' }),
+      progressResult: this.http.post<any>(`${baseUrl}/userprogress-recommendation`, { ...basePayload, Initial_Weight_kg: Number(profile.weight) })
+    }).pipe(
+      switchMap((results: any) => {
+        const progressData = results.progressResult;
+        const roadmap = progressData.roadmap || progressData;
+        const week1 = Array.isArray(roadmap) ? roadmap[0] : roadmap;
+
+        this.loadingText = 'Menyusun Variasi Meal Plan...';
+
+        const createMealPayload = (f: number) => ({
+          Daily_Calories: Number(week1.nutrition.calories),
+          Target_Protein_g: Number(week1.macro.protein_g),
+          Target_Carbs_g: Number(week1.macro.carbs_g),
+          Target_Fat_g: Number(week1.macro.fat_g),
+          Frequency: f
+        });
+
+        return forkJoin({
+          freq2: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(2)),
+          freq3: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(3)),
+          freq4: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(4)),
+          freq5: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(5))
+        }).pipe(
+          tap(mealResults => {
+            const finalData = {
+              userProfile: profile,
+              workoutRecommendation: { home: results.workoutHome, gym: results.workoutGym },
+              progressRecommendation: results.progressResult,
+              mealRecommendation: mealResults
+            };
+            localStorage.setItem('ml_result', JSON.stringify(finalData));
+            this.rawMLResult = finalData;
+            this.parseAndLoadData(finalData);
+          })
+        );
+      }),
+      catchError(err => {
+        console.error('ML Data Sync Failed:', err);
+        return of(null);
+      })
+    ).subscribe(() => this.isLoading = false);
+  }
+
+  parseAndLoadData(data: any) {
+    this.rawMLResult = data;
+    const profile = data.userProfile;
+    const roadmap = data.progressRecommendation?.roadmap || [];
+
+    this.userName = this.authService.getUser()?.fullname?.split(' ')[0] || 'User';
+
+    this.bodyCondition = {
+      height: profile.height,
+      weight: profile.weight,
+      bmiCategory: this.calculateBMI(profile.height, profile.weight),
+      bodyFat: profile.bodyFatPercentage || 0,
+      goal: profile.goal || 'Not Set'
+    };
+
+    this.updateTodayPlan();     // Logic Utama (Matching ID)
+    this.mapSuggestions();      // Logic Random Suggestions
+    this.mapStatistics(roadmap, profile);
     this.updateChartData();
   }
 
-  // 5. Fungsi Switch Tab
+  onEnvironmentChange(env: 'home' | 'gym') {
+    this.selectedEnvironment = env;
+    this.updateTodayPlan();
+  }
+
+  // --- LOGIKA UTAMA: Match Nama ML dengan Database untuk dapat ID GIF ---
+  updateTodayPlan() {
+    if (!this.rawMLResult) return;
+
+    const envData = this.rawMLResult.workoutRecommendation?.[this.selectedEnvironment];
+    const workoutPlan = envData?.workout_plan || envData;
+
+    if (!workoutPlan) {
+      this.setRestDay();
+      return;
+    }
+
+    const profile = this.rawMLResult.userProfile;
+    const todayShort = new Date().toLocaleDateString('en-US', { weekday: 'short' }); 
+    const workoutDaysArr = (profile.workoutDays || "").split(',').map((d: string) => d.trim());
+    const dayIndex = workoutDaysArr.indexOf(todayShort);
+
+    if (dayIndex !== -1) {
+      const targetDayNum = dayIndex + 1;
+      const allKeys = Object.keys(workoutPlan);
+      const dayKey = allKeys.find(k => k.toLowerCase().includes(`day ${targetDayNum}`));
+
+      if (dayKey && workoutPlan[dayKey]) {
+        this.workoutTitle = dayKey;
+        this.workoutDesc = `Ready for your ${this.selectedEnvironment} session!`;
+        this.workoutImage = 'pages/workoutType/weightLoss.png';
+        
+        const mlExercises = workoutPlan[dayKey];
+
+        // Ambil semua data dari Database untuk "Kamus" pencocokan
+        this.exerciseService.getAllExercises().subscribe({
+          next: (allDbExercises) => {
+            this.todayActivities = mlExercises.map((mlItem: any) => {
+              
+              // Cari latihan di DB yang namanya mirip (case insensitive)
+              const dbMatch = allDbExercises.find(dbItem => 
+                dbItem.name.toLowerCase().trim() === mlItem.exercise_name.toLowerCase().trim()
+              );
+
+              // Jika ketemu, pakai ID Database. Jika tidak, fallback ke ID ML (berharap benar)
+              const realId = dbMatch ? dbMatch.id : mlItem.id;
+
+              return {
+                id: realId, // ID ini penting buat routerLink detail
+                name: mlItem.exercise_name,
+                category: mlItem.muscle_group,
+                imageUrl: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${realId}.gif`, // GIF Valid
+                duration: mlItem.duration_minutes,
+                setsReps: `${mlItem.sets} x ${mlItem.reps}`,
+                status: 'PENDING'
+              };
+            });
+          },
+          error: (err) => {
+            console.error('Gagal mencocokkan ID latihan, pakai data ML mentah', err);
+            // Fallback jika DB error
+            this.todayActivities = mlExercises.map((mlItem: any) => ({
+              id: mlItem.id,
+              name: mlItem.exercise_name,
+              category: mlItem.muscle_group,
+              imageUrl: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${mlItem.id}.gif`,
+              duration: mlItem.duration_minutes,
+              setsReps: `${mlItem.sets} x ${mlItem.reps}`,
+              status: 'PENDING'
+            }));
+          }
+        });
+
+      } else {
+        this.setRestDay();
+      }
+    } else {
+      this.setRestDay();
+    }
+  }
+
+  // --- SUGGESTIONS: Ambil 3 Acak dari Database ---
+  private mapSuggestions() {
+    this.exerciseService.getAllExercises().subscribe({
+      next: (allExercises) => {
+        const randomExercises = allExercises.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+        this.workoutslist = randomExercises.map(ex => {
+          const muscles = Array.isArray(ex.targetMuscles) ? ex.targetMuscles.join(', ') : (ex.targetMuscles || "");
+          const isCardio = muscles.toLowerCase().includes('cardio');
+
+          return {
+            id: ex.id,
+            title: ex.name,
+            type: isCardio ? 'Cardio' : 'Muscular Strength',
+            duration: 15, 
+            image: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${ex.id}.gif`
+          };
+        });
+      }
+    });
+  }
+
+  private mapStatistics(roadmap: any[], profile: any) {
+    if (roadmap && roadmap.length > 0) {
+      const chartWeeks = roadmap.slice(0, 4);
+      
+      const finalTarget = roadmap.find(w => w.week === 12) || roadmap[roadmap.length - 1];
+      const targetWeightValue = finalTarget?.physical?.weight_kg || profile.weight;
+
+      this.chartDataMaster.weight.labels = chartWeeks.map((w: any) => `Week ${w.week}`);
+      this.chartDataMaster.weight.target = chartWeeks.map((w: any) => w.physical.weight_kg);
+      this.chartDataMaster.weight.actual = this.chartDataMaster.weight.target.map((v:any) => v + 0.1);
+
+      this.chartDataMaster.calories.labels = this.chartDataMaster.weight.labels;
+      this.chartDataMaster.calories.target = chartWeeks.map((w: any) => w.nutrition.calories);
+      this.chartDataMaster.calories.actual = this.chartDataMaster.calories.target.map((v:any) => v - 10);
+
+      this.chartDataMaster.duration.labels = this.chartDataMaster.weight.labels;
+      this.chartDataMaster.duration.target = chartWeeks.map(() => profile.duration || 60);
+      this.chartDataMaster.duration.actual = this.chartDataMaster.duration.target;
+
+      this.tabs[0].value = `${targetWeightValue} kg`;
+      this.tabs[1].value = `${chartWeeks[0].nutrition.calories} kcal`;
+      this.tabs[2].value = `${profile.duration || 60} min`;
+    }
+  }
+
+  private setRestDay() {
+    this.workoutTitle = "Rest Day";
+    this.workoutDesc = "Saatnya otot beristirahat agar tumbuh lebih maksimal.";
+    this.workoutImage = 'pages/workoutType/rest.png';
+    this.todayActivities = [];
+  }
+
   setChartType(type: ChartCategory) {
     this.selectedChart = type;
     this.updateChartData();
   }
 
-  // 6. Logic Pembaruan Data
   private updateChartData() {
     const data = this.chartDataMaster[this.selectedChart];
+    if (!data.labels.length) return;
 
     this.lineChartData = {
       labels: data.labels,
       datasets: [
         {
-          // DATASET 1: ACTUAL (Garis Berwarna + Area)
-          data: data.actual,
-          label: 'Actual',
+          data: data.target,
+          label: 'Target',
           borderColor: data.color,
           backgroundColor: (context: any) => {
-              const chart = context.chart;
-              const {ctx, chartArea} = chart;
-              if (!chartArea) return null;
-
-              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-              
-              // Gunakan opacity yang lebih tinggi (contoh: 0.6 atau 0.8) agar warna hijau terlihat padat
-              gradient.addColorStop(0, data.bg); // Hijau Lime agak tebal di atas
-              gradient.addColorStop(1, 'rgba(255, 255, 255, 0)'); // Tetap ada warna hijau tipis di bawah
-  
-              return gradient;
+            const chartArea = context.chart.chartArea;
+            if (!chartArea) return null;
+            const gradient = context.chart.ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, data.bg);
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            return gradient;
           },
-          fill: true, // Isi warna di bawah garis
+          fill: true,
           pointBackgroundColor: data.color,
           pointBorderColor: '#fff',
           borderWidth: 2
         },
-        {
-          // DATASET 2: TARGET (Garis Putus-putus Abu)
-          data: data.target,
-          label: 'Target',
-          borderColor: '#9ca3af', // Gray-400
-          borderDash: [5, 5], // Garis putus-putus
-          pointRadius: 0, // Titik target disembunyikan biar bersih
-          pointHoverRadius: 0,
-          fill: false,
-          borderWidth: 2
-        }
       ]
     };
-
-    // Trigger update visual (kadang perlu di Angular)
     this.chart?.update();
+  }
+
+  getStatusColor(status: string) {
+    if (!status) return 'bg-gray-100 text-gray-500';
+    switch (status.toUpperCase()) {
+      case 'FINISHED':
+        return 'bg-lime-100 text-lime-600';
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-600';
+      default:
+        return 'bg-gray-100 text-gray-500';
+    }
+  }
+  
+  get completedWorkouts() { return this.todayActivities.filter(a => a.status === 'FINISHED').length; }
+  get totalWorkouts() { return this.todayActivities.length; }
+  get currentDuration() { return this.completedWorkouts * 15; }
+  get targetDuration() { return this.totalWorkouts * 15; }
+  get circleDashOffset() {
+    const pct = this.totalWorkouts > 0 ? (this.completedWorkouts / this.totalWorkouts) * 100 : 0;
+    return 100 - pct;
+  }
+  getActiveTab() { return this.tabs.find(t => t.id === this.selectedChart); }
+  getLabel() { return this.selectedChart.charAt(0).toUpperCase() + this.selectedChart.slice(1); }
+
+  private calculateAge(dob: string): number {
+    if (!dob) return 25;
+    const birth = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
+    return age;
+  }
+
+  private calculateBMI(h: number, w: number): string {
+    const bmi = w / ((h / 100) * (h / 100));
+    if (bmi < 18.5) return 'Underweight';
+    if (bmi < 25) return 'Normal';
+    if (bmi < 30) return 'Overweight';
+    return 'Obese';
   }
 }

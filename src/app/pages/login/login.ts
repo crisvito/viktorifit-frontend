@@ -63,7 +63,7 @@ export class LoginPage {
   
         this.authService.saveSession(response.token, response.user);
         
-        this.router.navigate(['/']); 
+        this.router.navigate(['/dashboard']); 
         
         this.isLoading = false;
       },

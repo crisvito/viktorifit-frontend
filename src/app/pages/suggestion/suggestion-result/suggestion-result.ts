@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // Penting buat ngModel dropdown
 import { BmiCardComponent, ButtonComponent } from '../../../shared/components';
 
-// import { PredictionService } from '../../services/prediction.service'; //dari file ml yang udah di export, nama file nya disesuain aja
+// ... (Interface Workout, UserWellnessProfile SAMA SEPERTI SEBELUMNYA) ...
+// ... (Interface MealItem, NutritionData SAMA SEPERTI SEBELUMNYA) ...
+
 interface Workout {
   id: number;
   category: string;
@@ -17,37 +20,27 @@ interface Workout {
 interface UserWellnessProfile {
   id: string;
   name: string;
-  height: number;       
-  weight: number;       
-  bmi: number;          
-  bodyFat: {
-    percentage : string,
-    category : string;
-    image: string;
-  };      // dalam persen
+  height: number;
+  weight: number;
+  bmi: number;
+  bodyFat: { percentage : string, category : string; image: string; }; 
   gender: 'Male' | 'Female';
-  program: {
-    title: string;      // misal: Weight Loss
-    description: string;
-    image: string;      // path gambar
-  };
+  program: { title: string; description: string; image: string; };
   level: string;
   freq:number;
 }
 
-// 1. Khusus Meal (Satu Makanan)
 interface MealItem {
   name: string;
-  porsi: string;
+  porsi: string; 
   calories: number;
   protein: string;
   image: string;
 }
 
-// 2. Khusus Data Nutrisi (Total + List)
 interface NutritionData {
-  targetCalories: number; // Angka total yg sudah mateng (2750)
-  meals: MealItem[];      // Array makanannya
+  targetCalories: number;
+  meals: MealItem[];
 }
 
 @Component({
@@ -56,148 +49,185 @@ interface NutritionData {
   imports: [
     CommonModule,
     RouterModule, 
+    FormsModule, // Tambahkan ini
     ButtonComponent,
     BmiCardComponent
   ],
   templateUrl: './suggestion-result.html',
   styleUrl: './suggestion-result.css',
 })
-
 export class SuggestionResultPage implements OnInit {
   
   userData: UserWellnessProfile = {
-    id: '',
-    name: '',
-    height: 0,
-    weight: 0,
-    bmi: 0,
-    bodyFat: {
-      percentage:'',
-      category:'',
-      image:'',
-    },
+    id: '', name: 'Guest', height: 0, weight: 0, bmi: 0,
+    bodyFat: { percentage:'', category:'', image:'' },
     gender: 'Female',
-    program: {
-      title: 'Loading...',
-      description: '',
-      image: '' 
-    },
-    level:'',
-    freq:0,
+    program: { title: 'Loading...', description: '', image: '' },
+    level:'', freq:0,
   };
-  isLoading: boolean = true;
-  nutritionData: NutritionData | null = null;
 
-  constructor() { }
+  nutritionData: NutritionData | null = null;
+  
+  // Workout State
+  workoutMode: 'home' | 'gym' = 'home';
+  homeWorkouts: Workout[] = []; 
+  gymWorkouts: Workout[] = [];  
+  
+  // Meal Frequency State
+  mealFrequencyOptions = [2, 3, 4, 5];
+  selectedMealFreq: number = 3; // Default 3 kali makan
+  allMealRecommendations: any = null; // Simpan raw data { freq2, freq3... }
+
+  isLoading: boolean = true;
+
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
-    this.fetchUserData();
+    this.loadDataFromStorage();
   }
 
-  // Simulasi memanggil API Database
-  fetchUserData() {
+  loadDataFromStorage() {
     this.isLoading = true;
-
-    // Anggap ini request ke Backend (Service)
-    setTimeout(() => {
-      // DUMMY DATA (Ini yang nanti diganti response API)
-      this.userData = {
-        id: 'user_12345',
-        name: 'Viktoria',
-        height: 165,
-        weight: 60,
-        bmi: 21.3, // Sebaiknya dihitung di backend atau service
-        bodyFat: {
-          percentage:'18-20%',
-          category: 'Fitness',
-          image:'pages/recommendation/Athletic.png',
-        },
-        gender: 'Female',
-        program: {
-          title: 'Weight Loss',
-          description: 'Workout jenis ini merupakan workout yang berfokus pada bagian jantung. Secara umum, cardio fitness digunakan untuk menurunkan berat badan.',
-          image: 'pages/recommendation/cardio.png'
-        },
-        level: 'Beginner',
-        freq: 4,
-      };
-
-      this.nutritionData = {
-        targetCalories: 2750, // <--- Angka mateng dari backend
-        meals: [
-          { name: 'Gun powder chutney', porsi: '2.0 porsi', calories: 625, protein: '43.1g', image: 'assets/food1.jpg' },
-          { name: 'Maa chaane ki dal', porsi: '1.5 porsi', calories: 517, protein: '29.7g', image: 'assets/food2.jpg' },
-          { name: 'Lobster Roll Sandwich', porsi: '1.0 porsi', calories: 450, protein: '20.0g', image: 'assets/food3.jpg' },
-          { name: 'Bengal 5 Spice Blend', porsi: '2.0 porsi', calories: 580, protein: '36.5g', image: 'assets/food4.jpg' },
-          { name: 'Cracked Wheat Premix', porsi: '1.5 porsi', calories: 543, protein: '23.8g', image: 'assets/food5.jpg' }
-        ]
-      };
-
-      this.isLoading = false;
-    }, 1);
-  }
-
-  // Menghitung posisi marker (0% - 100%) berdasarkan skala chart (15 - 40)
-  // get markerPosition(): number {
-  //   const min = 15;
-  //   const max = 40;
-  //   const range = max - min;
+    const storedData = localStorage.getItem('guest_ml_result');
     
-  //   // Rumus: (Nilai - Min) / Range * 100
-  //   let percent = (( - min) / range) * 100;
-    
-  //   // Batasi supaya tidak keluar chart (clamp)
-  //   return Math.max(0, Math.min(100, percent));
-  // }
-
-  workoutMode: 'home' | 'gym' = 'home';
-
-  allWorkouts: Workout[] = [
-    {
-      id: 1,
-      category: 'Chest & Triceps',
-      name: 'Standard Push-Ups',
-      description: 'Fokus pada kontraksi otot dada bagian tengah dan penguatan stabilitas sendi bahu.',
-      sets: 4,
-      reps: '12',
-      type: 'home'
-    },
-    {
-      id: 2,
-      category: 'Legs',
-      name: 'Bodyweight Squats',
-      description: 'Latihan fundamental untuk memperkuat otot quadriceps dan glutes tanpa alat.',
-      sets: 3,
-      reps: '15',
-      type: 'home'
-    },
-    {
-      id: 3,
-      category: 'Chest',
-      name: 'Barbell Bench Press',
-      description: 'Latihan compound utama untuk membangun massa otot dada secara keseluruhan.',
-      sets: 4,
-      reps: '8-10',
-      type: 'gym'
-    },
-    {
-      id: 4,
-      category: 'Back',
-      name: 'Lat Pulldown',
-      description: 'Menargetkan otot latissimus dorsi untuk menciptakan bentuk punggung V-taper.',
-      sets: 3,
-      reps: '12',
-      type: 'gym'
+    if (!storedData) {
+      this.router.navigate(['/onboarding']);
+      return;
     }
-  ];
 
-  // Getter untuk filter data berdasarkan mode yang dipilih
+    try {
+      const parsed = JSON.parse(storedData);
+      const profile = parsed.userProfile;
+      const workoutRec = parsed.workoutRecommendation;
+      
+      // Simpan SEMUA data meal (freq2, freq3, freq4, freq5) ke variable global
+      this.allMealRecommendations = parsed.mealRecommendation; 
+
+      // 1. MAPPING USER PROFILE (SAMA)
+      const heightM = profile.Height_cm / 100;
+      const bmiVal = heightM > 0 ? parseFloat((profile.Weight_kg / (heightM * heightM)).toFixed(1)) : 0;
+      const bfInfo = this.getBodyFatInfo(profile.Body_Fat_Category, profile.Gender);
+      const progInfo = this.getProgramInfo(profile.Goal);
+
+      this.userData = {
+        id: 'guest_01', name: 'Guest User',
+        height: profile.Height_cm, weight: profile.Weight_kg, bmi: bmiVal,
+        gender: profile.Gender,
+        bodyFat: { percentage: `${profile.Body_Fat_Percentage}%`, category: bfInfo.label, image: bfInfo.image },
+        program: { title: profile.Goal, description: progInfo.description, image: progInfo.image },
+        level: profile.Level, freq: profile.Frequency
+      };
+
+      // 2. MAPPING MEAL (Set Default ke Frequency 3)
+      this.changeMealFreq(3);
+
+      // 3. MAPPING WORKOUT (SAMA)
+      const rawHome = workoutRec?.home?.workout_plan;
+      this.homeWorkouts = this.flattenWorkoutPlan(rawHome, 'home');
+      const rawGym = workoutRec?.gym?.workout_plan;
+      this.gymWorkouts = this.flattenWorkoutPlan(rawGym, 'gym');
+
+    } catch (e) {
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // ==========================================
+  // LOGIC GANTI FREQUENCY MEAL
+  // ==========================================
+  changeMealFreq(freq: number) {
+    this.selectedMealFreq = freq; // Update state untuk dropdown
+
+    if (!this.allMealRecommendations) return;
+
+    // Ambil data spesifik berdasarkan key (freq2, freq3, dst)
+    const key = `freq${freq}`;
+    const specificMealData = this.allMealRecommendations[key];
+
+    // Mapping ulang data Nutrition berdasarkan pilihan frequency
+    let mappedMeals: MealItem[] = [];
+    const mealPlanList = specificMealData?.meal_plan || [];
+
+    if (Array.isArray(mealPlanList) && mealPlanList.length > 0) {
+      mappedMeals = mealPlanList.map((m: any) => ({
+        name: m.menu_name || 'Food Item',
+        porsi: `${m.portion || 1} Portion`,
+        calories: Math.round(m.calories || 0),
+        protein: `${(m.protein || 0).toFixed(1)}g`,
+        image: 'assets/food-placeholder.jpg'
+      }));
+    }
+
+    const totalCal = specificMealData?.planned_total?.calories || specificMealData?.target_daily?.calories || 2000;
+
+    this.nutritionData = {
+      targetCalories: Math.round(totalCal),
+      meals: mappedMeals
+    };
+  }
+
+  // ==========================================
+  // HELPERS (flattenWorkoutPlan, getBodyFatInfo, getProgramInfo) 
+  // ... (Paste method helper yang SAMA DARI SEBELUMNYA di sini) ...
+  // ==========================================
+  
+  private flattenWorkoutPlan(planObj: any, type: 'home' | 'gym'): Workout[] {
+    if (!planObj || typeof planObj !== 'object') return [];
+    let allExercises: Workout[] = [];
+    let idCounter = 1;
+    Object.keys(planObj).forEach(dayKey => {
+        const exercises = planObj[dayKey];
+        if (Array.isArray(exercises)) {
+            const mapped = exercises.map((ex: any) => ({
+                id: idCounter++,
+                category: ex.muscle_group || 'General',
+                name: ex.exercise_name || 'Exercise',
+                description: ex.instructions || `Lakukan ${ex.sets} set x ${ex.reps} repetisi.`,
+                sets: ex.sets || 3,
+                reps: String(ex.reps || '12'),
+                type: type
+            }));
+            allExercises = allExercises.concat(mapped);
+        }
+    });
+    return allExercises;
+  }
+
+  getBodyFatInfo(catId: number, gender: string) {
+    const isFemale = (gender || '').toLowerCase() === 'female';
+    const prefix = isFemale ? 'female' : 'male';
+    switch(catId) {
+      case 1: 
+        return { label: 'Essential', image: `global/body-fat/${prefix}_veryLean.svg` };
+      case 2: 
+        return { label: 'Athlete', image: `global/body-fat/${prefix}_athletic.svg` };
+      case 3: 
+        return { label: 'Fitness', image: `global/body-fat/${prefix}_average.svg` };
+      case 4: 
+        return { label: 'Average', image: `global/body-fat/${prefix}_overweight.svg` };
+      case 5: 
+        return { label: 'Obese', image: `global/body-fat/${prefix}_obese.svg` };
+      default: 
+        return { label: 'Average', image: `global/body-fat/${prefix}_average.svg` };
+    }
+  }
+
+  getProgramInfo(goal: string) {
+    if (goal === 'Muscle Gain') {
+      return { description: 'Fokus hipertrofi otot.', image: 'pages/recommendation/weight.png' };
+    } else if (goal === 'Weight Loss') {
+      return { description: 'Fokus pembakaran kalori.', image: 'pages/recommendation/cardio.png' };
+    } else {
+      return { description: 'Kebugaran umum.', image: 'pages/recommendation/yoga.png' };
+    }
+  }
+
+  // UI Logic
   get filteredWorkouts() {
-    return this.allWorkouts.filter(w => w.type === this.workoutMode);
+    return this.workoutMode === 'home' ? this.homeWorkouts : this.gymWorkouts;
   }
+  setMode(mode: 'home' | 'gym') { this.workoutMode = mode; }
 
-  setMode(mode: 'home' | 'gym') {
-    console.log('Mode berubah ke:', mode); // Cek di console browser (F12)
-    this.workoutMode = mode;
-  }
 }
+

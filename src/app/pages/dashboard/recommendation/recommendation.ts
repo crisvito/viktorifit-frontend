@@ -1,250 +1,264 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BmiCardComponent } from '../../../shared/components';
+import { FormsModule } from '@angular/forms';
 
+// --- INTERFACE DEFINITIONS ---
 export interface Exercise {
   name: string;
   muscle: string;
   sets: number;
   reps: string;
   cals: number;
-  image?: string; // Opsional: jika nanti ada gambar
+  image?: string; 
 }
 
 export interface WorkoutDetails {
-  // totalDuration: string;  // '45 Mins'
-  intensity?: string;     // 'Intermediate' (Opsional)
-  totalCalories: number;  // 350
-  equipment: string[];    // ['Dumbbell', 'Mat']
-  exercises: Exercise[];  // Array dari interface Exercise di atas
+  totalDuration?: string; 
+  totalCalories: number; 
+  equipment: string[];   
+  exercises: Exercise[];
 }
 
 export interface WorkoutSchedule {
   day: number;
-  focus: string;    // 'Leg Day', 'Chest Day'
-  
+  title: string; 
   env: {
     home: WorkoutDetails;
     gym: WorkoutDetails;
   };
 }
 
-export interface UserWellnessProfile {
-  id: string;
+// Interface untuk Meal sesuai tampilan UI
+export interface Meal {
   name: string;
-  height: number;       // dalam cm
-  weight: number;       // dalam kg
-  bmi: number;          // hasil kalkulasi
-  bodyFat: {
-    percentage : string,
-    category : string;
-    image: string;
-  };      // dalam persen
-  gender: 'Male' | 'Female';
-  program: {
-    title: string;      // misal: Weight Loss
-    description: string;
-    image: string;      // path gambar
-  };
-  level: string;
-  freq:number;
-}
-
-export interface UserTarget{
-  bodyFatTarget: number;
-  weightTarget: number;
-}
-
-export interface UserRoutine{
-    level: string;
-    freq:number;
-    avg_dur:number;
-}
-
-// 1. Khusus Meal (Satu Makanan)
-interface Meal {
-  name: string;
-  porsi: string;
+  porsi: string; 
   calories: number;
   protein: string;
+  carbs: string;
+  fat: string;
   image: string;
+  items: string[]; 
 }
 
 @Component({
   selector: 'app-recommendation',
-  imports: [CommonModule, BmiCardComponent],
+  standalone: true,
+  imports: [CommonModule, BmiCardComponent, FormsModule],
   templateUrl: './recommendation.html',
-  styleUrl: './recommendation.css',
+  styleUrl: './recommendation.css', // Pastikan file css ada atau hapus baris ini
 })
+export class RecommendationPage implements OnInit {
 
-export class RecommendationPage {
-  // === 1. DATA USER & PROGRAM (Top Section) ===
-  // userProfile = {
-  //   name: 'Alex',
-  //   programType: 'Weight Loss',
-  //   targetWeight: 65,
-  //   currentWeight: 70,
-  //   height: 175,
-  //   bmi: 22.9,
-  //   bmiStatus: 'Normal',
-  //   bodyFat: 18,
-  //   gender: 'Female'
-  // };
+  // === 1. STATE VARIABLES ===
+  activeTab: 'home' | 'gym' = 'home';
+  selectedDayIndex: number = 0;
+  
+  workoutSchedule: WorkoutSchedule[] = [];
+  
+  userProfile: any = {}; 
+  userTarget: any = {};
+  userRoutine: any = {};
 
-// === 2. DATA WORKOUT SCHEDULE (Middle Section) ===
-activeTab: 'home' | 'gym' = 'home'; // Default 'home'
-selectedDayIndex: number = 0; // Default Day 1 (index 0)
+  // === 2. MEAL STATE ===
+  selectedFrequency: number = 3; 
+  displayedMeals: Meal[] = [];   
+  currentTotalCalories: number = 0;
+  
+  // Data Meal Lengkap dari ML
+  mealDatabase: Record<number, Meal[]> = {};
 
-// Data Dummy (Contoh struktur data kamu)
-WorkoutSchedule = [
-  { 
-    day: 1, 
-    focus: 'Leg Day', // Judul fokus tetap sama
-    env: {
-      home: {
-        // totalDuration: '45 Min',
-        totalCalories: 320,
-        equipment: ['Yoga Mat'],
-        exercises: [
-          { name: 'Squat Jump', muscle: 'Legs', sets: 3, reps: '12- 15', cals: 20 },
-          { name: 'Lunges', muscle: 'Glutes', sets: 3, reps: '12', cals: 15 },
-          { name: 'Calf Raises', muscle: 'Calves', sets: 3, reps: '20', cals: 10 }
-        ]
-      },
-      gym: {
-        // totalDuration: '60 Min',
-        totalCalories: 450,
-        equipment: ['Barbell', 'Leg Press Machine'],
-        exercises: [
-          { name: 'Barbell Squat', muscle: 'Legs', sets: 4, reps: '8-10', cals: 40 }, // Latihan lebih berat
-          { name: 'Leg Press', muscle: 'Legs', sets: 3, reps: '12', cals: 30 },
-          { name: 'Leg Extension', muscle: 'Quads', sets: 3, reps: '15', cals: 25 }
-        ]
-      }
+  constructor() {}
+
+  ngOnInit(): void {
+    this.loadMLData();
+  }
+
+
+  getBodyFatInfo(catId: number, gender: string) {
+    // Tentukan prefix gambar berdasarkan gender (cowok/cewek beda gambar biasanya)
+    // Kalau di aset kamu cuma ada satu jenis, hapus bagian prefix ini.
+    // Asumsi: gender 'male' -> 'm-', 'female' -> 'f-' (sesuaikan dengan nama file kamu)
+    const prefix = gender.toLowerCase() === 'female' ? 'female' : 'male'; 
+    
+    switch(catId) {
+      case 1: 
+        return { label: 'Essential', image: `/global/body-fat/${prefix}_veryLean.svg` };
+      case 2: 
+        return { label: 'Athlete', image: `/global/body-fat/${prefix}_athletic.svg` };
+      case 3: 
+        return { label: 'Fitness', image: `/global/body-fat/${prefix}_average.svg` };
+      case 4: 
+        return { label: 'Average', image: `/global/body-fat/${prefix}_overweight.svg` };
+      case 5: 
+        return { label: 'Obese', image: `/global/body-fat/${prefix}_obese.svg` };
+      default: 
+        return { label: 'Average', image: `/global/body-fat/${prefix}_average.svg` };
     }
-  },
-  { 
-    day: 2, 
-    focus: 'Chest Day', 
-    env: {
-      home: {
-        totalDuration: '30 Min',
-        totalCalories: 280,
-        equipment: ['None'],
-        exercises: [
-          { name: 'Diamond Push Up', muscle: 'Inner Chest', sets: 4, reps: '10', cals: 25 },
-          { name: 'Wide Push Up', muscle: 'Outer Chest', sets: 3, reps: '12', cals: 22 },
-        ]
-      },
-      gym: {
-        totalDuration: '55 Min',
-        totalCalories: 380,
-        equipment: ['Bench', 'Dumbbell'],
-        exercises: [
-          { name: 'Bench Press', muscle: 'Chest', sets: 4, reps: '8', cals: 45 },
-          { name: 'Incline Dumbbell Press', muscle: 'Upper Chest', sets: 3, reps: '10', cals: 35 },
-        ]
-      }
+  }
+
+  // === 3. LOAD & MAP DATA ===
+  loadMLData() {
+    const data = localStorage.getItem('ml_result');
+    if (!data) return;
+
+    try {
+      const parsed = JSON.parse(data);
+      const profile = parsed.userProfile || {};
+      const workoutHome = parsed.workoutRecommendation?.home?.workout_plan || {};
+      const workoutGym = parsed.workoutRecommendation?.gym?.workout_plan || {};
+      
+      // Ambil bagian mealRecommendation
+      const mealRecs = parsed.mealRecommendation || {};
+
+      const bodyFatInfo = this.getBodyFatInfo(profile.bodyFatCategory, profile.gender);
+
+      // A. MAP USER PROFILE
+      this.userProfile = {
+        name: 'User', 
+        height: profile.height,
+        weight: profile.weight,
+        bmi: this.calculateBMI(profile.weight, profile.height),
+        bodyFat: {
+          percentage: `${profile.bodyFatPercentage}%`,
+          category: this.getBodyFatCategory(profile.bodyFatCategory),
+          image: bodyFatInfo.image, 
+        },
+        gender: profile.gender,
+        program: {
+          title: profile.goal,
+          description: this.getGoalDescription(profile.goal),
+          image: 'pages/recommendation/cardio.png'
+        },
+        level: profile.level,
+        freq: profile.frequency
+      };
+
+      // B. MAP USER TARGET (Progress Week 12)
+      const roadmap = parsed.progressRecommendation?.roadmap || [];
+      const finalWeek = roadmap.length > 0 ? roadmap[roadmap.length - 1] : null;
+      
+      this.userTarget = {
+        weightTarget: finalWeek?.physical?.weight_kg || profile.weight, 
+        bodyFatTarget: 18 // Default
+      };
+
+      this.userRoutine = {
+        level: profile.level,
+        freq: profile.frequency,
+        avg_dur: profile.duration
+      };
+
+      // C. MAP WORKOUT SCHEDULE
+      const homeKeys = Object.keys(workoutHome);
+      const gymKeys = Object.keys(workoutGym);
+
+      this.workoutSchedule = homeKeys.map((dayKey, index) => {
+        const gymKey = gymKeys[index] || dayKey; 
+
+        return {
+          day: index + 1,
+          title: dayKey, 
+          env: {
+            home: this.mapWorkoutDetails(workoutHome[dayKey]),
+            gym: this.mapWorkoutDetails(workoutGym[gymKey])
+          }
+        };
+      });
+
+      // D. MAP MEAL RECOMMENDATION (PERBAIKAN DISINI)
+      // Perhatikan key akses: mealRecs.freqX.meal_plan
+      this.mealDatabase[2] = this.mapMeals(mealRecs.freq2?.meal_plan);
+      this.mealDatabase[3] = this.mapMeals(mealRecs.freq3?.meal_plan);
+      this.mealDatabase[4] = this.mapMeals(mealRecs.freq4?.meal_plan);
+      this.mealDatabase[5] = this.mapMeals(mealRecs.freq5?.meal_plan);
+
+      // Set Default Meal View
+      this.selectedFrequency = 3; // Default
+      this.updateRecommendation(this.selectedFrequency);
+
+    } catch (e) {
+      console.error("Error parsing ML Data", e);
     }
-  },
-  // ... hari lainnya
-];
+  }
 
+  // --- HELPER MAPPING WORKOUT ---
+  mapWorkoutDetails(exercises: any[]): WorkoutDetails {
+    if (!exercises) return { totalCalories: 0, equipment: [], exercises: [] };
 
-//USER DATA
-userProfile: UserWellnessProfile = {
-    id: 'user_12345',
-    name: 'Viktoria',
-    height: 165,
-    weight: 60,
-    bmi: 21.3, // Sebaiknya dihitung di backend atau service
-    bodyFat: {
-      percentage:'18-20%',
-      category: 'Fitness',
-      image:'pages/recommendation/Athletic.png',
-    },
-    gender: 'Female',
-    program: {
-      title: 'Weight Loss',
-      description: 'Workout jenis ini merupakan workout yang berfokus pada bagian jantung. Secara umum, cardio fitness digunakan untuk menurunkan berat badan.',
-      image: 'pages/recommendation/cardio.png'
-    },
-    level: 'Beginner',
-    freq: 4,
-};
+    const totalCals = exercises.reduce((acc, curr) => acc + (Number(curr.calories_burned) || 0), 0);
+    
+    const allEquip = exercises.map(e => e.equipment).join(',').split(',');
+    const uniqueEquip = [...new Set(allEquip.map(s => s.trim()))].filter(s => s && s !== 'None');
 
-//TARGET USER
-userTarget: UserTarget = {
-  weightTarget: 50,
-  bodyFatTarget : 18,
-}
+    // Total Duration = duration + rest
+    const totalDur = exercises.reduce((acc, curr) => acc + (Number(curr.duration_minutes) || 0) + (Number(curr.rest_minutes) || 0), 0);
 
-//USER ROUTINEE
-userRoutine: UserRoutine = {
-      level: 'Beginner',
-      freq: 4,
-      avg_dur: 16,
-}
+    return {
+      totalDuration: `${totalDur} Min`,
+      totalCalories: totalCals,
+      equipment: uniqueEquip.slice(0, 3), 
+      exercises: exercises.map(ex => ({
+        name: ex.exercise_name,
+        muscle: ex.muscle_group,
+        sets: ex.sets,
+        reps: String(ex.reps),
+        cals: ex.calories_burned,
+        image: '' 
+      }))
+    };
+  }
 
-//MEALS
-  selectedFrequency: number = 3; // Default 3x makan
-  displayedMeals: Meal[] = [];   // Data yang tampil di HTML
-  currentTotalCalories: number = 0; // Total kalori dari rekomendasi saat ini
-  // targetCalories: number = 2200; // Target harian user (bisa dari database user)
+  // --- HELPER MAPPING MEAL (PERBAIKAN DISINI) ---
+  mapMeals(mealsData: any[]): Meal[] {
+    if (!mealsData || !Array.isArray(mealsData)) return [];
+    
+    const dummyImages = ['pages/steak.png', 'pages/salmon.png', 'pages/chicken.png', 'pages/oatmeal.png', 'pages/fish.png'];
+    
+    return mealsData.map((m, i) => ({
+      name: m.menu_name, // Backend: menu_name -> UI: name
+      porsi: `${m.portion} Portion`, // Backend: portion (number) -> UI: porsi (string)
+      calories: Math.round(Number(m.calories)), // Bulatkan kalori
+      protein: `${Math.round(Number(m.protein))}g`,
+      carbs: `${Math.round(Number(m.carbs))}g`,
+      fat: `${Math.round(Number(m.fat))}g`,
+      items: [], // Backend tidak kirim ingredients, set kosong
+      image: dummyImages[i % dummyImages.length] 
+    }));
+  }
 
-  // 2. DATA MOCK (Pura-pura jadi Output Machine Learning)
-  mlDatabaseMock: Record<number, Meal[]> = {
-    1: [
-      { name: 'Super Steak & Potatoes', calories: 1800, protein: '120g' , image: 'pages/steak.png', porsi:'1.0 Porsi Besar'}
-    ],
-    2: [
-      { name: 'Avocado Toast & Eggs', calories: 800, protein: '40g', image: 'pages/toast.png', porsi:'1.0 Piring' },
-      { name: 'Salmon & Quinoa', calories: 1000, protein: '60g', image: 'pages/salmon.png', porsi:'1.0 Mangkok' }
-    ],
-    3: [
-      { name: 'Oatmeal & Berries', calories: 500, protein: '20g', image: 'pages/oatmeal.png', porsi:'1.0 Mangkok' },
-      { name: 'Grilled Chicken Breast', calories: 700, protein: '50g', image: 'pages/chicken.png', porsi:'1.0 Piring' },
-      { name: 'Tuna Salad', calories: 600, protein: '40g', image: 'pages/tuna.png', porsi:'1.0 Mangkok' }
-    ],
-    4: [
-      { name: 'Breakfast Omelette', calories: 400, protein: '20g', image: 'pages/omelette.png', porsi:'1.0 Piring' },
-      { name: 'Lunch Beef Bowl', calories: 500, protein: '30g', image: 'pages/beef.png', porsi:'1.0 Mangkok' },
-      { name: 'Afternoon Snack Bar', calories: 300, protein: '15g', image: 'pages/snack.png', porsi:'1.0 Bungkus' },
-      { name: 'Dinner Fish Fillet', calories: 600, protein: '35g', image: 'pages/fish.png', porsi:'1.0 Piring' }
-    ],
-    5: [
-      { name: 'Small Breakfast', calories: 300, protein: '15g', image: 'pages/img1.png', porsi:'0.5 Piring' },
-      { name: 'Mid-Morning Snack', calories: 400, protein: '25g', image: 'pages/img2.png', porsi:'1.0 Buah' },
-      { name: 'Lunch Portion', calories: 400, protein: '25g', image: 'pages/img3.png', porsi:'0.5 Piring' },
-      { name: 'Pre-Workout', calories: 300, protein: '15g', image: 'pages/img4.png', porsi:'1.0 Shake' },
-      { name: 'Dinner Light', calories: 400, protein: '20g', image: 'pages/img5.png', porsi:'0.5 Piring' }
-    ]
-  };
-
-  // Fungsi saat Dropdown berubah
+  // --- UI ACTIONS ---
   onDayChange(event: any) {
     const freq = parseInt(event.target.value);
     this.selectedFrequency = freq;
     this.updateRecommendation(freq);
   }
 
-  // Logic Update Data & Hitung Kalori
   updateRecommendation(freq: number) {
-    // 1. Ambil data dari Mock
-    this.displayedMeals = this.mlDatabaseMock[freq] || [];
-
-    // 2. Hitung Total Kalori (pake reduce biar keren & cepat)
+    this.displayedMeals = this.mealDatabase[freq] || [];
+    // Hitung total kalori dari meal yang ditampilkan
     this.currentTotalCalories = this.displayedMeals.reduce((sum, item) => sum + item.calories, 0);
   }
 
-  constructor() {}
-
-  ngOnInit(): void {
-    this.updateRecommendation(this.selectedFrequency);
-  }
-
-  // Logic ganti hari
   selectDay(index: number) {
     this.selectedDayIndex = index;
+  }
+
+  // --- UTILS ---
+  calculateBMI(w: number, h: number): number {
+    if (!h) return 0;
+    const heightM = h / 100;
+    return parseFloat((w / (heightM * heightM)).toFixed(1));
+  }
+
+  getBodyFatCategory(cat: number): string {
+    const categories = ['Essential Fat', 'Athletes', 'Fitness', 'Average', 'Obese'];
+    return categories[cat - 1] || 'Average';
+  }
+
+  getGoalDescription(goal: string): string {
+    if (goal === 'Muscle Gain') return 'Focus on hypertrophy and strength to build muscle mass.';
+    if (goal === 'Weight Loss') return 'High intensity cardio and deficit calories to burn fat.';
+    return 'Balanced workout to maintain health.';
   }
 }

@@ -36,14 +36,6 @@ export class ProfileSidebar {
     this.isSidebarOpen = false;
   }
 
-  openLogoutModal() {
-    this.showLogoutModal = true;
-  }
-
-  closeLogoutModal() {
-    this.showLogoutModal = false;
-  }
-
   confirmLogout() {
     this.authService.logout(); 
     this.closeSidebar();

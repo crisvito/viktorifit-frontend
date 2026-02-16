@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterModule } from '@angular/router';
 import { CalendarComponent } from '../../../shared/components';
+import { WorkoutHistoryService } from '../../../core';
 
 @Component({
   selector: 'app-schedule',
@@ -13,152 +14,119 @@ import { CalendarComponent } from '../../../shared/components';
 export class Schedule implements OnInit {
 
   isModeOpen = false;
-  selectedMode = 'Home';
-  isLogModalOpen = false;
-  
-  logForm = {
-    name: '',
-    description: '',
-    duration: ''
-  };
-
-  selectedActivityIndex: number = -1;
-
-  homeData: any[] = [];
-  gymData: any[] = [];
+  selectedMode: 'Home' | 'Gym' = 'Home';
+  currentDate: Date = new Date(); 
+  rawMLResult: any = null;
+  currentDayKey: string | null = null; 
+  userWorkoutDays: string[] = [];
   activities: any[] = [];
+  private currentUserId: number = 1;
+
+  constructor(private historyService: WorkoutHistoryService) {}
 
   ngOnInit() {
-    const storedHome = localStorage.getItem('viktorifit_home');
-    const storedGym = localStorage.getItem('viktorifit_gym');
-
-    if (storedHome) {
-      this.homeData = JSON.parse(storedHome);
-    } else {
-      this.homeData = this.getDefaultHomeData();
+    const mlData = localStorage.getItem('ml_result');
+    if (mlData) {
+      this.rawMLResult = JSON.parse(mlData);
+      const daysString = this.rawMLResult.userProfile?.workoutDays || "";
+      this.userWorkoutDays = daysString.split(',').map((d: string) => d.trim());
+      this.syncWithBackend();
     }
-
-    if (storedGym) {
-      this.gymData = JSON.parse(storedGym);
-    } else {
-      this.gymData = this.getDefaultGymData();
-    }
-
-    this.activities = this.homeData;
   }
 
+  syncWithBackend() {
+    const envKey = this.selectedMode.toLowerCase(); 
+    const workoutPlan = this.rawMLResult.workoutRecommendation?.[envKey]?.workout_plan || {};
+    const todayShort = new Date().toLocaleDateString('en-US', { weekday: 'short' });
+    const dayIndex = this.userWorkoutDays.indexOf(todayShort);
 
-  openLogModal(index: number) {
-    this.selectedActivityIndex = index;
-    const currentLogsCount = this.activities[index].logs ? this.activities[index].logs.length : 0;
-
-    this.logForm = {
-      name: `Log ${currentLogsCount + 1}`,
-      description: '',
-      duration: '' 
-    };
-    
-    this.isLogModalOpen = true;
-  }
-
-  closeLogModal() {
-    this.isLogModalOpen = false;
-  }
-
-  saveNewLog() {
-    if (this.selectedActivityIndex === -1) return;
-
-    const activity = this.activities[this.selectedActivityIndex];
-
-    if (!activity.logs) {
-      activity.logs = [];
+    if (dayIndex === -1) {
+      this.activities = [];
+      return;
     }
 
-    const inputDuration = parseInt(this.logForm.duration) || 0;
+    const targetDayNum = dayIndex + 1;
+    const allKeys = Object.keys(workoutPlan);
+    this.currentDayKey = allKeys.find(k => k.toLowerCase().includes(`day ${targetDayNum}`)) || null;
 
-    const newLogEntry = {
-      name: this.logForm.name,
-      description: this.logForm.description,
-      duration: `${inputDuration} mins`, 
-      durationValue: inputDuration,      
-      date: new Date()
-    };
+    if (this.currentDayKey && workoutPlan[this.currentDayKey]) {
+      const dailyPlan = workoutPlan[this.currentDayKey];
 
-    activity.logs.push(newLogEntry);
-    
-    const targetDuration = parseInt(activity.time) || 60; 
-    let totalLoggedDuration = 0;
-    activity.logs.forEach((log: any) => {
-        totalLoggedDuration += log.durationValue;
+      this.historyService.getHistory(this.currentUserId).subscribe(dbHistory => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        const todayDbData = dbHistory.filter(h => 
+          h.updatedAt.toString().startsWith(todayStr) && 
+          h.environment === this.selectedMode
+        );
+
+        dailyPlan.forEach((ex: any) => {
+          const isAlreadyInDb = todayDbData.find(h => h.title === ex.exercise_name);
+
+          if (!isAlreadyInDb) {
+            const payload = {
+              userId: this.currentUserId,
+              title: ex.exercise_name,
+              status: 'PENDING',
+              calories: `${ex.calories_burned} cal`,
+              totalTime: `${ex.duration_minutes + ex.rest_minutes} Min`,
+              sets: ex.sets,
+              reps: ex.reps,
+              environment: this.selectedMode
+            };
+            this.historyService.saveHistory(payload).subscribe();
+          }
+        });
+
+        this.loadActivitiesFromDB();
+      });
+    }
+  }
+
+  loadActivitiesFromDB() {
+    this.historyService.getHistory(this.currentUserId).subscribe(data => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      
+      this.activities = data
+        .filter(h => 
+          h.status === 'PENDING' && 
+          h.updatedAt.toString().startsWith(todayStr) && 
+          h.environment === this.selectedMode
+        )
+        .map(h => ({
+          id: h.id,
+          title: h.title,
+          calories: h.calories,
+          totalTime: h.totalTime,
+          sets: h.sets,
+          reps: h.reps,
+          environment: h.environment,
+          isFinished: false 
+        }));
     });
-
-    const calculatedProgress = (totalLoggedDuration / targetDuration) * 100;
-    activity.progress = Math.min(Math.round(calculatedProgress), 100);
-
-    if (this.selectedMode === 'Home') {
-      localStorage.setItem('viktorifit_home', JSON.stringify(this.homeData));
-    } else {
-      localStorage.setItem('viktorifit_gym', JSON.stringify(this.gymData));
-    }
-
-    this.closeLogModal();
   }
 
-  toggleMode() {
-    this.isModeOpen = !this.isModeOpen;
+  toggleActivityStatus(index: number) {
+    const activity = this.activities[index];
+
+    const payload = {
+      ...activity,
+      userId: this.currentUserId,
+      status: 'FINISHED'
+    };
+
+    this.historyService.saveHistory(payload).subscribe({
+      next: () => {
+        this.activities.splice(index, 1);
+      }
+    });
   }
 
-  setMode(mode: string) {
+  toggleMode() { this.isModeOpen = !this.isModeOpen; }
+  
+  setMode(mode: 'Home' | 'Gym') {
     this.selectedMode = mode;
     this.isModeOpen = false;
-    this.activities = (mode === 'Home') ? this.homeData : this.gymData;
-  }
-
-  currentDate: Date = new Date();
-
-  getDefaultHomeData() {
-    return [
-      {
-        title: 'Morning Yoga',
-        description: 'Relaxing yoga session to start your day with positive energy.',
-        tag: 'Flexibility',
-        time: '30 minutes', 
-        calories: '120 cal',
-        progress: 0,
-        logs: []
-      },
-      {
-        title: 'Dancing',
-        description: 'Fun cardio workout using dance moves to burn calories.',
-        tag: 'Cardio',
-        time: '45 minutes', 
-        calories: '300 cal',
-        progress: 0,
-        logs: []
-      }
-    ];
-  }
-
-  getDefaultGymData() {
-    return [
-      {
-        title: 'Bench Press',
-        description: 'Chest workout to build strength and muscle mass.',
-        tag: 'Strength',
-        time: '15 minutes', 
-        calories: '150 cal',
-        progress: 0,
-        logs: []
-      },
-      {
-        title: 'Treadmill Run',
-        description: 'High intensity interval running for cardiovascular health.',
-        tag: 'Cardio',
-        time: '30 minutes', 
-        calories: '400 cal',
-        progress: 0,
-        logs: []
-      }
-    ];
+    this.syncWithBackend();
   }
 }

@@ -1,3 +1,5 @@
 export * from './auth.service'
 export * from './faq.service'
 export * from './inquiry.service'
+export * from './history.service'
+export * from './exercise.service'
