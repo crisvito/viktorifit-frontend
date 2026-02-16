@@ -54,31 +54,51 @@ export class HomePage {
       title: 'Workout Calendar',
       description: 'Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam berolahraga.',
       iconType: 'calendar',
+<<<<<<< HEAD
       imagePlaceholder: '/assets/home/workout_calendar.png'
+=======
+      imagePlaceholder: '/pages/home/workout_calendar.png'
+>>>>>>> 9741e081527942c2b2a3db9cb1f62a8dcbb761b7
     },
     {
       title: 'Body Tracker',
       description: 'Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam berolahraga.',
       iconType: 'chart',
+<<<<<<< HEAD
       imagePlaceholder: '/assets/home/body_tracker.png'
+=======
+      imagePlaceholder: '/pages/home/body_tracker.png'
+>>>>>>> 9741e081527942c2b2a3db9cb1f62a8dcbb761b7
     },
     {
       title: 'Workout History',
       description: 'Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam berolahraga.',
       iconType: 'history',
+<<<<<<< HEAD
       imagePlaceholder: '/assets/home/workout_history.png'
+=======
+      imagePlaceholder: '/pages/home/workout_history.png'
+>>>>>>> 9741e081527942c2b2a3db9cb1f62a8dcbb761b7
     },
     {
       title: 'Tutorials',
       description: 'Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam berolahraga.',
       iconType: 'video',
+<<<<<<< HEAD
       imagePlaceholder: '/assets/home/workout_tutorials.png'
+=======
+      imagePlaceholder: '/pages/home/workout_tutorials.png'
+>>>>>>> 9741e081527942c2b2a3db9cb1f62a8dcbb761b7
     },
     {
       title: 'Recommendation',
       description: 'Kami menghadirkan 5 service utama yang akan membuat pengalaman terbaik mu dalam berolahraga.',
       iconType: 'bulb',
+<<<<<<< HEAD
       imagePlaceholder: '/assets/home/workout_recommendation.png'
+=======
+      imagePlaceholder: '/pages/home/workout_recommendation.png'
+>>>>>>> 9741e081527942c2b2a3db9cb1f62a8dcbb761b7
       }
     ];
 

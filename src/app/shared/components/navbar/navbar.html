@@ -1,4 +1,5 @@
 <nav class="fixed top-6 w-full z-50 px-4 md:px-20">
+<<<<<<< HEAD
   
   <div class="max-w-7xl mx-auto rounded-full p-4 flex items-center justify-between text-white relative transition-all duration-300 z-50"
        [ngClass]="isScrolled ? 'bg-black/45 backdrop-blur-md border border-[#626262]/75 shadow-lg' : 'bg-transparent border border-transparent'">
@@ -24,10 +25,57 @@
       <a routerLink="/support" 
         class="text-sm hover:text-(--main-color) transition-colors"
         routerLinkActive="text-(--main-color) border-b-2 border-(--main-color)">
+=======
+  <div
+    class="max-w-7xl mx-auto rounded-full p-4 flex items-center justify-between text-white relative transition-all duration-300 z-50"
+    [ngClass]="
+      isScrolled
+        ? 'bg-black/45 backdrop-blur-md border border-[#626262]/75 shadow-lg'
+        : 'bg-transparent border border-transparent'
+    "
+  >
+    <!-- LOGO -->
+    <a
+      routerLink="/"
+      class="text-xl font-poppins font-semibold italic tracking-wider uppercase transition-colors hover:text-(--main-color)"
+    >
+      <img src="/global/logo/Viktorifit_Green.svg" alt="Viktorifit-Logo" class="h-6" />
+    </a>
+
+    <!-- DESKTOP MENU -->
+    <div class="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2 font-poppins">
+      <a
+        routerLink="/"
+        routerLinkActive="text-(--main-color) border-b-2 border-(--main-color)"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="text-sm hover:text-(--main-color)"
+      >
+        Home
+      </a>
+
+      <!-- Suggestion (GUEST ONLY) -->
+      <a
+        *ngIf="!authService.isLoggedIn()"
+        routerLink="/suggestion-intro"
+        routerLinkActive="text-(--main-color) border-b-2 border-(--main-color)"
+        class="text-sm hover:text-(--main-color)"
+      >
+        Suggestion
+      </a>
+
+      <!-- Support (GUEST AND USER ONLY) -->
+      <a
+        *ngIf="!authService.isAdmin()"
+        routerLink="/support"
+        routerLinkActive="text-(--main-color) border-b-2 border-(--main-color)"
+        class="text-sm hover:text-(--main-color)"
+      >
+>>>>>>> 9741e081527942c2b2a3db9cb1f62a8dcbb761b7
         Support
       </a>
     </div>
 
+<<<<<<< HEAD
     <div class="hidden md:block">
       <a routerLink="/login" class="bg-(--main-color) text-black text-sm font-semibold px-8 py-2 rounded-full hover:bg-black hover:text-white transition-all duration-300">Login</a>
     </div>
@@ -54,6 +102,117 @@
         <a (click)="toggleMenu()" routerLink="/support" class="text-lg text-white hover:text-(--main-color)">Support</a>
         <div class="w-full h-[1px] bg-gray-700"></div>
         <a (click)="toggleMenu()" routerLink="/login" class="w-full text-center bg-(--main-color) text-black text-lg font-bold py-3 rounded-full hover:bg-white transition-all duration-300">Login</a>
+=======
+    <!-- RIGHT BUTTON DESKTOP -->
+    <div class="hidden md:block">
+      <!-- GUEST -->
+      <a
+        *ngIf="!authService.isLoggedIn()"
+        routerLink="/login"
+        class="bg-(--main-color) text-black text-sm font-semibold px-8 py-2 rounded-full hover:bg-black hover:text-white transition-all"
+      >
+        Login
+      </a>
+
+      <!-- USER -->
+      <a
+        *ngIf="authService.isUser()"
+        routerLink="/dashboard"
+        class="bg-(--main-color) text-black text-sm font-semibold px-8 py-2 rounded-full hover:bg-black hover:text-white transition-all"
+      >
+        Dashboard
+      </a>
+
+      <!-- ADMIN -->
+      <a
+        *ngIf="authService.isAdmin()"
+        routerLink="/admin"
+        class="bg-red-500 text-white text-sm font-semibold px-8 py-2 rounded-full hover:bg-red-600 transition-all"
+      >
+        Admin
+      </a>
+    </div>
+
+    <!-- MOBILE TOGGLE -->
+    <button
+      aria-label="toggle"
+      (click)="toggleMenu()"
+      class="md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5"
+    >
+      <div
+        class="w-6 h-0.5 bg-white rounded-full transition-all"
+        [class.rotate-45]="isMenuOpen"
+        [class.translate-y-2]="isMenuOpen"
+      ></div>
+      <div
+        class="w-6 h-0.5 bg-white rounded-full transition-all"
+        [class.opacity-0]="isMenuOpen"
+      ></div>
+      <div
+        class="w-6 h-0.5 bg-white rounded-full transition-all"
+        [class.-rotate-45]="isMenuOpen"
+        [class.-translate-y-2]="isMenuOpen"
+      ></div>
+    </button>
+  </div>
+
+  <!-- MOBILE MENU -->
+  <div
+    class="md:hidden w-full overflow-hidden transition-all duration-200"
+    [class.max-h-0]="!isMenuOpen"
+    [class.opacity-0]="!isMenuOpen"
+    [class.max-h-[500px]]="isMenuOpen"
+    [class.opacity-100]="isMenuOpen"
+    [class.mt-2]="isMenuOpen"
+  >
+    <div class="bg-black/60 backdrop-blur-xl border border-[#626262]/75 shadow-2xl rounded-3xl p-6">
+      <div class="flex flex-col items-center gap-6 font-poppins">
+        <a (click)="toggleMenu()" routerLink="/" class="text-lg text-white"> Home </a>
+
+        <!-- Suggestion (GUEST ONLY) -->
+        <a
+          *ngIf="!authService.isLoggedIn()"
+          (click)="toggleMenu()"
+          routerLink="/suggestion-intro"
+          class="text-lg text-white"
+        >
+          Suggestion
+        </a>
+
+        <a (click)="toggleMenu()" routerLink="/support" class="text-lg text-white"> Support </a>
+
+        <div class="w-full h-px bg-gray-700"></div>
+
+        <!-- GUEST -->
+        <a
+          *ngIf="!authService.isLoggedIn()"
+          (click)="toggleMenu()"
+          routerLink="/login"
+          class="w-full text-center bg-(--main-color) text-black text-lg font-bold py-3 rounded-full"
+        >
+          Login
+        </a>
+
+        <!-- USER -->
+        <a
+          *ngIf="authService.isUser()"
+          (click)="toggleMenu()"
+          routerLink="/dashboard"
+          class="w-full text-center bg-(--main-color) text-black text-lg font-bold py-3 rounded-full"
+        >
+          Dashboard
+        </a>
+
+        <!-- ADMIN -->
+        <a
+          *ngIf="authService.isAdmin()"
+          (click)="toggleMenu()"
+          routerLink="/admin"
+          class="w-full text-center bg-red-500 text-white text-lg font-bold py-3 rounded-full"
+        >
+          Admin Panel
+        </a>
+>>>>>>> 9741e081527942c2b2a3db9cb1f62a8dcbb761b7
       </div>
     </div>
     

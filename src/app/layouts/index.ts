@@ -1,2 +1,5 @@
 export * from "./blank-layout/blank-layout"
 export * from "./main-layout/main-layout"
+export * from "./dashboard-layout/dashboard-layout"
+export * from "./profile-layout/profile-layout"
+export * from "./admin-layout/admin-layout"

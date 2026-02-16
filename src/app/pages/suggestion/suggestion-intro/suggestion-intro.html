@@ -1,0 +1,27 @@
+<section
+  class="relative h-[110vh] w-full bg-black overflow-hidden px-20 flex items-center justify-center"
+>
+  <div class="absolute right-0 top-0 h-full">
+    <img
+      src="pages/recommendation/RecommendationFirst.png"
+      alt="Banner"
+      class="w-full h-full object-cover"
+    />
+    <div class="absolute inset-0 bg-linear-to-t from-black via-black/80 to-transparent"></div>
+  </div>
+
+  <div class="h-fit container relative z-10 justify-items-center">
+    <div class="max-w-4/5 text-center">
+      <h1 class="text-(--main-color) text-[72px] leading-[110px] font-bold mb-4 italic">
+        GET YOUR WORKOUT!
+      </h1>
+      <p class="text-slate-300 w-2/3 mx-auto text-[20px] leading-[25px]">
+        Hanya dalam waktu 10 menit, dapatkan penjelasan “yang begitu akurat“ tentang diri Anda dan
+        alasan yang mendasari cara Anda dalam bertindak.
+      </p>
+      <app-button ariaLabel="Klik untuk memulai pendaftaran" (click)="startOnboarding()">
+        Try Now
+      </app-button>
+    </div>
+  </div>
+</section>

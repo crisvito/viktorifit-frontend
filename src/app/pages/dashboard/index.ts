@@ -1,0 +1,7 @@
+export * from "./main-dashboard/main-dashboard"
+export * from "./schedule/schedule"
+export * from "./workout-detail/workout-detail"
+export * from "./workout-lists/workout-lists"
+export * from "./history/history"
+export * from "./statistic/statistic"
+export * from "./recommendation/recommendation"

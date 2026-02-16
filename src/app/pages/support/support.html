@@ -1,0 +1,147 @@
+<section class="hero-section">
+  <h1 class="hero-title">HOW CAN WE HELP?</h1>
+
+  <div class="search-container">
+    <img src="/pages/support/search-icon.svg" alt="Search" class="search-icon" />
+    <input
+      type="text"
+      placeholder="Search Question"
+      class="search-input"
+      (input)="searchFAQ($event)"
+    />
+    <button class="search-button">Search</button>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+  <h2 class="section-title">Frequently Asked Question</h2>
+
+  <div class="faq-container">
+    <div *ngIf="isLoading" class="text-center py-5">
+      <p>Loading questions...</p>
+    </div>
+    <div
+      *ngFor="let item of faqs; let i = index"
+      class="faq-item"
+      [class.active]="activeIndex === i"
+    >
+      <div class="faq-question" (click)="toggle(i)">
+        <span>{{ item.question }}</span>
+        <span class="faq-toggle" [class.active-icon]="activeIndex === i">+</span>
+      </div>
+
+      <div class="faq-answer">
+        <p>{{ item.answer }}</p>
+      </div>
+    </div>
+    <div *ngIf="!isLoading && faqs.length === 0" class="text-center py-10">
+      <p class="text-gray-400">No FAQ found.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section class="contact-section">
+  <div class="contact-card">
+    <div class="contact-content">
+      <div class="contact-info">
+        <p class="help-text">We're here to help you!</p>
+        <h2 class="discuss-title">
+          LETS DISCUSS<br />
+          <span class="text-white">Your Problem's<br />Solution Now!</span>
+        </h2>
+        <p class="contact-desc">
+          Hello! If you still have any question or problem you can tell us here, or contact us to
+          our social media. Thank you!
+        </p>
+        <div class="email-info">
+          <img src="/pages/support/Inbox.svg" alt="Email" class="icon-img" />
+          viktorifit@gmail.com
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <div class="form-card">
+          <form (ngSubmit)="submitForm(contactForm)" #contactForm="ngForm">
+            <div class="form-group">
+              <label for="name" class="input-label">Name</label>
+              <div class="input-card">
+                <input
+                  type="text"
+                  id="name"
+                  placeholder="e.g John Green"
+                  class="textbox-input"
+                  [(ngModel)]="contactData.name"
+                  name="name"
+                  #nameInput="ngModel"
+                  required
+                />
+              </div>
+              <div
+                class="error-message"
+                *ngIf="nameInput.invalid && (nameInput.touched || contactForm.submitted)"
+              >
+                This field is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email" class="input-label">Email</label>
+              <div class="input-card">
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="e.g johngreen@gmail.com"
+                  class="textbox-input"
+                  [(ngModel)]="contactData.email"
+                  name="email"
+                  #emailInput="ngModel"
+                  required
+                  email
+                />
+              </div>
+              <div
+                class="error-message"
+                *ngIf="emailInput.invalid && (emailInput.touched || contactForm.submitted)"
+              >
+                <span *ngIf="emailInput.errors?.['required']">This field is required</span>
+                <span *ngIf="emailInput.errors?.['email']">Please enter a valid email address</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="description" class="input-label">Description</label>
+              <div class="input-card">
+                <textarea
+                  id="description"
+                  rows="4"
+                  placeholder="Write your question or problem here..."
+                  class="textbox-input"
+                  [(ngModel)]="contactData.description"
+                  name="description"
+                  #descInput="ngModel"
+                  required
+                  maxlength="200"
+                ></textarea>
+              </div>
+              <div class="flex flex-row-reverse justify-between items-center">
+                <div class="char-count">{{ contactData.description.length }}/200</div>
+                <div
+                  class="error-message"
+                  *ngIf="descInput.invalid && (descInput.touched || contactForm.submitted)"
+                >
+                  This field is required
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="send-btn">
+              <img src="/pages/support/Send.svg" alt="Send" class="icon-img-btn" /> Send
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

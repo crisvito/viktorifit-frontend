@@ -1,0 +1,323 @@
+<div
+  (click)="closeAllDropdowns()"
+  class="font-poppins w-full min-h-screen pb-10 pt-24 md:pt-10 px-4 md:px-8 max-w-7xl mx-auto transition-all duration-300"
+>
+  <div class="sticky top-0 z-40 bg-[#F5F5F5] pt-10 pb-4">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <p class="text-xs md:text-sm text-gray-400 font-medium mb-1">
+          Admin / <span class="text-black font-semibold">Feedback</span>
+        </p>
+        <h1 class="text-2xl md:text-3xl font-bold text-black">Feedback</h1>
+      </div>
+
+      <div class="relative">
+        <button
+          (click)="toggleProfile(); $event.stopPropagation()"
+          class="flex items-center gap-3 focus:outline-none hover:bg-gray-100 p-2 rounded-lg transition cursor-pointer"
+        >
+          <div
+            class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#AFFA01] flex items-center justify-center overflow-hidden border border-gray-200"
+          >
+            <img
+              src="/pages/admin/person.svg"
+              alt="Admin"
+              class="w-[90%] h-[90%] translate-y-1/10 object-cover"
+            />
+          </div>
+          <div class="text-left hidden md:block">
+            <p class="font-semibold text-gray-700 text-sm">Admin</p>
+            <p class="text-xs text-gray-400">Administrator</p>
+          </div>
+        </button>
+
+        <div
+          *ngIf="isProfileOpen"
+          class="absolute right-0 mt-2 w-48 bg-white rounded-[9px] shadow-lg border border-gray-100 py-2 z-50 animate-fade-in-down"
+          (click)="$event.stopPropagation()"
+        >
+          <button
+            (click)="openLogoutModal()"
+            class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition text-left cursor-pointer"
+          >
+            <img src="/pages/admin/log-out.svg" class="w-4 h-4 opacity-60" /> Log Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bg-white rounded-[9px] shadow-sm border border-gray-100 p-5 md:p-8 min-h-[500px] relative z-10"
+  >
+    <div class="flex flex-col md:flex-row justify-end items-center mb-6 gap-4">
+      <div
+        class="flex w-full md:w-auto bg-[#F5F5F5] rounded-lg overflow-hidden border border-gray-200 focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all"
+      >
+        <span class="flex items-center justify-center pl-4 text-gray-400">
+          <img src="/pages/admin/search.svg" class="w-4 h-4 opacity-50" />
+        </span>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          placeholder="Search Feedback"
+          class="bg-transparent border-none outline-none px-4 py-2.5 text-sm w-full md:w-64 placeholder:text-gray-400"
+        />
+        <button
+          class="bg-black text-white px-6 py-2.5 text-sm font-medium hover:bg-gray-800 transition"
+        >
+          Search
+        </button>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto rounded-lg border border-gray-100 pb-2 md:pb-0">
+      <table class="w-full text-left border-collapse min-w-[800px]">
+        <thead>
+          <tr class="bg-white text-black font-semibold border-b border-gray-200 text-sm">
+            <th class="py-3 px-4 w-[20%]">User</th>
+            <th class="py-3 px-4 w-[25%]">Email</th>
+            <th class="py-3 px-4 w-[40%]">Feedback Message</th>
+            <th class="py-3 px-4 w-[15%] text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm text-gray-600">
+          <tr
+            *ngFor="let item of filteredData; let i = index"
+            (click)="viewFeedback(item)"
+            class="border-b border-gray-100 transition cursor-pointer bg-white hover:bg-gray-50 even:bg-[#F4F4F4] even:hover:bg-gray-200 relative group"
+          >
+            <td class="py-3 px-4 align-middle font-medium text-gray-800">
+              {{ item.user }}
+            </td>
+            <td class="py-3 px-4 align-middle text-gray-500">
+              {{ item.email }}
+            </td>
+
+            <td class="py-3 px-4 align-middle">
+              <div class="truncate max-w-50 md:max-w-87.5 text-gray-600" title="{{ item.message }}">
+                {{ item.message }}
+              </div>
+            </td>
+
+            <td
+              class="py-3 px-4 align-middle text-center relative"
+              (click)="$event.stopPropagation()"
+            >
+              <div class="relative inline-block text-left">
+                <button
+                  (click)="toggleStatusDropdown(i, $event)"
+                  type="button"
+                  class="px-3 py-1.5 rounded-sm text-white font-semibold text-[11px] uppercase shadow-sm transition w-27.5 flex items-center justify-between"
+                  [ngClass]="{
+                    'bg-[#8AC500] hover:bg-[#79AD00]': item.status === 'Resolved',
+                    'bg-[#D32F2F] hover:bg-[#B71C1C]': item.status === 'In Progress',
+                    'bg-gray-400 hover:bg-gray-500': item.status === 'Pending',
+                    'bg-gray-600 hover:bg-gray-700': item.status === 'Dismiss',
+                  }"
+                >
+                  <span class="flex-1 text-center truncate">{{ item.status }}</span>
+                  <img src="/pages/admin/dropdown.svg" alt="dropdown" class="w-2 h-2" />
+                </button>
+
+                <div
+                  *ngIf="openDropdownIndex === i"
+                  class="absolute right-0 mt-1 w-36 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-xl ring-1 ring-black ring-opacity-5 z-50 animate-fade-in"
+                >
+                  <div class="py-1">
+                    <button
+                      (click)="updateStatus(item, 'Resolved')"
+                      class="group flex w-full items-center px-4 py-2 text-xs text-gray-700 hover:bg-[#8AC500] hover:text-white transition"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full bg-[#8AC500] mr-2 group-hover:bg-white"
+                      ></span>
+                      Resolved
+                    </button>
+                    <button
+                      (click)="updateStatus(item, 'In Progress')"
+                      class="group flex w-full items-center px-4 py-2 text-xs text-gray-700 hover:bg-[#D32F2F] hover:text-white transition"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full bg-[#D32F2F] mr-2 group-hover:bg-white"
+                      ></span>
+                      In Progress
+                    </button>
+                    <button
+                      (click)="updateStatus(item, 'Pending')"
+                      class="group flex w-full items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-400 hover:text-white transition"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full bg-gray-400 mr-2 group-hover:bg-white"
+                      ></span>
+                      Pending
+                    </button>
+                    <button
+                      (click)="updateStatus(item, 'Dismiss')"
+                      class="group flex w-full items-center px-4 py-2 text-xs text-gray-700 hover:bg-gray-600 hover:text-white transition"
+                    >
+                      <span
+                        class="w-2 h-2 rounded-full bg-gray-600 mr-2 group-hover:bg-white"
+                      ></span>
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredData.length === 0">
+            <td colspan="4" class="text-center py-10 text-gray-400 italic bg-[#FAFAFA]">
+              No Feedback found matching "{{ searchText }}"
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center gap-2 mt-6">
+      <button
+        (click)="setRows(5)"
+        [class]="
+          rowsDisplay === 5
+            ? 'w-8 h-8 border border-black bg-black text-white rounded text-sm font-medium shadow-md'
+            : 'w-8 h-8 border border-gray-300 rounded text-gray-500 text-sm hover:bg-gray-100 hover:text-black transition'
+        "
+      >
+        5
+      </button>
+      <button
+        (click)="setRows(10)"
+        [class]="
+          rowsDisplay === 10
+            ? 'w-8 h-8 border border-black bg-black text-white rounded text-sm font-medium shadow-md'
+            : 'w-8 h-8 border border-gray-300 rounded text-gray-500 text-sm hover:bg-gray-100 hover:text-black transition'
+        "
+      >
+        10
+      </button>
+      <button
+        aria-label="close model"
+        (click)="setRows('All')"
+        [class]="
+          rowsDisplay === 'All'
+            ? 'px-3 h-8 border border-black bg-black text-white rounded text-sm font-medium shadow-md'
+            : 'px-3 h-8 border border-gray-300 rounded text-gray-500 text-sm hover:bg-gray-100 hover:text-black transition'
+        "
+      >
+        All...
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="isViewModalOpen && selectedFeedback"
+    class="fixed inset-0 z-60 flex items-center justify-center px-4 animate-fade-in"
+  >
+    <div
+      (click)="closeViewModal()"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+    ></div>
+    <div
+      class="bg-white rounded-[9px] w-full max-w-[500px] shadow-2xl transform transition-all scale-100 relative z-10 overflow-hidden"
+    >
+      <div class="bg-black px-8 py-5 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-white tracking-wide">Feedback Details</h3>
+        <button
+          aria-label="close model"
+          (click)="closeViewModal()"
+          class="text-white/60 hover:text-white transition bg-white/10 rounded-full p-1 cursor-pointer"
+        >
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="p-8 space-y-6">
+        <div class="flex items-center gap-4 border-b border-gray-100 pb-4">
+          <div
+            class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-lg"
+          >
+            {{ selectedFeedback.user.charAt(0) }}
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-gray-900 leading-none">
+              {{ selectedFeedback.user }}
+            </h4>
+            <p class="text-sm text-gray-500 mt-1 break-all">{{ selectedFeedback.email }}</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Message</p>
+          <div
+            class="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-gray-50 p-4 rounded-lg border border-gray-100 max-h-[300px] overflow-y-auto"
+          >
+            {{ selectedFeedback.message }}
+          </div>
+        </div>
+        <div class="flex justify-between items-center">
+          <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Current Status</p>
+          <span
+            class="px-3 py-1 rounded text-xs font-bold uppercase text-white"
+            [ngClass]="{
+              'bg-[#8AC500]': selectedFeedback.status === 'Resolved',
+              'bg-[#D32F2F]': selectedFeedback.status === 'In Progress',
+              'bg-gray-400': selectedFeedback.status === 'Pending',
+              'bg-gray-600': selectedFeedback.status === 'Dismiss',
+            }"
+          >
+            {{ selectedFeedback.status }}
+          </span>
+        </div>
+        <div class="pt-2">
+          <button
+            (click)="closeViewModal()"
+            class="w-full py-3 bg-[#F5F5F5] border-2 border-transparent rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-200 transition cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="isLogoutModalOpen"
+  class="fixed inset-0 z-60 flex items-center justify-center px-4 animate-fade-in"
+>
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-black/85 backdrop-blur-sm" (click)="closeLogoutModal()"></div>
+
+  <!-- Modal -->
+  <div class="bg-white rounded-xl w-full max-w-[400px] shadow-2xl relative z-10 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h3 class="text-lg font-bold text-gray-900">Confirm Logout</h3>
+    </div>
+
+    <div class="px-6 py-6 text-sm text-gray-600">
+      Are you sure you want to log out from the admin panel?
+    </div>
+
+    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+      <button
+        (click)="closeLogoutModal()"
+        class="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
+      >
+        Cancel
+      </button>
+
+      <button
+        (click)="confirmLogout()"
+        class="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 transition font-semibold"
+      >
+        Log Out
+      </button>
+    </div>
+  </div>
+</div>
