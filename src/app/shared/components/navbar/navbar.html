@@ -1,6 +1,6 @@
 <nav class="fixed top-6 w-full z-50 px-4 md:px-20">
   <div
-    class="max-w-7xl mx-auto rounded-full p-4 flex items-center justify-between text-white relative transition-all duration-300 z-50"
+    class="max-w-7xl mx-auto rounded-full p-3 md:p-4 flex items-center justify-between text-white relative transition-all duration-300 z-50"
     [ngClass]="
       isScrolled
         ? 'bg-black/45 backdrop-blur-md border border-[#626262]/75 shadow-lg'
@@ -53,7 +53,7 @@
       <a
         *ngIf="!authService.isLoggedIn()"
         routerLink="/login"
-        class="bg-(--main-color) text-black text-sm font-semibold px-8 py-2 rounded-full hover:bg-black hover:text-white transition-all"
+        class="bg-(--main-color) text-black text-sm font-semibold px-8 py-2 rounded-full border border-transparent hover:bg-black hover:border-[#C3F74A] hover:text-[#C3F74A] transition-all"
       >
         Login
       </a>

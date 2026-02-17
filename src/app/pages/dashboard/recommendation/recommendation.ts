@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BmiCardComponent } from '../../../shared/components';
 import { FormsModule } from '@angular/forms';
+import { ExerciseService } from '../../../core'; // Import Service
 
 // --- INTERFACE DEFINITIONS ---
 export interface Exercise {
@@ -29,7 +30,6 @@ export interface WorkoutSchedule {
   };
 }
 
-// Interface untuk Meal sesuai tampilan UI
 export interface Meal {
   name: string;
   porsi: string; 
@@ -46,7 +46,7 @@ export interface Meal {
   standalone: true,
   imports: [CommonModule, BmiCardComponent, FormsModule],
   templateUrl: './recommendation.html',
-  styleUrl: './recommendation.css', // Pastikan file css ada atau hapus baris ini
+  styleUrl: './recommendation.css',
 })
 export class RecommendationPage implements OnInit {
 
@@ -65,20 +65,29 @@ export class RecommendationPage implements OnInit {
   displayedMeals: Meal[] = [];   
   currentTotalCalories: number = 0;
   
-  // Data Meal Lengkap dari ML
   mealDatabase: Record<number, Meal[]> = {};
 
-  constructor() {}
+  // Cache untuk Master Data Exercise (biar gak bolak balik request)
+  private masterExercises: any[] = [];
+
+  constructor(private exerciseService: ExerciseService) {} // Inject Service
 
   ngOnInit(): void {
-    this.loadMLData();
+    // Panggil Master Data dulu, baru load ML Data
+    this.exerciseService.getAllExercises().subscribe({
+      next: (exercises) => {
+        this.masterExercises = exercises;
+        this.loadMLData(); // Load data setelah master data siap
+      },
+      error: (err) => {
+        console.error('Gagal load master exercise, gambar mungkin tidak muncul', err);
+        this.loadMLData(); // Tetap load data meski tanpa gambar
+      }
+    });
   }
 
 
   getBodyFatInfo(catId: number, gender: string) {
-    // Tentukan prefix gambar berdasarkan gender (cowok/cewek beda gambar biasanya)
-    // Kalau di aset kamu cuma ada satu jenis, hapus bagian prefix ini.
-    // Asumsi: gender 'male' -> 'm-', 'female' -> 'f-' (sesuaikan dengan nama file kamu)
     const prefix = gender.toLowerCase() === 'female' ? 'female' : 'male'; 
     
     switch(catId) {
@@ -107,8 +116,6 @@ export class RecommendationPage implements OnInit {
       const profile = parsed.userProfile || {};
       const workoutHome = parsed.workoutRecommendation?.home?.workout_plan || {};
       const workoutGym = parsed.workoutRecommendation?.gym?.workout_plan || {};
-      
-      // Ambil bagian mealRecommendation
       const mealRecs = parsed.mealRecommendation || {};
 
       const bodyFatInfo = this.getBodyFatInfo(profile.bodyFatCategory, profile.gender);
@@ -121,7 +128,7 @@ export class RecommendationPage implements OnInit {
         bmi: this.calculateBMI(profile.weight, profile.height),
         bodyFat: {
           percentage: `${profile.bodyFatPercentage}%`,
-          category: this.getBodyFatCategory(profile.bodyFatCategory),
+          category: bodyFatInfo.label, 
           image: bodyFatInfo.image, 
         },
         gender: profile.gender,
@@ -134,13 +141,13 @@ export class RecommendationPage implements OnInit {
         freq: profile.frequency
       };
 
-      // B. MAP USER TARGET (Progress Week 12)
+      // B. MAP USER TARGET
       const roadmap = parsed.progressRecommendation?.roadmap || [];
       const finalWeek = roadmap.length > 0 ? roadmap[roadmap.length - 1] : null;
       
       this.userTarget = {
         weightTarget: finalWeek?.physical?.weight_kg || profile.weight, 
-        bodyFatTarget: 18 // Default
+        bodyFatTarget: 18 
       };
 
       this.userRoutine = {
@@ -160,21 +167,20 @@ export class RecommendationPage implements OnInit {
           day: index + 1,
           title: dayKey, 
           env: {
+            // Panggil fungsi mapWorkoutDetails yang sudah diupdate
             home: this.mapWorkoutDetails(workoutHome[dayKey]),
             gym: this.mapWorkoutDetails(workoutGym[gymKey])
           }
         };
       });
 
-      // D. MAP MEAL RECOMMENDATION (PERBAIKAN DISINI)
-      // Perhatikan key akses: mealRecs.freqX.meal_plan
+      // D. MAP MEAL RECOMMENDATION
       this.mealDatabase[2] = this.mapMeals(mealRecs.freq2?.meal_plan);
       this.mealDatabase[3] = this.mapMeals(mealRecs.freq3?.meal_plan);
       this.mealDatabase[4] = this.mapMeals(mealRecs.freq4?.meal_plan);
       this.mealDatabase[5] = this.mapMeals(mealRecs.freq5?.meal_plan);
 
-      // Set Default Meal View
-      this.selectedFrequency = 3; // Default
+      this.selectedFrequency = 3; 
       this.updateRecommendation(this.selectedFrequency);
 
     } catch (e) {
@@ -182,7 +188,7 @@ export class RecommendationPage implements OnInit {
     }
   }
 
-  // --- HELPER MAPPING WORKOUT ---
+  // --- HELPER MAPPING WORKOUT (UPDATED WITH IMAGE MATCHING) ---
   mapWorkoutDetails(exercises: any[]): WorkoutDetails {
     if (!exercises) return { totalCalories: 0, equipment: [], exercises: [] };
 
@@ -191,38 +197,53 @@ export class RecommendationPage implements OnInit {
     const allEquip = exercises.map(e => e.equipment).join(',').split(',');
     const uniqueEquip = [...new Set(allEquip.map(s => s.trim()))].filter(s => s && s !== 'None');
 
-    // Total Duration = duration + rest
     const totalDur = exercises.reduce((acc, curr) => acc + (Number(curr.duration_minutes) || 0) + (Number(curr.rest_minutes) || 0), 0);
 
     return {
       totalDuration: `${totalDur} Min`,
       totalCalories: totalCals,
       equipment: uniqueEquip.slice(0, 3), 
-      exercises: exercises.map(ex => ({
-        name: ex.exercise_name,
-        muscle: ex.muscle_group,
-        sets: ex.sets,
-        reps: String(ex.reps),
-        cals: ex.calories_burned,
-        image: '' 
-      }))
+      exercises: exercises.map(ex => {
+        
+        // --- LOGIKA PENCOCOKAN GAMBAR ---
+        // Cari latihan di masterExercises yang namanya mirip dengan ex.exercise_name dari ML
+        const matchedExercise = this.masterExercises.find(master => 
+          master.name.toLowerCase().trim() === ex.exercise_name.toLowerCase().trim()
+        );
+
+        // Jika ketemu, ambil ID-nya untuk bikin URL Cloudinary. 
+        // Jika tidak, pakai ID dari ML (fallback) atau gambar placeholder
+        const realId = matchedExercise ? matchedExercise.id : ex.exerciseId;
+        const imageUrl = realId 
+          ? `https://res.cloudinary.com/dmhzqtzrr/image/upload/${realId}.gif`
+          : 'assets/images/placeholder_exercise.png'; // Ganti dengan path placeholder kamu
+
+        return {
+          name: ex.exercise_name,
+          muscle: ex.muscle_group,
+          sets: ex.sets,
+          reps: String(ex.reps),
+          cals: ex.calories_burned,
+          image: imageUrl // Masukkan URL hasil pencocokan
+        };
+      })
     };
   }
 
-  // --- HELPER MAPPING MEAL (PERBAIKAN DISINI) ---
+  // --- HELPER MAPPING MEAL ---
   mapMeals(mealsData: any[]): Meal[] {
     if (!mealsData || !Array.isArray(mealsData)) return [];
     
     const dummyImages = ['pages/steak.png', 'pages/salmon.png', 'pages/chicken.png', 'pages/oatmeal.png', 'pages/fish.png'];
     
     return mealsData.map((m, i) => ({
-      name: m.menu_name, // Backend: menu_name -> UI: name
-      porsi: `${m.portion} Portion`, // Backend: portion (number) -> UI: porsi (string)
-      calories: Math.round(Number(m.calories)), // Bulatkan kalori
+      name: m.menu_name, 
+      porsi: `${m.portion} Portion`, 
+      calories: Math.round(Number(m.calories)), 
       protein: `${Math.round(Number(m.protein))}g`,
       carbs: `${Math.round(Number(m.carbs))}g`,
       fat: `${Math.round(Number(m.fat))}g`,
-      items: [], // Backend tidak kirim ingredients, set kosong
+      items: [], 
       image: dummyImages[i % dummyImages.length] 
     }));
   }
@@ -236,7 +257,6 @@ export class RecommendationPage implements OnInit {
 
   updateRecommendation(freq: number) {
     this.displayedMeals = this.mealDatabase[freq] || [];
-    // Hitung total kalori dari meal yang ditampilkan
     this.currentTotalCalories = this.displayedMeals.reduce((sum, item) => sum + item.calories, 0);
   }
 

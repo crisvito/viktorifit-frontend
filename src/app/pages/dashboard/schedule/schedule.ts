@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterModule } from '@angular/router';
 import { CalendarComponent } from '../../../shared/components';
-import { WorkoutHistoryService } from '../../../core';
+import { WorkoutHistoryService, ExerciseService } from '../../../core'; // Tambahkan ExerciseService
 
 @Component({
   selector: 'app-schedule',
@@ -22,9 +22,33 @@ export class Schedule implements OnInit {
   activities: any[] = [];
   private currentUserId: number = 1;
 
-  constructor(private historyService: WorkoutHistoryService) {}
+  // Variabel untuk menyimpan "Kamus" latihan
+  private masterExercises: any[] = [];
+
+  constructor(
+    private historyService: WorkoutHistoryService,
+    private exerciseService: ExerciseService // Inject Service
+  ) {}
 
   ngOnInit() {
+    // 1. Load Master Data Exercise Dulu
+    this.exerciseService.getAllExercises().subscribe({
+      next: (exercises) => {
+        this.masterExercises = exercises;
+        
+        // 2. Setelah master data siap, baru jalankan logic schedule
+        this.initScheduleData();
+      },
+      error: (err) => {
+        console.error('Gagal load master exercise', err);
+        // Tetap jalan meski tanpa gambar
+        this.initScheduleData();
+      }
+    });
+  }
+
+  // Logic init dipisah biar rapi
+  initScheduleData() {
     const mlData = localStorage.getItem('ml_result');
     if (mlData) {
       this.rawMLResult = JSON.parse(mlData);
@@ -61,7 +85,10 @@ export class Schedule implements OnInit {
         );
 
         dailyPlan.forEach((ex: any) => {
-          const isAlreadyInDb = todayDbData.find(h => h.title === ex.exercise_name);
+          // Pencocokan nama harus hati-hati (trim & lowercase)
+          const isAlreadyInDb = todayDbData.find(h => 
+            h.title.toLowerCase().trim() === ex.exercise_name.toLowerCase().trim()
+          );
 
           if (!isAlreadyInDb) {
             const payload = {
@@ -78,6 +105,7 @@ export class Schedule implements OnInit {
           }
         });
 
+        // Load data terbaru untuk ditampilkan
         this.loadActivitiesFromDB();
       });
     }
@@ -93,26 +121,50 @@ export class Schedule implements OnInit {
           h.updatedAt.toString().startsWith(todayStr) && 
           h.environment === this.selectedMode
         )
-        .map(h => ({
-          id: h.id,
-          title: h.title,
-          calories: h.calories,
-          totalTime: h.totalTime,
-          sets: h.sets,
-          reps: h.reps,
-          environment: h.environment,
-          isFinished: false 
-        }));
+        .map(h => {
+          // --- LOGIC MENCARI EXERCISE ID ---
+          // Cari latihan di masterExercises yang namanya sama dengan history title
+          const matchedExercise = this.masterExercises.find(m => 
+            m.name.toLowerCase().trim() === h.title.toLowerCase().trim()
+          );
+
+          // Ambil ID Exercise (bukan ID History)
+          // Jika ketemu pakai ID master, jika tidak null/string kosong
+          const exerciseId = matchedExercise ? matchedExercise.id : null;
+          
+          return {
+            id: h.id,          // Ini HISTORY ID (untuk update status)
+            exerciseId: exerciseId, // Ini EXERCISE ID (untuk gambar/routerLink)
+            title: h.title,
+            calories: h.calories,
+            totalTime: h.totalTime,
+            sets: h.sets,
+            reps: h.reps,
+            environment: h.environment,
+            isFinished: false,
+            // Bonus: Langsung generate URL Image disini biar di HTML bersih
+            imageUrl: exerciseId 
+              ? `https://res.cloudinary.com/dmhzqtzrr/image/upload/${exerciseId}.gif`
+              : 'assets/images/placeholder_exercise.png'
+          };
+        });
     });
   }
 
   toggleActivityStatus(index: number) {
     const activity = this.activities[index];
 
+    // Payload update hanya butuh data history asli
     const payload = {
-      ...activity,
+      id: activity.id,     // History ID
       userId: this.currentUserId,
-      status: 'FINISHED'
+      title: activity.title,
+      status: 'FINISHED',
+      calories: activity.calories,
+      totalTime: activity.totalTime,
+      sets: activity.sets,
+      reps: activity.reps,
+      environment: activity.environment
     };
 
     this.historyService.saveHistory(payload).subscribe({

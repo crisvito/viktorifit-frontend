@@ -2,7 +2,7 @@
   <div class="relative mb-6 md:mb-8 overflow-hidden rounded-2xl bg-black text-white">
     <div class="absolute inset-0 -bottom-20 z-0 opacity-100">
       <img
-        src="pages/recommendation/city.png"
+        src="pages/suggestion/city.png"
         alt="City Background"
         class="w-full h-full object-cover object-bottom grayscale"
       />
@@ -34,18 +34,55 @@
     <!-- Todays Plan -->
     <section class="lg:col-span-7 rounded-xl bg-white p-4 md:p-6 shadow-sm">
       <div class="mb-4 flex items-center justify-between">
-        <h2 class="text-[20px] md:text-[24px] font-semibold">Today's Plan</h2>
+        <h2 class="text-[20px] md:text-[24px] font-semibold text-[#313131]">Today's Plan</h2>
 
-        <div class="relative">
-          <select
-            title="enviroment"
-            [(ngModel)]="selectedEnvironment"
-            (change)="onEnvironmentChange(selectedEnvironment)"
-            class="appearance-none bg-[#F3F4F6] border-none text-[12px] md:text-[14px] font-medium py-2 px-4 pr-8 rounded-lg outline-none focus:ring-2 focus:ring-[#C3F74A] cursor-pointer"
+        <div class="flex items-center gap-3 md:gap-4">
+          <div class="relative">
+            <select
+              title="enviroment"
+              [(ngModel)]="selectedEnvironment"
+              (change)="onEnvironmentChange(selectedEnvironment)"
+              class="appearance-none bg-[#F3F4F6] border-none text-[12px] md:text-[14px] font-medium py-2 px-4 pr-8 rounded-lg outline-none focus:ring-2 focus:ring-[#C3F74A] cursor-pointer text-gray-700"
+            >
+              <option value="home">🏠 Home</option>
+              <option value="gym">🏋️ Gym</option>
+            </select>
+
+            <div
+              class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500"
+            >
+              <svg
+                class="fill-current h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+                />
+              </svg>
+            </div>
+          </div>
+          <a
+            routerLink="/dashboard/schedule"
+            class="group flex items-center gap-1 text-[12px] md:text-[14px] font-medium text-gray-500 hover:text-[#4E7000] transition-colors cursor-pointer"
           >
-            <option value="home">🏠 Home Workout</option>
-            <option value="gym">🏋️ Gym Workout</option>
-          </select>
+            See Detail
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="w-3 h-3 md:w-4 md:h-4 transition-transform duration-200 group-hover:translate-x-1"
+            >
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
         </div>
       </div>
 
@@ -227,7 +264,7 @@
             <img
               [src]="bodyCondition.bodyFatImage"
               [alt]="bodyCondition.bodyFatCategory"
-              class="h-50 w-auto object-contain object-top"
+              class="h-96 w-auto object-contain object-top"
             />
           </div>
         </div>

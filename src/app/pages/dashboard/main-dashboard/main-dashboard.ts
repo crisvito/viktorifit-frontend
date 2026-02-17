@@ -34,7 +34,17 @@ export class MainDashboardPage implements OnInit {
 
   todayActivities: any[] = [];
   workoutslist: any[] = []; // Data Suggestions
-  bodyCondition: any = { height: 0, weight: 0, bmiCategory: '-', bodyFat: 0, goal: '-' };
+  
+  // Update struktur awal bodyCondition (tambahkan properti image & category string)
+  bodyCondition: any = { 
+    height: 0, 
+    weight: 0, 
+    bmiCategory: '-', 
+    bodyFat: 0, 
+    goal: '-',
+    bodyFatImage: '',    // Tambahan untuk HTML
+    bodyFatCategory: ''  // Tambahan untuk HTML
+  };
   
   public selectedChart: ChartCategory = 'weight';
   private chartDataMaster: any = {
@@ -74,7 +84,7 @@ export class MainDashboardPage implements OnInit {
     private router: Router,
     private authService: AuthService,
     private http: HttpClient,
-    private exerciseService: ExerciseService // Service untuk ambil ID & GIF valid
+    private exerciseService: ExerciseService
   ) {}
 
   goToDetail(id: string) {
@@ -175,16 +185,22 @@ export class MainDashboardPage implements OnInit {
 
     this.userName = this.authService.getUser()?.fullname?.split(' ')[0] || 'User';
 
+    // --- LOGIC BARU: Ambil Info Gambar Body Fat ---
+    const bodyFatInfo = this.getBodyFatInfo(profile.bodyFatCategory || 3, profile.gender || 'male');
+
     this.bodyCondition = {
       height: profile.height,
       weight: profile.weight,
       bmiCategory: this.calculateBMI(profile.height, profile.weight),
       bodyFat: profile.bodyFatPercentage || 0,
-      goal: profile.goal || 'Not Set'
+      goal: profile.goal || 'Not Set',
+      // Masukkan ke state agar HTML bisa baca
+      bodyFatImage: bodyFatInfo.image,
+      bodyFatCategory: bodyFatInfo.label
     };
 
-    this.updateTodayPlan();     // Logic Utama (Matching ID)
-    this.mapSuggestions();      // Logic Random Suggestions
+    this.updateTodayPlan();     
+    this.mapSuggestions();      
     this.mapStatistics(roadmap, profile);
     this.updateChartData();
   }
@@ -194,7 +210,6 @@ export class MainDashboardPage implements OnInit {
     this.updateTodayPlan();
   }
 
-  // --- LOGIKA UTAMA: Match Nama ML dengan Database untuk dapat ID GIF ---
   updateTodayPlan() {
     if (!this.rawMLResult) return;
 
@@ -219,28 +234,32 @@ export class MainDashboardPage implements OnInit {
       if (dayKey && workoutPlan[dayKey]) {
         this.workoutTitle = dayKey;
         this.workoutDesc = `Ready for your ${this.selectedEnvironment} session!`;
-        this.workoutImage = 'pages/workoutType/weightLoss.png';
+
+        console.log(profile);
+        
+        if(profile.goal == "Muscle Gain"){
+          this.workoutImage = `/global/workout-type/muscleGain_transparent_background.svg`;
+        }else if(profile.goal == "Weight Loss"){
+          this.workoutImage = `/global/workout-type/weightGain_transparent_background.svg`;
+        }else{
+          this.workoutImage = `/global/workout-type/maintain_transparent_background.svg`;
+        }
+          
         
         const mlExercises = workoutPlan[dayKey];
 
-        // Ambil semua data dari Database untuk "Kamus" pencocokan
         this.exerciseService.getAllExercises().subscribe({
           next: (allDbExercises) => {
             this.todayActivities = mlExercises.map((mlItem: any) => {
-              
-              // Cari latihan di DB yang namanya mirip (case insensitive)
               const dbMatch = allDbExercises.find(dbItem => 
                 dbItem.name.toLowerCase().trim() === mlItem.exercise_name.toLowerCase().trim()
               );
-
-              // Jika ketemu, pakai ID Database. Jika tidak, fallback ke ID ML (berharap benar)
               const realId = dbMatch ? dbMatch.id : mlItem.id;
-
               return {
-                id: realId, // ID ini penting buat routerLink detail
+                id: realId,
                 name: mlItem.exercise_name,
                 category: mlItem.muscle_group,
-                imageUrl: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${realId}.gif`, // GIF Valid
+                imageUrl: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${realId}.gif`,
                 duration: mlItem.duration_minutes,
                 setsReps: `${mlItem.sets} x ${mlItem.reps}`,
                 status: 'PENDING'
@@ -248,8 +267,6 @@ export class MainDashboardPage implements OnInit {
             });
           },
           error: (err) => {
-            console.error('Gagal mencocokkan ID latihan, pakai data ML mentah', err);
-            // Fallback jika DB error
             this.todayActivities = mlExercises.map((mlItem: any) => ({
               id: mlItem.id,
               name: mlItem.exercise_name,
@@ -270,16 +287,13 @@ export class MainDashboardPage implements OnInit {
     }
   }
 
-  // --- SUGGESTIONS: Ambil 3 Acak dari Database ---
   private mapSuggestions() {
     this.exerciseService.getAllExercises().subscribe({
       next: (allExercises) => {
         const randomExercises = allExercises.sort(() => 0.5 - Math.random()).slice(0, 3);
-
         this.workoutslist = randomExercises.map(ex => {
           const muscles = Array.isArray(ex.targetMuscles) ? ex.targetMuscles.join(', ') : (ex.targetMuscles || "");
           const isCardio = muscles.toLowerCase().includes('cardio');
-
           return {
             id: ex.id,
             title: ex.name,
@@ -396,5 +410,25 @@ export class MainDashboardPage implements OnInit {
     if (bmi < 25) return 'Normal';
     if (bmi < 30) return 'Overweight';
     return 'Obese';
+  }
+
+  // --- Fungsi Baru Helper Body Fat Image ---
+  getBodyFatInfo(catId: number, gender: string) {
+    const prefix = gender.toLowerCase() === 'female' ? 'female' : 'male'; 
+    
+    switch(catId) {
+      case 1: 
+        return { label: 'Essential', image: `/global/body-fat/${prefix}_veryLean.svg` };
+      case 2: 
+        return { label: 'Athlete', image: `/global/body-fat/${prefix}_athletic.svg` };
+      case 3: 
+        return { label: 'Fitness', image: `/global/body-fat/${prefix}_average.svg` };
+      case 4: 
+        return { label: 'Average', image: `/global/body-fat/${prefix}_overweight.svg` };
+      case 5: 
+        return { label: 'Obese', image: `/global/body-fat/${prefix}_obese.svg` };
+      default: 
+        return { label: 'Average', image: `/global/body-fat/${prefix}_average.svg` };
+    }
   }
 }

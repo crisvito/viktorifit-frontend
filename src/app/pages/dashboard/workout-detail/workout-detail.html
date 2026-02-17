@@ -110,12 +110,7 @@
 
         <div class="flex flex-wrap gap-3">
           <div *ngFor="let item of workout.equipments" class="flex flex-col items-center gap-1">
-            <div
-              class="w-14 h-14 md:w-15 md:h-15 bg-[#DBF3A3] rounded-md flex items-center justify-center border border-[#AFFA01]"
-            >
-              <img [src]="item.icon" alt="{{ item.name }}" class="w-7 h-7 md:w-8 md:h-8" />
-            </div>
-            <span class="text-[11px] font-medium text-[#4E7000]">{{ item.name }}</span>
+            <span class="text-[15px] font-semibold text-[#4E7000]">• {{ item.name }}</span>
           </div>
         </div>
       </div>
