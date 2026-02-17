@@ -1,0 +1,23 @@
+{
+  "name": "Viktorifit App",
+  "short_name": "Viktorifit",
+  "theme_color": "#C3F74A",
+  "background_color": "#000000",
+  "display": "standalone",
+  "scope": "./",
+  "start_url": "./",
+  "icons": [
+    {
+      "src": "global/logo/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "global/logo/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
