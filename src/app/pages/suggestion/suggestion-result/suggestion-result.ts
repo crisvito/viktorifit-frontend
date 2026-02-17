@@ -88,7 +88,7 @@ export class SuggestionResultPage implements OnInit {
 
   loadDataFromStorage() {
     this.isLoading = true;
-    const storedData = localStorage.getItem('guest_ml_result');
+    const storedData = localStorage.getItem('ml_result');
     
     if (!storedData) {
       this.router.navigate(['/onboarding']);
