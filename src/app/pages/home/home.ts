@@ -125,6 +125,16 @@ export class HomePage {
 
   activeIndex = 0;
 
+  scrollToSection() {
+    // Cari elemen berdasarkan ID yang kita buat tadi
+    const element = document.getElementById('feature');
+    
+    if (element) {
+      // Perintah scroll halus ke elemen tersebut
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   // 3. Fungsi Geser
 navigasiSlider(arah: 'kiri' | 'kanan') {
   if (arah === 'kanan') {

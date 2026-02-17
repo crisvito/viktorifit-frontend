@@ -116,19 +116,19 @@ export class OnboardingPage {
   // DATA OPTIONS
   // ==========================================
   maleBodyFatOptions: Bodyfat[] = [
-    { label: 'Essential', range: '2-5%', value: 4, category: 1, image: 'pages/onboarding/bodyfat/m-1.png' },
-    { label: 'Athlete', range: '6-13%', value: 10, category: 2, image: 'pages/onboarding/bodyfat/m-2.png' },
-    { label: 'Fitness', range: '14-17%', value: 15, category: 3, image: 'pages/onboarding/bodyfat/m-3.png' },
-    { label: 'Average', range: '18-24%', value: 21, category: 4, image: 'pages/onboarding/bodyfat/m-4.png' },
-    { label: 'Obese', range: '25%+', value: 30, category: 5, image: 'pages/onboarding/bodyfat/m-5.png' }
+    { label: 'Essential', range: '2-5%', value: 4, category: 1, image: '/global/body-fat/male_veryLean.svg' },
+    { label: 'Athlete', range: '6-13%', value: 10, category: 2, image: '/global/body-fat/male_athletic.svg' },
+    { label: 'Fitness', range: '14-17%', value: 15, category: 3, image: '/global/body-fat/male_average.svg' },
+    { label: 'Average', range: '18-24%', value: 21, category: 4, image: '/global/body-fat/male_overweight.svg' },
+    { label: 'Obese', range: '25%+', value: 30, category: 5, image: '/global/body-fat/male_obese.svg' }
   ];
 
   femaleBodyFatOptions: Bodyfat[] = [
-    { label: 'Essential', range: '10-13%', value: 12, category: 1, image: 'pages/onboarding/bodyfat/f-1.png' },
-    { label: 'Athlete', range: '14-20%', value: 17, category: 2, image: 'pages/onboarding/bodyfat/f-2.png' },
-    { label: 'Fitness', range: '21-24%', value: 22, category: 3, image: 'pages/onboarding/bodyfat/f-3.png' },
-    { label: 'Average', range: '25-31%', value: 28, category: 4, image: 'pages/onboarding/bodyfat/f-4.png' },
-    { label: 'Obese', range: '32%+', value: 35, category: 5, image: 'pages/onboarding/bodyfat/f-5.png' }
+    { label: 'Essential', range: '10-13%', value: 12, category: 1, image: 'global/onboarding/female_veryLean-1.svg' },
+    { label: 'Athlete', range: '14-20%', value: 17, category: 2, image: '/global/body-fat/female_athleticpng' },
+    { label: 'Fitness', range: '21-24%', value: 22, category: 3, image: '/global/body-fat/female_average.svg' },
+    { label: 'Average', range: '25-31%', value: 28, category: 4, image: '/global/body-fat/female_overweight.svg' },
+    { label: 'Obese', range: '32%+', value: 35, category: 5, image: '/global/body-fat/female_obese.svg' }
   ];
 
   workoutDuration: WorkoutDuration[] = [
@@ -157,7 +157,7 @@ export class OnboardingPage {
       }
     }
 
-    const existingData = localStorage.getItem('guest_ml_result');
+    const existingData = localStorage.getItem('ml_result');
     if (existingData) {
       this.router.navigate(['/suggestion-result']);
     }
@@ -334,7 +334,7 @@ export class OnboardingPage {
               mealRecommendation: mealResults 
             };
 
-            localStorage.setItem('guest_ml_result', JSON.stringify(finalData));
+            localStorage.setItem('ml_result', JSON.stringify(finalData));
           })
         );
       })
@@ -342,7 +342,7 @@ export class OnboardingPage {
       next: () => {
         // --- LOGIC TAMBAHAN: CEK STATUS LOGIN ---
         if (this.authService.isLoggedIn()) {
-          const guestDataStr = localStorage.getItem('guest_ml_result');
+          const guestDataStr = localStorage.getItem('ml_result');
           
           if (guestDataStr) {
             const parsed = JSON.parse(guestDataStr);
@@ -375,7 +375,7 @@ export class OnboardingPage {
             this.http.post(`${environment.apiUrl}profile/create`, profilePayload).subscribe({
               next: (savedProfile: any) => {
                 this.authService.updateUserSession(savedProfile);
-                localStorage.removeItem('guest_ml_result');
+                localStorage.removeItem('ml_result');
                 this.router.navigate(['/dashboard']);
               },
               error: (err) => {

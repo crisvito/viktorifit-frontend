@@ -103,6 +103,7 @@
     </p>
     <div class="flex justify-center md:justify-start">
       <app-button
+        (click)="scrollToSection()"
         ariaLabel="Klik untuk mempelajari lebih lanjut"
         extraClass="font-semibold text-black !text-[16px] !md:text-[24px] border-1 border-transparent
           hover:bg-black hover:border-[#C3F74A] hover:text-[#C3F74A] transition-all duration-300 
@@ -115,7 +116,7 @@
 </section>
 
 <!-- feature -->
-<section class="relative w-full min-h-screen pt-16 pb-30 px-6 md:px-20 overflow-hidden font-sans">
+<section id="feature" class="relative w-full min-h-screen pt-16 pb-30 px-6 md:px-20 overflow-hidden font-sans">
   <div
     class="absolute inset-0 bg-[#D4F28D] z-0 pointer-events-none"
     data-aos="fade"

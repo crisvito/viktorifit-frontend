@@ -96,7 +96,9 @@
               <div class="flex-1 min-w-0 pr-2">
                 <div class="flex justify-between items-start">
                   <p class="text-sm font-bold text-gray-800 truncate">{{ item.title }}</p>
-                  <span class="text-[10px] text-gray-400 whitespace-nowrap ml-2">Now</span>
+                  <span class="text-[10px] text-gray-400 whitespace-nowrap ml-2">{{
+                    item.time
+                  }}</span>
                 </div>
                 <p class="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
                   {{ item.message }}

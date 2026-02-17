@@ -1,224 +1,271 @@
-<div class="h-full flex">
-  <div class="w-[43%] bg-(--main-color)"></div>
-  <div class="w-[57%] flex flex-col gap-8 py-20 px-32">
-    <div class="flex flex-col items-center">
-      <h2 class="text-[48px] font-bold">Sign Up</h2>
-      <p class="text-[16px]">Create New Account and Start Your Journey Now!</p>
+<div class="min-h-screen flex w-full bg-white">
+  <div class="hidden md:block md:w-1/2 lg:w-[45%] relative bg-gray-50">
+    <img
+      src="/global/workout-type/muscleGain_background.svg"
+      alt="bg"
+      class="absolute inset-0 w-full h-full object-cover"
+    />
+    <div class="absolute inset-0 bg-black/10"></div>
+  </div>
+
+  <div
+    class="w-full md:w-1/2 lg:w-[55%] flex flex-col justify-center px-6 py-10 md:px-12 lg:px-24 overflow-y-auto"
+  >
+    <div class="w-full max-w-md mx-auto flex flex-col gap-8">
+      <div class="text-center md:text-left space-y-2">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Sign Up</h2>
+        <p class="text-gray-500 text-sm md:text-base">
+          Create New Account and Start Your Journey Now!
+        </p>
+      </div>
+
+      <form #RegisterForm="ngForm" class="flex flex-col gap-2">
+        <div class="flex flex-col gap-1.5">
+          <label for="fullname" class="text-sm font-semibold text-gray-700">Full Name</label>
+          <input
+            type="text"
+            id="fullname"
+            name="fullname"
+            placeholder="e.g Hillary Violen"
+            [(ngModel)]="dataRegister.fullname"
+            #fullname="ngModel"
+            required
+            [class.border-red-500]="getErrorMessage(fullname, '')"
+            [class.focus:border-red-500]="getErrorMessage(fullname, '')"
+            [class.focus:ring-red-200]="getErrorMessage(fullname, '')"
+            class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#C3F74A] focus:bg-white focus:ring-4 focus:ring-[#C3F74A]/20 outline-none transition-all duration-200"
+          />
+          <div class="h-4 flex items-center">
+            <span class="text-red-500 text-xs font-medium" *ngIf="getErrorMessage(fullname, '')">
+              {{ getErrorMessage(fullname, 'Fullname') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="username" class="text-sm font-semibold text-gray-700">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="e.g johngreen"
+            [(ngModel)]="dataRegister.username"
+            #username="ngModel"
+            required
+            [class.border-red-500]="getErrorMessage(username, '')"
+            [class.focus:border-red-500]="getErrorMessage(username, '')"
+            [class.focus:ring-red-200]="getErrorMessage(username, '')"
+            class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#C3F74A] focus:bg-white focus:ring-4 focus:ring-[#C3F74A]/20 outline-none transition-all duration-200"
+          />
+          <div class="h-4 flex items-center">
+            <span class="text-red-500 text-xs font-medium" *ngIf="getErrorMessage(username, '')">
+              {{ getErrorMessage(username, 'Username') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="email" class="text-sm font-semibold text-gray-700">Email Address</label>
+          <input
+            type="text"
+            id="email"
+            name="email"
+            placeholder="e.g johngreen@abc.com"
+            required
+            [(ngModel)]="dataRegister.email"
+            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            #email="ngModel"
+            [class.border-red-500]="getErrorMessage(email, '')"
+            [class.focus:border-red-500]="getErrorMessage(email, '')"
+            [class.focus:ring-red-200]="getErrorMessage(email, '')"
+            class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#C3F74A] focus:bg-white focus:ring-4 focus:ring-[#C3F74A]/20 outline-none transition-all duration-200"
+          />
+          <div class="h-4 flex items-center">
+            <span class="text-red-500 text-xs font-medium" *ngIf="getErrorMessage(email, '')">
+              {{ getErrorMessage(email, 'Email') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="password" class="text-sm font-semibold text-gray-700">Password</label>
+          <div class="relative flex items-center group">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              name="password"
+              placeholder="Min. 8 characters"
+              required
+              [(ngModel)]="dataRegister.password"
+              #password="ngModel"
+              pattern="^(?=.*[\W_]).{8,}$"
+              [class.border-red-500]="getErrorMessage(password, '')"
+              [class.focus:border-red-500]="getErrorMessage(password, '')"
+              [class.focus:ring-red-200]="getErrorMessage(password, '')"
+              minlength="8"
+              class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#C3F74A] focus:bg-white focus:ring-4 focus:ring-[#C3F74A]/20 outline-none transition-all duration-200 pr-10"
+            />
+            <button
+              type="button"
+              aria-label="Toggle password visibility"
+              (click)="togglePassword()"
+              class="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none p-1"
+            >
+              <svg
+                *ngIf="!showPassword"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg
+                *ngIf="showPassword"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                ></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="h-4 flex items-center">
+            <span class="text-red-500 text-xs font-medium" *ngIf="getErrorMessage(password, '')">
+              {{ getErrorMessage(password, 'Password') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="confirmPassword" class="text-sm font-semibold text-gray-700"
+            >Confirm Password</label
+          >
+          <div class="relative flex items-center group">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Re-enter password"
+              [(ngModel)]="confirmPassword"
+              #confirmInput="ngModel"
+              required
+              [class.border-red-500]="getConfirmPasswordError(confirmInput)"
+              [class.focus:border-red-500]="getConfirmPasswordError(confirmInput)"
+              [class.focus:ring-red-200]="getConfirmPasswordError(confirmInput)"
+              class="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#C3F74A] focus:bg-white focus:ring-4 focus:ring-[#C3F74A]/20 outline-none transition-all duration-200 pr-10"
+            />
+            <button
+              type="button"
+              aria-label="Toggle password visibility"
+              (click)="toggleConfirmPassword()"
+              class="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none p-1"
+            >
+              <svg
+                *ngIf="!showConfirmPassword"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg
+                *ngIf="showConfirmPassword"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                ></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="h-4 flex items-center">
+            <span
+              class="text-red-500 text-xs font-medium"
+              *ngIf="getConfirmPasswordError(confirmInput)"
+            >
+              {{ getConfirmPasswordError(confirmInput) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-col mt-1">
+          <div class="flex items-start gap-3">
+            <div class="flex items-center h-5">
+              <input
+                type="checkbox"
+                id="terms-and-use"
+                name="terms"
+                [(ngModel)]="isTermsAccepted"
+                (change)="termsError = false"
+                title="term-and-use"
+                class="w-4 h-4 rounded border-gray-300 text-[#C3F74A] focus:ring-[#C3F74A] cursor-pointer"
+              />
+            </div>
+            <label for="terms-and-use" class="text-sm text-gray-600 select-none cursor-pointer">
+              I have read and agree to all of the
+              <a
+                href="javascript:void(0)"
+                class="font-medium text-black hover:underline underline-offset-2"
+                >terms and use</a
+              >
+            </label>
+          </div>
+
+          <div *ngIf="termsError" class="text-red-500 text-xs font-medium mt-1 ml-1 animate-pulse">
+            * You must agree to the terms and use to register.
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4 mt-2">
+          <app-button
+            extraClass="w-full !rounded-lg !py-3.5 !text-base md:!text-lg !font-bold shadow-sm hover:shadow-md transition-all active:scale-[0.98] !mt-3"
+            (click)="onRegister(RegisterForm)"
+            [class.opacity-70]="isLoading"
+            [class.pointer-events-none]="isLoading"
+          >
+            Create Account
+          </app-button>
+
+          <div class="text-sm text-center text-gray-500">
+            Already have an account?
+            <a routerLink="/login" class="font-bold text-black hover:underline cursor-pointer ml-1"
+              >Sign In</a
+            >
+          </div>
+        </div>
+      </form>
     </div>
-    <form #RegisterForm="ngForm" class="flex flex-col gap-3">
-      <div class="flex flex-col gap-2">
-        <label for="fullname" class="font-medium text-black">Full Name</label>
-        <input
-          type="text"
-          id="fullname"
-          name="fullname"
-          placeholder="e.g Hillary Violen"
-          [(ngModel)]="dataRegister.fullname"
-          #fullname="ngModel"
-          required
-          [class.border-red-500]="getErrorMessage(fullname, '')"
-          [class.focus:border-red-500]="getErrorMessage(fullname, '')"
-          [class.focus:ring-red-200]="getErrorMessage(fullname, '')"
-          class="rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
-        />
-        <span class="text-red-500 text-xs h-4 font-bold">
-          {{ getErrorMessage(fullname, 'Fullname') }}
-        </span>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label for="username" class="font-medium text-black">Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="e.g johngreen"
-          [(ngModel)]="dataRegister.username"
-          #username="ngModel"
-          required
-          [class.border-red-500]="getErrorMessage(username, '')"
-          [class.focus:border-red-500]="getErrorMessage(username, '')"
-          [class.focus:ring-red-200]="getErrorMessage(username, '')"
-          class="rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
-        />
-        <span class="text-red-500 text-xs h-4 font-bold">
-          {{ getErrorMessage(username, 'Username') }}
-        </span>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label for="email" class="font-medium text-black">Email</label>
-        <input
-          type="text"
-          id="email"
-          name="email"
-          placeholder="e.g johngreen@abc.com"
-          required
-          [(ngModel)]="dataRegister.email"
-          pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-          #email="ngModel"
-          [class.border-red-500]="getErrorMessage(email, '')"
-          [class.focus:border-red-500]="getErrorMessage(email, '')"
-          [class.focus:ring-red-200]="getErrorMessage(email, '')"
-          class="rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
-        />
-        <span class="text-red-500 text-xs h-4 font-bold">
-          {{ getErrorMessage(email, 'Email') }}
-        </span>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label for="password" class="font-medium text-gray-700">Password</label>
-        <div class="relative flex items-center group">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            id="password"
-            name="password"
-            placeholder="at least 8 character"
-            required
-            [(ngModel)]="dataRegister.password"
-            #password="ngModel"
-            pattern="^(?=.*[\W_]).{8,}$"
-            [class.border-red-500]="getErrorMessage(password, '')"
-            [class.focus:border-red-500]="getErrorMessage(password, '')"
-            [class.focus:ring-red-200]="getErrorMessage(password, '')"
-            minlength="8"
-            class="w-full rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
-          />
-          <button
-            type="button"
-            aria-label="Toggle password visibility"
-            (click)="togglePassword()"
-            class="absolute right-4 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none invisible group-focus-within:visible"
-          >
-            <svg
-              *ngIf="!showPassword"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            <svg
-              *ngIf="showPassword"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-              ></path>
-              <line x1="1" y1="1" x2="23" y2="23"></line>
-            </svg>
-          </button>
-        </div>
-        <span class="text-red-500 text-xs h-4 font-bold">
-          {{ getErrorMessage(password, 'Password') }}
-        </span>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label for="confirmPassword" class="font-medium text-gray-700">Confirm Password</label>
-        <div class="relative flex items-center group">
-          <input
-            [type]="showConfirmPassword ? 'text' : 'password'"
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="at least 8 character"
-            [(ngModel)]="confirmPassword"
-            #confirmInput="ngModel"
-            required
-            [class.border-red-500]="getConfirmPasswordError(confirmInput)"
-            [class.focus:border-red-500]="getConfirmPasswordError(confirmInput)"
-            [class.focus:ring-red-200]="getConfirmPasswordError(confirmInput)"
-            class="w-full rounded-sm bg-gray-100 border border-gray-300 px-4 py-4 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition placeholder-gray-400"
-          />
-          <button
-            type="button"
-            aria-label="Toggle password visibility"
-            (click)="toggleConfirmPassword()"
-            class="absolute right-4 text-gray-400 hover:text-gray-600 focus:outline-none invisible group-focus-within:visible"
-          >
-            <svg
-              *ngIf="!showConfirmPassword"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            <svg
-              *ngIf="showConfirmPassword"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-              ></path>
-              <line x1="1" y1="1" x2="23" y2="23"></line>
-            </svg>
-          </button>
-        </div>
-        <span class="text-red-500 text-xs font-bold h-4">
-          {{ getConfirmPasswordError(confirmInput) }}
-        </span>
-      </div>
-
-      <div class="flex gap-2 items-center text-[12px]">
-        <input
-          type="checkbox"
-          id="terms-and-use"
-          name="terms-and-use"
-          title="term-and-use"
-          class="self-start bg-gray-500 border border-gray-500"
-        />
-        <label for="terms-and-use" class="text-gray-600">
-          I have read and agree all of
-          <a class="underline text-blue-500">terms and use</a>
-        </label>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <app-button
-          extraClass="w-full !rounded-sm !text-[18px] !font-medium !mt-5"
-          (click)="onRegister(RegisterForm)"
-          [class.opacity-70]="isLoading"
-          [class.pointer-events-none]="isLoading"
-        >
-          Create Account
-        </app-button>
-        <span class="text-[12px] text-center text-gray-400">
-          Already have an account?
-          <a routerLink="/login" class="underline text-blue-500">Sign In</a>
-        </span>
-      </div>
-    </form>
   </div>
 </div>

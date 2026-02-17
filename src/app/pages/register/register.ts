@@ -7,16 +7,21 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
+  standalone: true, // Pastikan standalone true jika menggunakan imports
   imports: [RouterModule, ButtonComponent, FormsModule, CommonModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
-
 export class RegisterPage {
   serverError: string = '';
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
   isLoading: boolean = false;
+
+  // --- TAMBAHAN BARU ---
+  isTermsAccepted: boolean = false; // Untuk binding checkbox
+  termsError: boolean = false;      // Untuk status error visual
+  // ---------------------
 
   confirmPassword: string = "";
   dataRegister = {
@@ -35,28 +40,26 @@ export class RegisterPage {
     if (label == 'Username' && this.serverError.includes('Username')) {
       return this.serverError;
     }
-
     if (label == 'Email' && this.serverError.includes('Email')) {
       return this.serverError;
     }
-
     
     if (!control || !control.invalid || !(control.touched || control.dirty)) {
       return '';
     }
     
     if (control.hasError('required')) return `${label} field is required`;
-    if (control.hasError('minlength')) return `${label} Must be at least 8 chars with a symbol (e.g. -, *, /)`;
+    if (control.hasError('minlength')) return `${label} Must be at least 8 chars`; // Sederhanakan pesan jika perlu
     if (control.hasError('pattern')) return `Please enter a valid email address `;
 
     return `${label} field is required`;
   }
+
   getConfirmPasswordError(control: NgModel): string {
     if (!control || !(control.touched || control.dirty)) return '';
     if (this.confirmPassword !== this.dataRegister.password) {
       return 'Password does not match';
     }
-
     return '';
   }
 
@@ -70,6 +73,7 @@ export class RegisterPage {
 
   onRegister(form: NgForm) {
     this.serverError = '';
+    this.termsError = false; // Reset error terms setiap kali tombol ditekan
     
     if (this.isLoading) return;
 
@@ -77,6 +81,15 @@ export class RegisterPage {
       form.control.markAllAsTouched(); 
       return;
     }
+
+    // --- LOGIC VALIDASI TERMS ---
+    // Cek apakah checkbox dicentang
+    if (!this.isTermsAccepted) {
+      this.termsError = true; // Munculkan error merah
+      return; // Stop proses register
+    }
+    // ---------------------------
+
 
     this.isLoading = true;
 
@@ -88,8 +101,9 @@ export class RegisterPage {
       error: (error) => {
         if (error.error && error.error.message) {
           this.serverError = error.error.message;
+        } else {
+            this.serverError = "Registration failed. Please try again.";
         }
-        this.serverError = error.error.message;
         this.isLoading = false;
       }
     });

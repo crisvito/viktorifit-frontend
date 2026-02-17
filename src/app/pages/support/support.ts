@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { FaqService, inquiryService } from '../../core';
@@ -10,11 +10,14 @@ import { FaqService, inquiryService } from '../../core';
   templateUrl: './support.html',
   styleUrls: ['./support.css']
 })
-export class SupportPage {
+export class SupportPage implements OnInit {
   activeIndex: number | null = null;
   isLoading: boolean = false;
   faqs: any[] = [];
   serverError: string = '';
+
+  // Tambahan State untuk Toast
+  showToast: boolean = false;
 
   constructor(
     private inquiryService: inquiryService,
@@ -77,15 +80,28 @@ export class SupportPage {
     this.inquiryService.createInquiry(this.contactData).subscribe({
       next: (res) => {
         this.isLoading = false;
-        alert('Inquiry sent successfully!'); 
+        
+        // 1. Reset Form & Data
         form.resetForm();
         this.contactData = { name: "", email: "", description: "" };
+
+        // 2. Tampilkan Toast Success
+        this.showToast = true;
+
+        // 3. Sembunyikan Toast otomatis setelah 3 detik
+        setTimeout(() => {
+          this.showToast = false;
+        }, 3000);
       },
       error: (err) => {
         this.isLoading = false;
         this.serverError = err.error?.message || 'Failed to send inquiry. Please try again.';
-        console.error(err);
       }
     })
+  }
+
+  // Helper untuk menutup toast manual (opsional jika user klik silang)
+  closeToast() {
+    this.showToast = false;
   }
 }

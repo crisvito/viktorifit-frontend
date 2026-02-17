@@ -215,11 +215,11 @@ export class SuggestionResultPage implements OnInit {
 
   getProgramInfo(goal: string) {
     if (goal === 'Muscle Gain') {
-      return { description: 'Fokus hipertrofi otot.', image: 'pages/recommendation/weight.png' };
+      return { description: 'Fokus hipertrofi otot.', image: 'pages/suggestion/weight.png' };
     } else if (goal === 'Weight Loss') {
-      return { description: 'Fokus pembakaran kalori.', image: 'pages/recommendation/cardio.png' };
+      return { description: 'Fokus pembakaran kalori.', image: 'pages/suggestion/cardio.png' };
     } else {
-      return { description: 'Kebugaran umum.', image: 'pages/recommendation/yoga.png' };
+      return { description: 'Kebugaran umum.', image: 'pages/suggestion/yoga.png' };
     }
   }
 

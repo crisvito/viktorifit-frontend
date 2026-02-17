@@ -21,11 +21,7 @@
   </div>
 
   <div class="absolute bottom-0 left-0 w-full z-9">
-    <img
-      src="pages/recommendation/city.png"
-      alt="City Background"
-      class="w-full h-auto object-cover"
-    />
+    <img src="pages/suggestion/city.png" alt="City Background" class="w-full h-auto object-cover" />
   </div>
 
   <div class="absolute h-[94vh] inset-0 bg-black z-0"></div>
@@ -169,8 +165,6 @@
           class="group bg-[#F1F1F1] p-8 rounded-[18px] border border-transparent transition-all flex flex-col md:flex-row justify-between gap-6"
         >
           <div class="flex flex-row gap-8">
-            <div class="bg-gray-200 w-50 rounded-[10px] text-center">image</div>
-
             <div class="max-w-md">
               <div class="flex items-center gap-0">
                 <span class="text-[16px] font-semibold text-[#4E7000] mb-2">{{
@@ -255,10 +249,6 @@
         class="group bg-gray-50 p-6 rounded-[20px] border-2 border-gray-100 flex flex-col justify-between gap-6 min-w-[400px] snap-center"
       >
         <div class="text-left">
-          <div class="w-full h-50 mb-4 bg-gray-100 rounded-[14px] overflow-hidden">
-            <img [src]="" alt="{{ meal.name }}" class="w-full h-full object-cover" />
-          </div>
-
           <h3 class="text-[20px] font-semibold text-[#2D3319] mb-1 truncate">
             {{ meal.name }}
           </h3>
