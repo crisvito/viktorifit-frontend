@@ -1,59 +1,246 @@
-# ViktorifitFrontend
+# VIKTORIFIT Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.9.
+**VIKTORIFIT Frontend** adalah aplikasi web client modern yang berfungsi sebagai antarmuka utama platform asisten kebugaran personal. Repositori ini berfokus **sepenuhnya pada pengembangan Frontend**, mencakup UI/UX, client-side logic, state management.
 
-## Development server
+Frontend dirancang untuk memberikan pengalaman pengguna yang responsif, cepat, dan intuitif dalam merencanakan serta memantau aktivitas kebugaran.
 
-To start a local development server, run:
+> Catatan: Repositori ini **tidak mencakup backend atau machine learning engine**. Backend berperan sebagai external API service.
+
+---
+
+## Application Features
+
+### 🏋️ Personalized Workout Recommendation
+
+Fitur inti yang secara otomatis merancang program latihan berdasarkan kondisi fisik, tujuan, dan preferensi pengguna. Sistem menyesuaikan intensitas, jenis latihan, serta distribusi jadwal agar sesuai dengan profil masing-masing pengguna.
+
+---
+
+### 🔔 Notification System
+
+Pengingat latihan harian yang disesuaikan dengan jadwal pengguna, dilengkapi tips kesehatan atau kutipan motivasi untuk menjaga konsistensi latihan.
+
+---
+
+### 📊 Progress Tracker
+
+Visualisasi perkembangan fisik dan performa pengguna dalam bentuk grafik interaktif. Metrik yang ditampilkan meliputi:
+
+* Perubahan berat badan
+* Durasi latihan
+* Perbandingan kalori terbakar vs target bulanan
+
+---
+
+### 📅 Workout Calendar
+
+Penjadwalan otomatis yang menyusun agenda latihan mingguan berdasarkan hasil rekomendasi sistem.
+
+---
+
+### 🔄 Re-generate Plan
+
+Memungkinkan pengguna memperbarui atau menyusun ulang rencana latihan secara manual saat terjadi perubahan target, kondisi fisik, atau ketersediaan waktu.
+
+---
+
+### 🕘 Workout History
+
+Menyimpan seluruh riwayat sesi latihan berdasarkan waktu pelaksanaan untuk referensi dan evaluasi progres.
+
+---
+
+### 📋 Workout Movement Library
+
+Daftar lengkap gerakan latihan beserta deskripsi dan manfaatnya untuk mendukung latihan mandiri.
+
+---
+
+### 🎥 Movement Tutorials
+
+Panduan gerakan dalam bentuk gambar atau video agar pengguna dapat melakukan latihan dengan teknik yang benar.
+
+---
+
+### ❓ FAQ (Frequently Asked Questions)
+
+Halaman FAQ menyediakan kumpulan pertanyaan yang sering diajukan pengguna beserta jawabannya untuk membantu memahami fitur aplikasi, penggunaan sistem, dan tips kebugaran. Fitur ini dirancang untuk meningkatkan self-service support dan pengalaman pengguna.
+
+---
+
+### 🛠️ Admin Dashboard
+
+Panel kontrol khusus administrator yang mencakup:
+
+* **FAQ Management**
+  CRUD interface untuk mengelola daftar pertanyaan yang sering diajukan.
+
+* **User Feedback Table**
+  Tabel pemantauan kritik, saran, dan masukan pengguna.
+
+---
+
+## Frontend Architecture
+
+Aplikasi menggunakan pendekatan **Clean Architecture** di sisi client untuk skalabilitas dan maintainability.
+
+### Core Module
+
+Singleton services seperti:
+
+* Authentication Service
+* JWT Interceptor
+* Global Error Handling
+
+### Shared Module
+
+Reusable UI components:
+
+* Button, Modal, Card
+* Pipes & Directives
+
+### Feature Modules
+
+Modul berbasis fitur dengan **lazy loading**:
+
+* User Dashboard
+* Workout Planner
+* Admin Panel
+* FAQ Page
+
+---
+
+## Key Frontend Capabilities
+
+* Dynamic multi-step form wizard
+* Real-time validation
+* Client-side data transformation
+* Interactive charts & analytics
+* Role-based route protection
+* REST API integration
+* Responsive UI design
+
+---
+
+## Technical Stack
+
+* **Framework:** Angular 17+ (Standalone Components)
+* **Language:** TypeScript
+* **State Management:** RxJS
+* **Styling:** Tailwind CSS
+* **Charts:** Ng2-charts / Chart.js
+* **HTTP Client:** Angular HttpClient
+* **Authentication:** JWT via Interceptor
+
+---
+
+## 📂 Project Structure
+
+```bash
+src/
+├── app/
+│   ├── pages/       # Application pages (dashboard, FAQ, admin, etc.)
+│   ├── shared/      # Reusable UI components
+│   ├── features/    # Feature modules (lazy-loaded)
+│   └── app.routes.ts
+├── environments/
+└── assets/
+```
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+
+* Node.js v18.x+
+* Angular CLI v17.x
+* Backend API service running
+
+### Clone Repository
+
+```bash
+git clone https://github.com/username/viktorifit-frontend.git
+cd viktorifit-frontend
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Environment Configuration
+
+Edit endpoint API di:
+
+```
+src/environments/environment.ts
+```
+
+```ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080/api/v1'
+};
+```
+
+---
+
+## Run Development Server
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Aplikasi dapat diakses di:
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
+
+## API Integration
+
+Frontend berkomunikasi dengan backend melalui RESTful API:
+
+* `POST /auth/login` — Login & token retrieval
+* `GET /workouts/recommendations` — Data rencana latihan
+* `GET /admin/feedback` — Data feedback (Admin)
+* `GET /faq` — Mengambil daftar FAQ
+
+Backend berfungsi sebagai external data provider.
+
+---
+
+## Production Build
+
+Untuk membuat build produksi:
 
 ```bash
-ng generate --help
+ng build --configuration production
 ```
 
-## Building
+Output tersedia di:
 
-To build the project run:
-
-```bash
-ng build
+```
+dist/
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Siap di-deploy ke platform seperti:
 
-## Running unit tests
+* Vercel
+* Netlify
+* Nginx / Static Web Server
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+---
 
-```bash
-ng test
-```
+## 🤝 Contribution
 
-## Running end-to-end tests
+Kontribusi terbuka untuk perbaikan UI, optimasi performa, dan peningkatan pengalaman pengguna.
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+1. Fork repository
+2. Buat branch fitur baru
+3. Commit perubahan
+4. Submit pull request
