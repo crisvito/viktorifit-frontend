@@ -2,17 +2,18 @@ import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
-import { 
-  Chart, 
-  ChartConfiguration, 
-  ChartOptions, 
-  ScriptableContext, 
+import { 
+  Chart, 
+  ChartConfiguration, 
+  ChartOptions, 
+  ScriptableContext, 
   Plugin,
   registerables 
 } from 'chart.js';
 
 Chart.register(...registerables);
 
+// Plugin Custom untuk efek garis vertikal pada chart
 const customChartEffectsPlugin: Plugin<'line'> = {
   id: 'customChartEffects',
   beforeDatasetsDraw(chart) {
@@ -20,11 +21,11 @@ const customChartEffectsPlugin: Plugin<'line'> = {
     ctx.save();
     ctx.beginPath();
     ctx.lineWidth = 0.7;
-    ctx.strokeStyle = '#9CA3AF'; 
+    ctx.strokeStyle = '#9CA3AF'; 
     ctx.moveTo(left, bottom);
-    ctx.lineTo(left, top - 20); 
+    ctx.lineTo(left, top - 20); 
     ctx.moveTo(left, bottom);
-    ctx.lineTo(right + 20, bottom); 
+    ctx.lineTo(right + 20, bottom); 
     ctx.stroke();
 
     chart.data.datasets.forEach((dataset, datasetIndex) => {
@@ -34,7 +35,7 @@ const customChartEffectsPlugin: Plugin<'line'> = {
             const lastDataPoint = meta.data[meta.data.length - 1];
             if (lastDataPoint) {
               ctx.beginPath();
-              ctx.lineWidth = 1; 
+              ctx.lineWidth = 1; 
               ctx.strokeStyle = (dataset.borderColor as string) || '#757575';
               ctx.moveTo(lastDataPoint.x, lastDataPoint.y);
               ctx.lineTo(lastDataPoint.x, bottom);
@@ -60,27 +61,27 @@ export class StatisticPage implements OnInit {
   isPeriodModalOpen = false;
   monthsList = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
   yearsList: number[] = [];
-  selectedMonthIndex: number = new Date().getMonth(); 
+  selectedMonthIndex: number = new Date().getMonth(); 
   selectedYear: number = new Date().getFullYear();
   tempMonthIndex: number = 0;
   tempYear: number = 0;
   
-  rawMLData: any = null;
+  readyData: any = null; // Data yang sudah Enriched
   selectedStat: string = 'weights';
   currentTheme = { color: '#AFFA01', gradientStart: 'rgba(175, 250, 1, 0.25)' };
 
   statCards = [
     { id: 'duration', title: 'Duration', value: '0 mins', icon: '/pages/statistic/duration.svg', change: '0%', changeText: 'From initial', isPositive: true },
     { id: 'weights', title: 'Weights', value: '0 kg', icon: '/pages/statistic/weights.svg', change: '0%', changeText: 'Target weight', isPositive: true },
-    { id: 'calories', title: 'Calories Burn', value: '0 cal', icon: '/pages/statistic/calories.svg', change: '0%', changeText: 'Daily plan', isPositive: true }
+    { id: 'calories', title: 'Daily Calories', value: '0 cal', icon: '/pages/statistic/calories.svg', change: '0%', changeText: 'Daily plan', isPositive: true }
   ];
 
   topActivities: any[] = [];
   donutSegments: { dashArray: string, dashOffset: number }[] = [];
-  readonly CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 40; 
+  readonly CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 40; 
 
   public lineChartData: ChartConfiguration<'line'>['data'] = { datasets: [], labels: [] };
-  public lineChartType: 'line' = 'line'; 
+  public lineChartType: 'line' = 'line'; 
   public lineChartPlugins = [customChartEffectsPlugin];
   
   public lineChartOptions: ChartOptions<'line'> = {
@@ -107,10 +108,20 @@ export class StatisticPage implements OnInit {
   constructor(private cd: ChangeDetectorRef) { this.generateYears(); }
 
   ngOnInit() {
-    const data = localStorage.getItem('ml_result');
+    // 1. AMBIL DATA DARI 'ml_data_ready' (Optimized Source)
+    const data = localStorage.getItem('ml_data_ready');
+    
     if (data) {
-      this.rawMLData = JSON.parse(data);
+      this.readyData = JSON.parse(data);
       this.updateStatistics();
+    } else {
+        // Fallback jika user langsung loncat ke halaman statistic tanpa lewat dashboard
+        // (Jarang terjadi, tapi untuk safety)
+        const rawData = localStorage.getItem('ml_result');
+        if (rawData) {
+            this.readyData = JSON.parse(rawData);
+            this.updateStatistics();
+        }
     }
   }
 
@@ -128,10 +139,10 @@ export class StatisticPage implements OnInit {
   }
 
   updateStatistics() {
-    if (!this.rawMLData) return;
+    if (!this.readyData) return;
 
-    const profile = this.rawMLData.userProfile;
-    const roadmap = this.rawMLData.progressRecommendation?.roadmap || [];
+    const profile = this.readyData.userProfile;
+    const roadmap = this.readyData.progressRecommendation?.roadmap || [];
     
     // 1. Hitung Card Values
     this.calculateCards(profile, roadmap);
@@ -159,7 +170,7 @@ export class StatisticPage implements OnInit {
     this.statCards[1].value = `${targetW} kg`;
     const wDiff = ((targetW - profile.weight) / profile.weight) * 100;
     this.statCards[1].change = `${wDiff > 0 ? '+' : ''}${wDiff.toFixed(1)}%`;
-    this.statCards[1].isPositive = targetW <= profile.weight; // Turun berat biasanya dianggap positif di fitness
+    this.statCards[1].isPositive = targetW <= profile.weight; 
 
     // Calories
     const calVal = currentWeek.nutrition?.calories || 2000;
@@ -174,7 +185,6 @@ export class StatisticPage implements OnInit {
   }
 
   calculateChart(roadmap: any[], profile: any) {
-    // Kita ambil 12 minggu dari roadmap
     const labels = roadmap.map(w => `W${w.week}`);
     let targetData: number[] = [];
 
@@ -207,12 +217,19 @@ export class StatisticPage implements OnInit {
         },
       ]
     };
-    this.chart?.update();
+    if(this.chart) this.chart.update();
   }
 
   calculateTopActivities() {
-    // Mengambil kategori otot dari rekomendasi workout home sebagai contoh activity
-    const workoutPlan = this.rawMLData.workoutRecommendation?.home?.workout_plan || {};
+    // Mengambil kategori otot dari rekomendasi workout home
+    // Safe access (?.) karena 'home' mungkin ada tapi 'workout_plan' bisa jadi null (meski jarang untuk home)
+    const workoutPlan = this.readyData.workoutRecommendation?.home?.workout_plan; 
+    
+    if (!workoutPlan) {
+        this.topActivities = [];
+        return;
+    }
+
     const firstDayKey = Object.keys(workoutPlan)[0];
     const exercises = workoutPlan[firstDayKey] || [];
 
@@ -222,10 +239,11 @@ export class StatisticPage implements OnInit {
     });
 
     const total = exercises.length;
+    // Map data untuk UI
     this.topActivities = Object.keys(categories).map((name, i) => ({
       name: name,
       count: categories[name],
-      percent: Math.round((categories[name] / total) * 100) + '%',
+      percent: total > 0 ? Math.round((categories[name] / total) * 100) + '%' : '0%',
       chartColor: ['url(#gradGreen)', 'url(#gradBlue)', 'url(#gradYellow)', 'url(#gradRed)'][i % 4],
       legendColor: ['#AFFA01', '#3B82F6', '#FFF492', '#FF3F3F'][i % 4]
     })).slice(0, 4);
@@ -238,6 +256,8 @@ export class StatisticPage implements OnInit {
     let acc = 0;
     const total = this.topActivities.reduce((a, c) => a + c.count, 0);
     
+    if (total === 0) return;
+
     this.topActivities.forEach(act => {
       const ratio = act.count / total;
       const len = ratio * this.CIRCLE_CIRCUMFERENCE;
@@ -249,7 +269,7 @@ export class StatisticPage implements OnInit {
     });
   }
 
-  // --- UI Helpers ---
+  // --- UI Helpers (Tahun/Bulan Modal) ---
   generateYears() {
     const currentYear = new Date().getFullYear();
     for (let y = currentYear - 1; y <= currentYear + 1; y++) this.yearsList.push(y);

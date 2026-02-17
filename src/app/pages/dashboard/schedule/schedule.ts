@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterModule, Router } from '@angular/router';
 import { CalendarComponent } from '../../../shared/components';
-import { WorkoutHistoryService, ExerciseService } from '../../../core'; // Import Service
+import { WorkoutHistoryService, AuthService } from '../../../core'; 
 
 @Component({
   selector: 'app-schedule',
@@ -13,196 +13,202 @@ import { WorkoutHistoryService, ExerciseService } from '../../../core'; // Impor
 })
 export class Schedule implements OnInit {
 
+  // UI State
   isModeOpen = false;
   selectedMode: 'Home' | 'Gym' = 'Home';
   currentDate: Date = new Date(); 
-  rawMLResult: any = null;
-  currentDayKey: string | null = null; 
+  
+  // Data
+  private readyData: any = null;
+  private currentDailyPlan: any[] = []; 
+  private currentUserId: number = 0; 
+  
+  // Public Variables
   userWorkoutDays: string[] = [];
   activities: any[] = [];
-  private currentUserId: number = 1;
-
-  // 1. Variable untuk menyimpan "Kamus" latihan (Image & ID)
-  private masterExercises: any[] = [];
-  
-  // 2. Variable untuk menyimpan Rencana Asli ML hari ini (Duration & Rest)
-  private currentDailyPlan: any[] = []; 
+  isRestDay: boolean = false;
 
   constructor(
     private historyService: WorkoutHistoryService,
-    private exerciseService: ExerciseService,
+    private authService: AuthService, // Inject Auth Service
     private router: Router
   ) {}
 
   ngOnInit() {
-    // Load Master Data Exercise Dulu
-    this.exerciseService.getAllExercises().subscribe({
-      next: (exercises) => {
-        this.masterExercises = exercises;
-        
-        // Setelah master data siap, baru jalankan logic schedule
-        this.initScheduleData();
-      },
-      error: (err) => {
-        console.error('Gagal load master exercise', err);
-        // Tetap jalan meski tanpa gambar
-        this.initScheduleData();
-      }
-    });
+    const user = this.authService.getUser();
+    this.currentUserId = user?.id || 0;
+    this.initScheduleData();
   }
 
-  goToActivity(index: number) {
-    const activity = this.activities[index];
-    
-    // Pastikan kita punya exerciseId (ID Master Latihan)
-    if (activity && activity.exerciseId) {
-      this.router.navigate(['/dashboard/workout-detail', activity.exerciseId]);
-    } else {
-      console.warn('Exercise ID tidak ditemukan, tidak bisa melihat detail.');
-    }
-  }
-
-  // Logic init dipisah biar rapi
   initScheduleData() {
-    const mlData = localStorage.getItem('ml_result');
+    // 1. Ambil data MATANG dari LocalStorage
+    const mlData = localStorage.getItem('ml_data_ready'); 
+    
     if (mlData) {
-      this.rawMLResult = JSON.parse(mlData);
-      const daysString = this.rawMLResult.userProfile?.workoutDays || "";
-      this.userWorkoutDays = daysString.split(',').map((d: string) => d.trim());
-      this.syncWithBackend();
+      this.readyData = JSON.parse(mlData);
+      // Ambil hari dari profile (jika ada)
+      const daysString = this.readyData.userProfile?.workoutDays || "";
+      this.userWorkoutDays = daysString.split(',').map((d: string) => d.trim()).filter((d: string) => d !== "");
+      
+      this.syncAndLoad();
     }
   }
 
-  syncWithBackend() {
+  syncAndLoad() {
+    this.activities = []; // Reset dulu biar bersih
     const envKey = this.selectedMode.toLowerCase(); 
-    const workoutPlan = this.rawMLResult.workoutRecommendation?.[envKey]?.workout_plan || {};
+    
+    // Support CamelCase (DB) & SnakeCase (ML)
+    const workoutPlanMap = this.readyData.workoutRecommendation?.[envKey]?.workoutPlan || 
+                           this.readyData.workoutRecommendation?.[envKey]?.workout_plan || {};
+    
+    // 1. Cek Hari Ini
     const todayShort = new Date().toLocaleDateString('en-US', { weekday: 'short' });
-    const dayIndex = this.userWorkoutDays.indexOf(todayShort);
+    
+    // --- LOGIKA HARI WORKOUT (Fixed Sequence) ---
+    const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    
+    // Urutkan hari pilihan user sesuai kalender (Mon, Tue, Wed...)
+    const sortedDays = this.userWorkoutDays.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+    
+    // Cari posisi hari ini di dalam jadwal yang sudah urut
+    const dayPosition = sortedDays.indexOf(todayShort);
 
-    if (dayIndex === -1) {
-      this.activities = [];
-      this.currentDailyPlan = []; // Reset plan jika libur
+    // 2. Jika hari ini BUKAN jadwal latihan (Rest Day)
+    if (dayPosition === -1) {
+      this.currentDailyPlan = [];
+      this.isRestDay = true;
       return;
     }
 
-    const targetDayNum = dayIndex + 1;
-    const allKeys = Object.keys(workoutPlan);
-    this.currentDayKey = allKeys.find(k => k.toLowerCase().includes(`day ${targetDayNum}`)) || null;
+    this.isRestDay = false;
+    const targetDayNum = dayPosition + 1; // Index 0 -> Day 1
+    
+    // 3. Cari Key yang cocok (misal "Day 1")
+    const dayKey = Object.keys(workoutPlanMap).find(k => k.toLowerCase().includes(`day ${targetDayNum}`));
 
-    if (this.currentDayKey && workoutPlan[this.currentDayKey]) {
-      // 3. SIMPAN PLAN ASLI KE VARIABLE GLOBAL CLASS
-      // Ini penting agar loadActivitiesFromDB bisa mengakses data duration/rest asli
-      this.currentDailyPlan = workoutPlan[this.currentDayKey];
+    if (dayKey && workoutPlanMap[dayKey]) {
+      // INI BLUEPRINT UTAMA KITA
+      this.currentDailyPlan = workoutPlanMap[dayKey]; 
 
-      this.historyService.getHistory(this.currentUserId).subscribe(dbHistory => {
-        const todayStr = new Date().toISOString().split('T')[0];
-        
-        const todayDbData = dbHistory.filter(h => 
-          h.updatedAt.toString().startsWith(todayStr) && 
-          h.environment === this.selectedMode
-        );
+      // 4. Ambil Status dari Database (History)
+      this.historyService.getHistory(this.currentUserId).subscribe({
+        next: (dbHistory) => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            // Filter DB hanya untuk hari ini & mode ini
+            const todayDbData = dbHistory.filter(h => 
+                h.updatedAt.toString().startsWith(todayStr) && 
+                h.environment === this.selectedMode
+            );
 
-        this.currentDailyPlan.forEach((ex: any) => {
-          // Pencocokan nama harus hati-hati (trim & lowercase)
-          const isAlreadyInDb = todayDbData.find(h => 
-            h.title.toLowerCase().trim() === ex.exercise_name.toLowerCase().trim()
-          );
-          
-          if (!isAlreadyInDb) {
-            const payload = {
-              userId: this.currentUserId,
-              title: ex.exercise_name,
-              status: 'PENDING',
-              calories: `${ex.calories_burned} cal`,
-              totalTime: `${ex.duration_minutes + ex.rest_minutes} Min`, // Simpan total string ke DB
-              sets: ex.sets,
-              reps: ex.reps,
-              environment: this.selectedMode
-            };
-            this.historyService.saveHistory(payload).subscribe();
-          }
-        });
-
-        // Load data terbaru untuk ditampilkan
-        this.loadActivitiesFromDB();
+            // Jalankan Mapping
+            this.mapPlanToUI(todayDbData);
+        },
+        error: (err) => {
+            console.error("DB Error, showing local plan", err);
+            this.mapPlanToUI([]); 
+        }
       });
+    } else {
+        // Kasus aneh: Hari latihan tapi data plan tidak ketemu
+        this.activities = [];
+        this.isRestDay = true;
     }
   }
 
-  loadActivitiesFromDB() {
-    this.historyService.getHistory(this.currentUserId).subscribe(data => {
-      const todayStr = new Date().toISOString().split('T')[0];
-      
-      this.activities = data
-        .filter(h => 
-          h.status === 'PENDING' && 
-          h.updatedAt.toString().startsWith(todayStr) && 
-          h.environment === this.selectedMode
-        )
-        .map(h => {
-          // A. LOGIC MENCARI EXERCISE ID (Untuk Gambar)
-          const matchedExercise = this.masterExercises.find(m => 
-            m.name.toLowerCase().trim() === h.title.toLowerCase().trim()
-          );
+  // --- LOGIC UTAMA: MERGE PLAN + DB ---
+  mapPlanToUI(dbData: any[]) {
+    if (!this.currentDailyPlan || this.currentDailyPlan.length === 0) return;
 
-          // B. LOGIC MENCARI DATA ASLI ML (Untuk Duration & Rest)
-          // Kita cari object asli dari local storage yang namanya sama dengan history DB
-          const originalMLData = this.currentDailyPlan.find(ml => 
-             ml.exercise_name.toLowerCase().trim() === h.title.toLowerCase().trim()
-          );
+    this.activities = this.currentDailyPlan.map(planItem => {
+        // Support name Camel & Snake
+        const itemName = planItem.exerciseName || planItem.exercise_name;
+        
+        // 1. Cek apakah item ini ada di DB? (Match by Name)
+        const dbRecord = dbData.find(h => 
+            h.title.toLowerCase().trim() === itemName.toLowerCase().trim()
+        );
 
-          // Ambil detail durasi & istirahat (Fallback ke 0 jika tidak ketemu)
-          const durationVal = originalMLData ? originalMLData.duration_minutes : 0;
-          const restVal = originalMLData ? originalMLData.rest_minutes : 0;
+        // 2. Hitung Angka (Duration, Rest, Sets)
+        const duration = Number(planItem.durationMinutes || planItem.duration_minutes) || 0;
+        const restTotal = Number(planItem.restMinutes || planItem.rest_minutes) || 0;
+        const sets = Number(planItem.sets) || 1;
+        const restPerSet = sets > 0 ? Math.round(restTotal / sets) : 0;
+        const totalTimeVal = duration + restTotal;
 
-          const exerciseId = matchedExercise ? matchedExercise.id : null;
-          
-          return {
-            id: h.id,          // ID History
-            exerciseId: exerciseId, // ID Exercise (Gambar)
+        // 3. Tentukan Status & ID
+        const isFinished = dbRecord ? dbRecord.status === 'FINISHED' : false;
+        const dbId = dbRecord ? dbRecord.id : null;
+
+        return {
+            id: dbId, // Null jika belum tersimpan di DB
+            exerciseId: planItem.realId, // ID Master (untuk link detail)
             
-            title: h.title,
-            calories: h.calories,
+            title: itemName,
+            description: planItem.instructions || "Lakukan gerakan ini dengan benar.",
+            tag: planItem.muscleGroup || planItem.muscle_group || "General",
             
-            // Masukkan data terpisah agar bisa dipakai di HTML {{ item.duration }}
-            duration: durationVal,
-            rest: restVal,
+            // Data Angka
+            sets: sets,
+            reps: planItem.reps,
+            calories: planItem.caloriesBurned || planItem.calories_burned,
             
-            sets: h.sets,
-            reps: h.reps,
-            environment: h.environment,
-            isFinished: false,
+            // Data Waktu (Display)
+            timePerSet: `${duration} min`, 
+            rest: restPerSet, 
+            totalTime: `${totalTimeVal} Min`, 
             
-            imageUrl: exerciseId 
-              ? `https://res.cloudinary.com/dmhzqtzrr/image/upload/${exerciseId}.gif`
-              : 'assets/images/placeholder_exercise.png'
-          };
-        });
+            // Gambar (Fallback jika null)
+            imageUrl: planItem.imageUrl || 'assets/images/placeholder_exercise.png',
+            
+            isFinished: isFinished,
+            environment: this.selectedMode
+        };
     });
+
+    // Sort: Pending di atas, Finished di bawah
+    this.activities.sort((a, b) => (a.isFinished === b.isFinished) ? 0 : a.isFinished ? 1 : -1);
   }
 
   toggleActivityStatus(index: number) {
     const activity = this.activities[index];
-
-    // Payload update ke database tetap pakai struktur DB
+    const newStatus = activity.isFinished ? 'PENDING' : 'FINISHED';
+    
+    // Payload Simpan/Update
     const payload = {
-      id: activity.id,     // History ID
+      id: activity.id, // Jika null, backend akan Create Baru. Jika ada, Update.
       userId: this.currentUserId,
       title: activity.title,
-      status: 'FINISHED',
-      calories: activity.calories,
-      // Total time string tetap kita kirim untuk konsistensi DB
-      totalTime: `${activity.duration + activity.rest} Min`, 
+      status: newStatus,
+      calories: `${activity.calories} cal`,
+      totalTime: activity.totalTime, 
       sets: activity.sets,
       reps: activity.reps,
       environment: activity.environment
     };
 
     this.historyService.saveHistory(payload).subscribe({
-      next: () => {
-        this.activities.splice(index, 1);
+      next: (savedRecord: any) => { 
+          // Update data lokal agar responsif
+          activity.isFinished = !activity.isFinished;
+          
+          // PENTING: Simpan ID baru jika ini create pertama kali
+          if (!activity.id && savedRecord && savedRecord.id) {
+              activity.id = savedRecord.id;
+          }
+
+          // Sort ulang
+          this.activities.sort((a, b) => (a.isFinished === b.isFinished) ? 0 : a.isFinished ? 1 : -1);
       }
     });
+  }
+
+  goToActivity(index: number) {
+    const activity = this.activities[index];
+    if (activity && activity.exerciseId) {
+      this.router.navigate(['/dashboard/workout-detail', activity.exerciseId]);
+    }
   }
 
   toggleMode() { this.isModeOpen = !this.isModeOpen; }
@@ -210,6 +216,6 @@ export class Schedule implements OnInit {
   setMode(mode: 'Home' | 'Gym') {
     this.selectedMode = mode;
     this.isModeOpen = false;
-    this.syncWithBackend();
+    this.syncAndLoad(); 
   }
 }

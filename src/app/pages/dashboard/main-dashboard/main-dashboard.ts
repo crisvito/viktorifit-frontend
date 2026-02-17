@@ -5,9 +5,9 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
-import { switchMap, tap, catchError } from 'rxjs/operators';
+import { switchMap, map, catchError } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
-import { AuthService, ExerciseService } from '../../../core'; 
+import { AuthService, ExerciseService, WorkoutHistoryService, UserProgressService } from '../../../core'; 
 import { environment } from '../../../../environment/environment';
 
 type ChartCategory = 'weight' | 'calories' | 'duration';
@@ -23,55 +23,38 @@ export class MainDashboardPage implements OnInit {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
   isLoading = false;
-  loadingText = 'Menyiapkan Dashboard...';
+  loadingText = 'Menyusun Program Personalisasi...';
   userName: string = 'User';
+  currentWeek: number = 1; 
+  
   workoutTitle: string = 'Rest Day';
-  workoutDesc: string = 'Your body needs time to recover.';
-  workoutImage: string = 'pages/workoutType/rest.png';
-  
+  workoutDesc: string = 'Recover to grow stronger.';
+  workoutImage: string = 'global/workout-type/maintain_transparent_background.svg';
   public selectedEnvironment: 'home' | 'gym' = 'home';
-  private rawMLResult: any = null;
-
-  todayActivities: any[] = [];
-  workoutslist: any[] = []; // Data Suggestions
   
-  // Update struktur awal bodyCondition (tambahkan properti image & category string)
+  private readyData: any = null; 
+  todayActivities: any[] = [];
+  workoutslist: any[] = []; 
+  private currentUserId: number = 0; 
+  
   bodyCondition: any = { 
-    height: 0, 
-    weight: 0, 
-    bmiCategory: '-', 
-    bodyFat: 0, 
-    goal: '-',
-    bodyFatImage: '',    // Tambahan untuk HTML
-    bodyFatCategory: ''  // Tambahan untuk HTML
+    height: 0, weight: 0, bmiCategory: '-', bodyFat: 0, goal: '-',
+    bodyFatImage: '', bodyFatCategory: ''  
   };
   
   public selectedChart: ChartCategory = 'weight';
   private chartDataMaster: any = {
-    weight: { labels: [], actual: [], target: [], color: '#3b82f6', bg: 'rgba(59, 131, 246, 0.79)', unit: 'kg' },
-    calories: { labels: [], actual: [], target: [], color: '#ec8a00', bg: 'rgba(233, 89, 0, 0.84)', unit: 'kcal' },
-    duration: { labels: [], actual: [], target: [], color: '#84cc16', bg: 'rgba(137, 228, 0, 0.96)', unit: 'min' }
+    weight: { labels: [], target: [], color: '#3b82f6', bg: 'rgba(59, 131, 246, 0.79)' },
+    calories: { labels: [], target: [], color: '#ec8a00', bg: 'rgba(233, 89, 0, 0.84)' },
+    duration: { labels: [], target: [], color: '#84cc16', bg: 'rgba(137, 228, 0, 0.96)' }
   };
 
   public lineChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public lineChartOptions: ChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    elements: { line: { tension: 0.4 }, point: { radius: 4, hoverRadius: 6 } },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        mode: 'index',
-        intersect: false,
-        callbacks: {
-          label: (context) => {
-            const unit = this.chartDataMaster[this.selectedChart].unit;
-            return ` ${context.dataset.label}: ${context.parsed.y} ${unit}`;
-          }
-        }
-      }
-    },
-    scales: { x: { grid: { display: false } }, y: { beginAtZero: false, grid: { color: '#f3f4f6' } } }
+    responsive: true, maintainAspectRatio: false,
+    elements: { line: { tension: 0.4 }, point: { radius: 4 } },
+    plugins: { legend: { display: false } },
+    scales: { x: { display: false }, y: { display: false } } 
   };
 
   tabs = [
@@ -83,48 +66,266 @@ export class MainDashboardPage implements OnInit {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private http: HttpClient,
-    private exerciseService: ExerciseService
+    private exerciseService: ExerciseService,
+    private historyService: WorkoutHistoryService,
+    private progressService: UserProgressService, 
+    private http: HttpClient
   ) {}
 
-  goToDetail(id: string) {
-    if (id) {
-      this.router.navigate(['/dashboard/workout-detail', id]);
-    }
-  }
-
   ngOnInit() {
-    const localData = localStorage.getItem('ml_result');
-    if (localData) {
-      this.rawMLResult = JSON.parse(localData);
-      this.parseAndLoadData(this.rawMLResult);
-    } else {
-      this.fetchFreshRecommendations();
+    const user = this.authService.getUser();
+    this.currentUserId = user?.id || 0;
+    this.userName = user?.fullname?.split(' ')[0] || 'User';
+    this.initDashboard();
+  }
+
+  // ==========================================
+  // 1. INITIALIZER (LOGIKA CEK DB VS ML)
+  // ==========================================
+  initDashboard() {
+    this.isLoading = true;
+
+    // A. Cek Roadmap (Boss Utama)
+    this.progressService.getProgress(this.currentUserId).subscribe({
+      next: (dbProgress) => {
+        this.currentWeek = this.progressService.calculateCurrentWeek(dbProgress.startDate);
+        const roadmap = JSON.parse(dbProgress.roadmapData);
+
+        // B. Cek Workout Home & Gym di DB secara bersamaan
+        forkJoin({
+          home: this.progressService.getWorkout(this.currentUserId, 'home').pipe(catchError(() => of(null))),
+          gym: this.progressService.getWorkout(this.currentUserId, 'gym').pipe(catchError(() => of(null)))
+        }).subscribe(res => {
+          
+          if (res.home && res.gym) {
+            // Data sudah lengkap di DB
+            const cached = localStorage.getItem('ml_data_ready');
+            const mealData = cached ? JSON.parse(cached).mealRecommendation : null;
+
+            this.readyData = {
+              userProfile: this.authService.getUser()?.userProfileDTO,
+              progressRecommendation: roadmap,
+              workoutRecommendation: {
+                home: JSON.parse(res.home.workoutData),
+                gym: JSON.parse(res.gym.workoutData)
+              },
+              mealRecommendation: mealData
+            };
+
+            // Jika meal hilang (misal clear cache), fetch ML tapi tetap pakai roadmap DB
+            if (!mealData) {
+              this.fetchAndEnrich(false, roadmap); 
+            } else {
+              this.processAndEnrich(this.readyData, false);
+            }
+          } else {
+            // Roadmap ada tapi workout belum di-save di DB
+            this.fetchAndEnrich(true, roadmap); 
+          }
+        });
+      },
+      error: () => this.fetchAndEnrich(true) // User baru total
+    });
+  }
+
+  fetchAndEnrich(shouldSave: boolean, existingRoadmap?: any) {
+    this.createFreshRecommendationRequest().subscribe(newData => {
+      if (newData) {
+        if (existingRoadmap) newData.progressRecommendation = existingRoadmap;
+
+        if (shouldSave) {
+          // AUTO-SAVE SEMUA DATA DARI ML KE DATABASE
+          this.progressService.saveProgress(this.currentUserId, newData.progressRecommendation).subscribe();
+          this.progressService.saveWorkout(this.currentUserId, 'home', newData.workoutRecommendation.home).subscribe();
+          this.progressService.saveWorkout(this.currentUserId, 'gym', newData.workoutRecommendation.gym).subscribe();
+        }
+
+        this.processAndEnrich(newData, true);
+      } else {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // ==========================================
+  // 2. DATA ENRICHMENT (ID EXERCISE & GAMBAR)
+  // ==========================================
+  processAndEnrich(mlData: any, saveToLocal: boolean) {
+    this.exerciseService.getAllExercises().pipe(catchError(() => of([]))).subscribe((dbExercises) => {
+      this.enrichWorkoutPlan(mlData.workoutRecommendation?.home, dbExercises);
+      this.enrichWorkoutPlan(mlData.workoutRecommendation?.gym, dbExercises);
+      this.enrichAllMealPlans(mlData.mealRecommendation);
+
+      if (saveToLocal) {
+        localStorage.setItem('ml_data_ready', JSON.stringify(mlData));
+      }
+      
+      this.readyData = mlData;
+      this.renderDashboard();
+      this.isLoading = false;
+    });
+  }
+
+  enrichWorkoutPlan(envData: any, dbExercises: any[]) {
+    if (!envData) return;
+    const plan = envData.workoutPlan || envData.workout_plan; // Support camel & snake
+    if (!plan) return;
+
+    Object.keys(plan).forEach(dayKey => {
+      const exercises = plan[dayKey];
+      exercises.forEach((ex: any) => {
+        const name = ex.exerciseName || ex.exercise_name;
+        const match = dbExercises.find(e => e.name.toLowerCase().trim() === name.toLowerCase().trim());
+        ex.realId = match ? match.id : null; 
+        ex.imageUrl = match ? `https://res.cloudinary.com/dmhzqtzrr/image/upload/${match.id}.gif` : 'assets/images/placeholder_exercise.png';
+      });
+    });
+  }
+
+  enrichAllMealPlans(mealRecs: any) {
+    if(!mealRecs) return;
+    const dummyImages = ['pages/steak.png', 'pages/salmon.png', 'pages/chicken.png', 'pages/oatmeal.png'];
+    Object.keys(mealRecs).forEach(key => {
+      const plan = mealRecs[key];
+      const items = plan.meal_plan || plan.mealPlan;
+      if (items) {
+        items.forEach((m: any, i: number) => m.imageUrl = dummyImages[i % dummyImages.length]);
+      }
+    });
+  }
+
+  // ==========================================
+  // 3. UI RENDERING
+  // ==========================================
+  renderDashboard() {
+    if (!this.readyData) return;
+    const profile = this.readyData.userProfile;
+    const roadmap = (this.readyData.progressRecommendation?.roadmap || this.readyData.progressRecommendation) || [];
+    const currentWeekData = roadmap[this.currentWeek - 1] || roadmap[0];
+
+    const bodyFatInfo = this.getBodyFatInfo(profile.bodyFatCategory || 2, profile.gender || 'male');
+    this.bodyCondition = {
+      height: profile.height,
+      weight: profile.weight,
+      bmiCategory: this.calculateBMI(profile.height, profile.weight),
+      bodyFat: profile.bodyFatPercentage || 0,
+      goal: profile.goal || 'Not Set',
+      bodyFatImage: bodyFatInfo.image,
+      bodyFatCategory: bodyFatInfo.label
+    };
+
+    this.updateTodayPlan();
+    this.mapSuggestions();
+    this.mapStatistics(roadmap, profile, currentWeekData);
+    this.updateChartData();
+  }
+
+  updateTodayPlan() {
+    this.setRestDay();
+    const envData = this.readyData.workoutRecommendation?.[this.selectedEnvironment];
+    const workoutPlan = envData?.workoutPlan || envData?.workout_plan;
+    if (!workoutPlan) return;
+
+    const todayShort = new Date().toLocaleDateString('en-US', { weekday: 'short' }); 
+    const workoutDaysArr = (this.readyData.userProfile.workoutDays || "").split(',').map((d: string) => d.trim());
+    const dayIndex = workoutDaysArr.indexOf(todayShort);
+
+    if (dayIndex === -1) return;
+
+    const dayOrder = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    const userDays = (this.readyData.userProfile.workoutDays || "").split(',').map((d: string) => d.trim())
+
+    const sortedDays = userDays.sort((a:any, b:any) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+
+    const dayPosition = sortedDays.indexOf(todayShort);
+
+    const dayNumber = dayPosition + 1;
+
+
+    const dayKey = Object.keys(workoutPlan).find(k => k.toLowerCase().includes(`day ${dayNumber}`));
+    if (dayKey && workoutPlan[dayKey]) {
+        this.workoutTitle = dayKey;
+        this.workoutDesc = `Day Workout ${dayNumber} • Week ${this.currentWeek}`;
+        this.workoutImage = this.readyData.userProfile.goal === "Muscle Gain" ? '/global/workout-type/muscleGain_transparent_background.svg' : '/global/workout-type/weightLoss_transparent_background.svg';
+        
+        this.todayActivities = workoutPlan[dayKey].map((ex: any) => ({
+            id: ex.realId, 
+            name: ex.exerciseName || ex.exercise_name, 
+            category: ex.muscleGroup || ex.muscle_group, 
+            imageUrl: ex.imageUrl, 
+            duration: ex.durationMinutes || ex.duration_minutes, 
+            setsReps: `${ex.sets} x ${ex.reps}`
+        }));
+        this.syncToHistoryDB(workoutPlan[dayKey]);
     }
   }
 
-  fetchFreshRecommendations() {
-    const user = this.authService.getUser();
-    const profile = user?.userProfileDTO;
-    if (!profile) return;
+  mapStatistics(roadmap: any[], profile: any, currentWeekData: any) {
+    if (!roadmap || roadmap.length === 0) return;
 
-    this.isLoading = true;
-    this.loadingText = 'Menganalisa Workout & Meal...';
+    // 1. Tentukan Window: Start = Current Week, End = Current Week + 3 (Total 4 Minggu)
+    const startIndex = Math.max(0, this.currentWeek - 1); // Index array mulai 0
+    const endIndex = startIndex + 4;
+    
+    // Ambil potongan data (slice)
+    const chartWeeks = roadmap.slice(startIndex, endIndex);
+    
+    // 2. Siapkan Labels (W1, W2, dst)
+    const labels = chartWeeks.map((w: any) => `W${w.week}`);
+
+    // 3. Mapping Data ke Master (Wajib convert ke Number)
+    // Support camelCase (dari DB) dan snake_case (dari ML)
+    this.chartDataMaster.weight.labels = labels;
+    this.chartDataMaster.weight.target = chartWeeks.map((w: any) => 
+        Number(w.physical?.weightKg || w.physical?.weight_kg || 0)
+    );
+    
+    this.chartDataMaster.calories.labels = labels;
+    this.chartDataMaster.calories.target = chartWeeks.map((w: any) => 
+        Number(w.nutrition?.calories || 0)
+    );
+    
+    this.chartDataMaster.duration.labels = labels;
+    this.chartDataMaster.duration.target = chartWeeks.map(() => 
+        Number(profile.duration || 60)
+    );
+
+    // 4. Update Angka di Tab (UI)
+    // Weight Target: Mengambil data dari minggu TERAKHIR di window chart (Target 4 minggu ke depan)
+    const targetWeekData = chartWeeks[chartWeeks.length - 1] || currentWeekData;
+    const targetWeight = targetWeekData.physical?.weightKg || targetWeekData.physical?.weight_kg || 0;
+
+    // Calories: Tetap ambil minggu ini
+    const currentCalories = currentWeekData?.nutrition?.calories || 0;
+
+    this.tabs[0].value = `${targetWeight} kg`; // Ini yang kamu minta (Target Week ke-4)
+    this.tabs[1].value = `${currentCalories} kcal`;
+    this.tabs[2].value = `${profile.duration || 60} min`;
+  }
+
+  // ==========================================
+  // 4. ML REQUESTS (PASSED POSTMAN TEST)
+  // ==========================================
+  createFreshRecommendationRequest() {
+    const profile = this.authService.getUser()?.userProfileDTO;
+    if (!profile) return of(null);
 
     const baseUrl = `${environment.apiUrl}ml`;
     const age = this.calculateAge(profile.dob);
 
+    // Payload identik dengan format Postman kamu
     const basePayload = {
-      Age: age,
-      Gender: profile.gender === 'male' ? 'Male' : 'Female',
+      Age: Number(age),
+      Gender: profile.gender === 'female' ? 'Female' : 'Male',
       Height_cm: Number(profile.height),
       Weight_kg: Number(profile.weight),
-      Body_Fat_Category: Number(profile.bodyFatCategory || 3),
+      Body_Fat_Category: Number(profile.bodyFatCategory || 2),
       Body_Fat_Percentage: Number(profile.bodyFatPercentage || 15.0),
       Goal: profile.goal || "Muscle Gain",
-      Frequency: Number(profile.frequency || 3),
+      Frequency: Number(profile.frequency || 4),
       Duration: Number(profile.duration || 60),
-      Level: profile.level || 'Beginner',
+      Level: profile.level || "Beginner",
       Badminton: profile.badminton ? 1 : 0,
       Football: profile.football ? 1 : 0,
       Basketball: profile.basketball ? 1 : 0,
@@ -132,267 +333,110 @@ export class MainDashboardPage implements OnInit {
       Swim: profile.swim ? 1 : 0
     };
 
-    forkJoin({
+    return forkJoin({
       workoutHome: this.http.post(`${baseUrl}/workout-recommendation`, { ...basePayload, Environment: 'Home' }),
       workoutGym: this.http.post(`${baseUrl}/workout-recommendation`, { ...basePayload, Environment: 'Gym' }),
       progressResult: this.http.post<any>(`${baseUrl}/userprogress-recommendation`, { ...basePayload, Initial_Weight_kg: Number(profile.weight) })
     }).pipe(
-      switchMap((results: any) => {
-        const progressData = results.progressResult;
-        const roadmap = progressData.roadmap || progressData;
+      switchMap((res: any) => {
+        const roadmap = res.progressResult.roadmap || res.progressResult;
         const week1 = Array.isArray(roadmap) ? roadmap[0] : roadmap;
-
-        this.loadingText = 'Menyusun Variasi Meal Plan...';
-
-        const createMealPayload = (f: number) => ({
-          Daily_Calories: Number(week1.nutrition.calories),
-          Target_Protein_g: Number(week1.macro.protein_g),
-          Target_Carbs_g: Number(week1.macro.carbs_g),
-          Target_Fat_g: Number(week1.macro.fat_g),
-          Frequency: f
+        
+        const mealPayload = (f: number) => ({
+            Daily_Calories: Number(week1.nutrition.calories),
+            Target_Protein_g: Number(week1.macro.protein_g),
+            Target_Carbs_g: Number(week1.macro.carbs_g),
+            Target_Fat_g: Number(week1.macro.fat_g),
+            Frequency: f
         });
 
         return forkJoin({
-          freq2: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(2)),
-          freq3: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(3)),
-          freq4: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(4)),
-          freq5: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(5))
+            freq2: this.http.post(`${baseUrl}/meal-recommendation`, mealPayload(2)),
+            freq3: this.http.post(`${baseUrl}/meal-recommendation`, mealPayload(3)),
+            freq4: this.http.post(`${baseUrl}/meal-recommendation`, mealPayload(4)),
+            freq5: this.http.post(`${baseUrl}/meal-recommendation`, mealPayload(5))
         }).pipe(
-          tap(mealResults => {
-            const finalData = {
-              userProfile: profile,
-              workoutRecommendation: { home: results.workoutHome, gym: results.workoutGym },
-              progressRecommendation: results.progressResult,
-              mealRecommendation: mealResults
-            };
-            localStorage.setItem('ml_result', JSON.stringify(finalData));
-            this.rawMLResult = finalData;
-            this.parseAndLoadData(finalData);
-          })
+          map(meals => ({
+            userProfile: profile,
+            workoutRecommendation: { home: res.workoutHome, gym: res.workoutGym },
+            progressRecommendation: res.progressResult,
+            mealRecommendation: meals
+          }))
         );
       }),
-      catchError(err => {
-        console.error('ML Data Sync Failed:', err);
-        return of(null);
-      })
-    ).subscribe(() => this.isLoading = false);
+      catchError(err => { console.error('ML Sync Failed:', err); return of(null); })
+    );
   }
 
-  parseAndLoadData(data: any) {
-    this.rawMLResult = data;
-    const profile = data.userProfile;
-    const roadmap = data.progressRecommendation?.roadmap || [];
+  // ==========================================
+  // 5. HELPERS & UI UTILS
+  // ==========================================
+  goToDetail(id: string) { if (id) this.router.navigate(['/dashboard/workout-detail', id]); }
 
-    this.userName = this.authService.getUser()?.fullname?.split(' ')[0] || 'User';
+  syncToHistoryDB(activities: any[]) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      this.historyService.getHistory(this.currentUserId).subscribe(dbHistory => {
+          const existsToday = dbHistory.filter(h => h.updatedAt.toString().startsWith(todayStr) && h.environment === this.selectedEnvironment);
+          activities.forEach((plan: any) => {
+              const name = plan.exerciseName || plan.exercise_name;
+              if (!existsToday.find(h => h.title.toLowerCase().trim() === name.toLowerCase().trim())) {
+                  const cal = plan.caloriesBurned || plan.calories_burned;
+                  this.historyService.saveHistory({ userId: this.currentUserId, title: name, status: 'PENDING', calories: `${cal} cal`, environment: this.selectedEnvironment }).subscribe();
+              }
+          });
+      });
+  }
 
-    // --- LOGIC BARU: Ambil Info Gambar Body Fat ---
-    const bodyFatInfo = this.getBodyFatInfo(profile.bodyFatCategory || 3, profile.gender || 'male');
+  onEnvironmentChange(env: 'home' | 'gym') { this.selectedEnvironment = env; this.updateTodayPlan(); }
+  setChartType(type: ChartCategory) { this.selectedChart = type; this.updateChartData(); }
 
-    this.bodyCondition = {
-      height: profile.height,
-      weight: profile.weight,
-      bmiCategory: this.calculateBMI(profile.height, profile.weight),
-      bodyFat: profile.bodyFatPercentage || 0,
-      goal: profile.goal || 'Not Set',
-      // Masukkan ke state agar HTML bisa baca
-      bodyFatImage: bodyFatInfo.image,
-      bodyFatCategory: bodyFatInfo.label
+  private updateChartData() {
+    const data = this.chartDataMaster[this.selectedChart];
+    
+    // Safety check
+    if (!data || !data.labels || data.labels.length === 0) return;
+
+    // PENTING: Membuat Objek Baru agar Angular Change Detection jalan
+    this.lineChartData = {
+      labels: [...data.labels], // Copy array labels
+      datasets: [
+        {
+          data: [...data.target], // Copy array data
+          label: 'Target',
+          borderColor: data.color,
+          backgroundColor: data.bg,
+          fill: true,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: data.color,
+          pointRadius: 6,       // Titik diperbesar dikit
+          pointHoverRadius: 8,
+          borderWidth: 3,
+          tension: 0.4          // Garis melengkung
+        }
+      ]
     };
 
-    this.updateTodayPlan();     
-    this.mapSuggestions();      
-    this.mapStatistics(roadmap, profile);
-    this.updateChartData();
-  }
-
-  onEnvironmentChange(env: 'home' | 'gym') {
-    this.selectedEnvironment = env;
-    this.updateTodayPlan();
-  }
-
-  updateTodayPlan() {
-    if (!this.rawMLResult) return;
-
-    const envData = this.rawMLResult.workoutRecommendation?.[this.selectedEnvironment];
-    const workoutPlan = envData?.workout_plan || envData;
-
-    if (!workoutPlan) {
-      this.setRestDay();
-      return;
-    }
-
-    const profile = this.rawMLResult.userProfile;
-    const todayShort = new Date().toLocaleDateString('en-US', { weekday: 'short' }); 
-    const workoutDaysArr = (profile.workoutDays || "").split(',').map((d: string) => d.trim());
-    const dayIndex = workoutDaysArr.indexOf(todayShort);
-
-    if (dayIndex !== -1) {
-      const targetDayNum = dayIndex + 1;
-      const allKeys = Object.keys(workoutPlan);
-      const dayKey = allKeys.find(k => k.toLowerCase().includes(`day ${targetDayNum}`));
-
-      if (dayKey && workoutPlan[dayKey]) {
-        this.workoutTitle = dayKey;
-        this.workoutDesc = `Ready for your ${this.selectedEnvironment} session!`;
-
-        
-        if(profile.goal == "Muscle Gain"){
-          this.workoutImage = `/global/workout-type/muscleGain_transparent_background.svg`;
-        }else if(profile.goal == "Weight Loss"){
-          this.workoutImage = `/global/workout-type/weightLoss_transparent_background.svg`;
-        }else{
-          this.workoutImage = `/global/workout-type/maintain_transparent_background.svg`;
-        }
-          
-        
-        const mlExercises = workoutPlan[dayKey];
-
-        this.exerciseService.getAllExercises().subscribe({
-          next: (allDbExercises) => {
-            this.todayActivities = mlExercises.map((mlItem: any) => {
-              const dbMatch = allDbExercises.find(dbItem => 
-                dbItem.name.toLowerCase().trim() === mlItem.exercise_name.toLowerCase().trim()
-              );
-              const realId = dbMatch ? dbMatch.id : mlItem.id;
-              return {
-                id: realId,
-                name: mlItem.exercise_name,
-                category: mlItem.muscle_group,
-                imageUrl: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${realId}.gif`,
-                duration: mlItem.duration_minutes,
-                setsReps: `${mlItem.sets} x ${mlItem.reps}`,
-                status: 'PENDING'
-              };
-            });
-          },
-          error: (err) => {
-            this.todayActivities = mlExercises.map((mlItem: any) => ({
-              id: mlItem.id,
-              name: mlItem.exercise_name,
-              category: mlItem.muscle_group,
-              imageUrl: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${mlItem.id}.gif`,
-              duration: mlItem.duration_minutes,
-              setsReps: `${mlItem.sets} x ${mlItem.reps}`,
-              status: 'PENDING'
-            }));
-          }
-        });
-
-      } else {
-        this.setRestDay();
-      }
-    } else {
-      this.setRestDay();
+    // Trigger update manual
+    if (this.chart) {
+      this.chart.update();
     }
   }
 
   private mapSuggestions() {
-    this.exerciseService.getAllExercises().subscribe({
-      next: (allExercises) => {
-        const randomExercises = allExercises.sort(() => 0.5 - Math.random()).slice(0, 3);
-        this.workoutslist = randomExercises.map(ex => {
-          const muscles = Array.isArray(ex.targetMuscles) ? ex.targetMuscles.join(', ') : (ex.targetMuscles || "");
-          const isCardio = muscles.toLowerCase().includes('cardio');
-          return {
-            id: ex.id,
-            title: ex.name,
-            type: isCardio ? 'Cardio' : 'Muscular Strength',
-            duration: 15, 
-            image: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${ex.id}.gif`
-          };
-        });
-      }
-    });
-  }
-
-  private mapStatistics(roadmap: any[], profile: any) {
-    if (roadmap && roadmap.length > 0) {
-      const chartWeeks = roadmap.slice(0, 4);
-      
-      const finalTarget = roadmap.find(w => w.week === 12) || roadmap[roadmap.length - 1];
-      const targetWeightValue = finalTarget?.physical?.weight_kg || profile.weight;
-
-      this.chartDataMaster.weight.labels = chartWeeks.map((w: any) => `Week ${w.week}`);
-      this.chartDataMaster.weight.target = chartWeeks.map((w: any) => w.physical.weight_kg);
-      this.chartDataMaster.weight.actual = this.chartDataMaster.weight.target.map((v:any) => v + 0.1);
-
-      this.chartDataMaster.calories.labels = this.chartDataMaster.weight.labels;
-      this.chartDataMaster.calories.target = chartWeeks.map((w: any) => w.nutrition.calories);
-      this.chartDataMaster.calories.actual = this.chartDataMaster.calories.target.map((v:any) => v - 10);
-
-      this.chartDataMaster.duration.labels = this.chartDataMaster.weight.labels;
-      this.chartDataMaster.duration.target = chartWeeks.map(() => profile.duration || 60);
-      this.chartDataMaster.duration.actual = this.chartDataMaster.duration.target;
-
-      this.tabs[0].value = `${targetWeightValue} kg`;
-      this.tabs[1].value = `${chartWeeks[0].nutrition.calories} kcal`;
-      this.tabs[2].value = `${profile.duration || 60} min`;
+    const plan = this.readyData?.workoutRecommendation?.home?.workoutPlan || this.readyData?.workoutRecommendation?.home?.workout_plan;
+    if (plan) {
+        const firstDayKey = Object.keys(plan)[0]; 
+        const firstDay = plan[firstDayKey] as any[];
+        if (firstDay) this.workoutslist = firstDay.slice(0, 3).map((ex:any) => ({ 
+          id: ex.realId, title: ex.exerciseName || ex.exercise_name, type: 'Strength', image: ex.imageUrl 
+        }));
     }
   }
 
   private setRestDay() {
-    this.workoutTitle = "Rest Day";
-    this.workoutDesc = "Saatnya otot beristirahat agar tumbuh lebih maksimal.";
+    this.workoutTitle = "Rest Day"; this.todayActivities = [];
     this.workoutImage = 'global/workout-type/maintain_transparent_background.svg';
-    this.todayActivities = [];
   }
-
-  setChartType(type: ChartCategory) {
-    this.selectedChart = type;
-    this.updateChartData();
-  }
-
-  private updateChartData() {
-    const data = this.chartDataMaster[this.selectedChart];
-    if (!data.labels.length) return;
-
-    this.lineChartData = {
-      labels: data.labels,
-      datasets: [
-        {
-          data: data.target,
-          label: 'Target',
-          borderColor: data.color,
-          backgroundColor: (context: any) => {
-            const chartArea = context.chart.chartArea;
-            if (!chartArea) return null;
-            const gradient = context.chart.ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            gradient.addColorStop(0, data.bg);
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            return gradient;
-          },
-          fill: true,
-          pointBackgroundColor: data.color,
-          pointBorderColor: '#fff',
-          borderWidth: 2
-        },
-      ]
-    };
-    this.chart?.update();
-  }
-
-  getStatusColor(status: string) {
-    if (!status) return 'bg-gray-100 text-gray-500';
-    switch (status.toUpperCase()) {
-      case 'FINISHED':
-        return 'bg-lime-100 text-lime-600';
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-600';
-      default:
-        return 'bg-gray-100 text-gray-500';
-    }
-  }
-  
-  get completedWorkouts() { return this.todayActivities.filter(a => a.status === 'FINISHED').length; }
-  get totalWorkouts() { return this.todayActivities.length; }
-  get currentDuration() { return this.completedWorkouts * 15; }
-  get targetDuration() { return this.totalWorkouts * 15; }
-  get circleDashOffset() {
-    const pct = this.totalWorkouts > 0 ? (this.completedWorkouts / this.totalWorkouts) * 100 : 0;
-    return 100 - pct;
-  }
-  getActiveTab() { return this.tabs.find(t => t.id === this.selectedChart); }
-  getLabel() { return this.selectedChart.charAt(0).toUpperCase() + this.selectedChart.slice(1); }
 
   private calculateAge(dob: string): number {
     if (!dob) return 25;
@@ -405,29 +449,15 @@ export class MainDashboardPage implements OnInit {
 
   private calculateBMI(h: number, w: number): string {
     const bmi = w / ((h / 100) * (h / 100));
-    if (bmi < 18.5) return 'Underweight';
-    if (bmi < 25) return 'Normal';
-    if (bmi < 30) return 'Overweight';
-    return 'Obese';
+    return bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese';
   }
 
-  // --- Fungsi Baru Helper Body Fat Image ---
   getBodyFatInfo(catId: number, gender: string) {
-    const prefix = gender.toLowerCase() === 'female' ? 'female' : 'male'; 
-    
-    switch(catId) {
-      case 1: 
-        return { label: 'Essential', image: `/global/body-fat/${prefix}_veryLean.svg` };
-      case 2: 
-        return { label: 'Athlete', image: `/global/body-fat/${prefix}_athletic.svg` };
-      case 3: 
-        return { label: 'Fitness', image: `/global/body-fat/${prefix}_average.svg` };
-      case 4: 
-        return { label: 'Average', image: `/global/body-fat/${prefix}_overweight.svg` };
-      case 5: 
-        return { label: 'Obese', image: `/global/body-fat/${prefix}_obese.svg` };
-      default: 
-        return { label: 'Average', image: `/global/body-fat/${prefix}_average.svg` };
-    }
+    const prefix = (gender || 'male').toLowerCase() === 'female' ? 'female' : 'male';
+    const labels = ['', 'Very Lean', 'Athlete', 'Fitness', 'Average', 'Obese'];
+    return { label: labels[catId] || 'Average', image: `/global/body-fat/${prefix}_average.svg` };
   }
+
+  getActiveTab() { return this.tabs.find(t => t.id === this.selectedChart); }
+  getLabel() { return this.selectedChart.charAt(0).toUpperCase() + this.selectedChart.slice(1); }
 }

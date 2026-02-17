@@ -26,14 +26,13 @@ export class CalendarComponent implements OnInit, OnChanges {
   weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']; 
   calendarDays: CalendarDate[][] = []; 
 
-  // --- LOGIC 12 MINGGU ---
   programStartDate: Date = new Date();
   programEndDate: Date = new Date();
 
+  private readyData: any = null;
+
   ngOnInit() {
-    this.initializeProgramDates(); // Set tanggal mulai & selesai
-    this.generateCalendar();
-    this.calculateSummary();
+    this.loadAndInitialize();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -43,21 +42,29 @@ export class CalendarComponent implements OnInit, OnChanges {
     }
   }
 
-  // 1. FUNGSI HITUNG DURASI PROGRAM
-  initializeProgramDates() {
-    // Di sini kita set Start Date. 
-    // Idealnya ambil dari localStorage jika user sudah pernah login sebelumnya.
-    // Contoh: const storedStart = localStorage.getItem('program_start_date');
-    
-    // Untuk sekarang kita pakai 'Hari Ini' sebagai start, atau ambil dari data ML kalau ada created_at
-    this.programStartDate = new Date(); 
-    
-    // Reset jam ke 00:00:00 agar perbandingan tanggal akurat
-    this.programStartDate.setHours(0, 0, 0, 0);
+  loadAndInitialize() {
+    const data = localStorage.getItem('ml_data_ready');
+    if (data) {
+      this.readyData = JSON.parse(data);
+      
+      // 1. Set Start Date dari profil (Kapan program dibuat)
+      const updatedAt = this.readyData.userProfile?.updatedAt;
+      this.programStartDate = updatedAt ? new Date(updatedAt) : new Date();
+      this.programStartDate.setHours(0, 0, 0, 0);
 
-    // Hitung End Date: Start + 12 Minggu (84 Hari)
-    this.programEndDate = new Date(this.programStartDate);
-    this.programEndDate.setDate(this.programStartDate.getDate() + (12 * 7));
+      // 2. Set End Date (Start + 12 Minggu)
+      this.programEndDate = new Date(this.programStartDate);
+      this.programEndDate.setDate(this.programStartDate.getDate() + (12 * 7));
+
+      // 3. Ambil workout days jika @Input kosong
+      if (!this.workoutDays || this.workoutDays.length === 0) {
+        const daysString = this.readyData.userProfile?.workoutDays || "";
+        this.workoutDays = daysString.split(',').map((d: string) => d.trim());
+      }
+    }
+
+    this.generateCalendar();
+    this.calculateSummary();
   }
 
   generateCalendar() {
@@ -81,20 +88,14 @@ export class CalendarComponent implements OnInit, OnChanges {
 
     // Hari Bulan Ini
     for (let day = 1; day <= daysInMonth; day++) {
-      // Buat objek tanggal untuk hari yang sedang dicek
       const checkDate = new Date(year, month, day);
-      checkDate.setHours(0, 0, 0, 0); // Reset jam biar bandinginnya apel-to-apel
+      checkDate.setHours(0, 0, 0, 0);
 
       const dayNameShort = checkDate.toLocaleDateString('en-US', { weekday: 'short' }); 
       
-      // LOGIC PENENTUAN WARNA HIJAU:
-      // 1. Apakah hari ini (Mon/Tue) adalah jadwal user?
       const isDayMatch = this.workoutDays.some(d => d.trim().toLowerCase() === dayNameShort.toLowerCase());
-      
-      // 2. Apakah tanggal ini masih dalam periode 12 minggu?
       const isWithinProgram = checkDate >= this.programStartDate && checkDate <= this.programEndDate;
 
-      // Gabungkan kedua syarat
       const isWorkoutDay = isDayMatch && isWithinProgram;
 
       week.push({ day: day, isCurrentMonth: true, isWorkout: isWorkoutDay });
@@ -116,32 +117,44 @@ export class CalendarComponent implements OnInit, OnChanges {
   }
 
   calculateSummary() {
-    const data = localStorage.getItem('ml_result');
-    if (data) {
-      try {
-        const parsed = JSON.parse(data);
-        this.homeStats = this.extractStats(parsed.workoutRecommendation?.home?.workout_plan);
-        this.gymStats = this.extractStats(parsed.workoutRecommendation?.gym?.workout_plan);
-      } catch (e) {
-        console.error("Error calculating summary", e);
-      }
+    if (!this.readyData) return;
+
+    try {
+      // Ambil data Home & Gym dari Enriched Data
+      this.homeStats = this.extractStatsFromPlan(this.readyData.workoutRecommendation?.home?.workout_plan);
+      this.gymStats = this.extractStatsFromPlan(this.readyData.workoutRecommendation?.gym?.workout_plan);
+    } catch (e) {
+      console.error("Error calculating summary", e);
     }
   }
 
-  private extractStats(plan: any) {
-    if (plan) {
-      const firstKey = Object.keys(plan)[0];
-      if (firstKey && plan[firstKey]) {
-         const exs = plan[firstKey];
-         const mins = exs.reduce((acc: number, cur: any) => 
-            acc + (Number(cur.duration_minutes) || 0) + (Number(cur.rest_minutes) || 0), 0);
-         const cals = exs.reduce((acc: number, cur: any) => 
-            acc + (Number(cur.calories_burned) || 0), 0);
-         
-         return { duration: `${mins} Mins`, calories: `${cals} cal` };
+  private extractStatsFromPlan(plan: any) {
+    if (!plan) return { duration: '0 Mins', calories: '0 cal' };
+
+    const days = Object.keys(plan);
+    if (days.length === 0) return { duration: '0 Mins', calories: '0 cal' };
+
+    let totalMins = 0;
+    let totalCals = 0;
+
+    // Hitung rata-rata dari semua hari yang ada di plan
+    days.forEach(dayKey => {
+      const exercises = plan[dayKey];
+      if (Array.isArray(exercises)) {
+        exercises.forEach((ex: any) => {
+          totalMins += (Number(ex.duration_minutes) || 0) + (Number(ex.rest_minutes) || 0);
+          totalCals += (Number(ex.calories_burned) || 0);
+        });
       }
-    }
-    return { duration: '0 Mins', calories: '0 cal' };
+    });
+
+    const avgMins = Math.round(totalMins / days.length);
+    const avgCals = Math.round(totalCals / days.length);
+
+    return { 
+      duration: `${avgMins} Mins`, 
+      calories: `${avgCals} cal` 
+    };
   }
 
   changeMonth(offset: number) {

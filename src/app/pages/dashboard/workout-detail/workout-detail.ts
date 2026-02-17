@@ -14,7 +14,12 @@ import { ExerciseService } from '../../../core/services/exercise.service';
 export class WorkoutDetail implements OnInit {
   searchText = '';
   workoutId: string | null = null;
-  workout: any = {};
+  workout: any = {
+    steps: [],
+    equipments: [],
+    otherTutorials: []
+  };
+  isLoading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -32,27 +37,51 @@ export class WorkoutDetail implements OnInit {
     });
   }
 
+  /**
+   * SAPU JAGAT CLEANER
+   * Membersihkan format: • ['body weight \n • chair'] -> ["body weight", "chair"]
+   */
+  private cleanToArray(val: any): string[] {
+    if (!val) return [];
+    
+    // Ubah ke string dulu jika formatnya aneh
+    let str = Array.isArray(val) ? val.join(', ') : String(val);
+
+    return str
+      .replace(/[\[\]']/g, '')         // Hapus [ ] dan '
+      .replace(/•/g, '')               // Hapus bullet points •
+      .replace(/[\r\n]+/g, ', ')       // Ganti baris baru jadi koma
+      .split(',')                      // Pecah jadi array
+      .map(item => item.trim())        // Bersihkan spasi
+      .filter(item => item.length > 0);// Buang yang kosong
+  }
+
   fetchWorkoutDetail(id: string) {
+    this.isLoading = true;
     this.exerciseService.getExerciseById(id).subscribe({
       next: (data) => {
+        // Mendeteksi data equipment (cek tunggal atau jamak dari API)
+        const rawEquips = this.cleanToArray(data.equipments || data.equipment);
+        const rawMuscles = this.cleanToArray(data.targetMuscles);
+        const rawSteps = this.cleanToArray(data.instructions);
+
         this.workout = {
           id: data.id,
           title: data.name,
-          type: data.targetMuscles.join(', ').toLowerCase().includes('cardio') ? 'Cardio Fitness' : 'Muscular Strength',
+          type: rawMuscles.join(', ').toLowerCase().includes('cardio') ? 'Cardio Fitness' : 'Muscular Strength',
           duration: '15 - 20 minutes',
           calories: '150 Kcal',
-          description: `This exercise focuses on your ${data.targetMuscles.join(', ')}.`,
+          description: `This exercise focuses on your ${rawMuscles.join(', ')}.`,
           image: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${data.id}.gif`,
 
-          steps: data.instructions.map((step: string, index: number) => {
-            const cleanedText = step.replace(/^['\[]+|['\]]+$/g, '').trim();
-            return {
-              number: index + 1,
-              text: cleanedText
-            };
-          }),
+          // Mapping Instruksi
+          steps: rawSteps.map((step, index) => ({
+            number: index + 1,
+            text: step
+          })),
 
-          equipments: data.equipments.map((eq: string) => ({
+          // Mapping Equipment (Agar icon & nama muncul)
+          equipments: rawEquips.map(eq => ({
             name: eq,
             icon: `/assets/workout-detail/${eq.toLowerCase().replace(/\s+/g, '-')}.svg`
           })),
@@ -61,24 +90,41 @@ export class WorkoutDetail implements OnInit {
         };
 
         this.loadOtherTutorials();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error("Error loading detail", err);
+        this.isLoading = false;
       }
     });
   }
 
+  /**
+   * Mengambil tutorial lain dari cache agar ringan
+   */
   loadOtherTutorials() {
-    this.exerciseService.getAllExercises().subscribe(allData => {
-      this.workout.otherTutorials = allData
-        .filter(ex => ex.exerciseId !== this.workoutId)
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 3)
-        .map(ex => ({
-          id: ex.id,
-          title: ex.name,
-          type: ex.targetMuscles.join(', ').toLowerCase().includes('cardio') ? 'Cardio' : 'Muscular',
-          duration: '15 Min',
-          image: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${ex.id}.gif`
-        }));
-    });
+    const cached = localStorage.getItem('workout_master_cache');
+    if (cached) {
+      this.processOtherTutorials(JSON.parse(cached));
+    } else {
+      this.exerciseService.getAllExercises().subscribe(allData => {
+        this.processOtherTutorials(allData);
+      });
+    }
+  }
+
+  private processOtherTutorials(data: any[]) {
+    this.workout.otherTutorials = data
+      .filter(ex => ex.id !== this.workoutId)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3)
+      .map(ex => ({
+        id: ex.id,
+        title: ex.title || ex.name,
+        type: ex.type || (this.cleanToArray(ex.targetMuscles).join('').toLowerCase().includes('cardio') ? 'Cardio' : 'Muscular'),
+        duration: ex.duration || '15 Min',
+        image: ex.image || `https://res.cloudinary.com/dmhzqtzrr/image/upload/${ex.id}.gif`
+      }));
   }
 
   goBack(): void {

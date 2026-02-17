@@ -1,18 +1,18 @@
-<div class="w-full space-y-8 lg:-mt-16">
-  <div class="bg-[#F4F4F4] rounded-[11px] border border-[#D2D2D2]">
+<div class="w-full space-y-8 lg:-mt-16 font-poppins">
+  <div class="bg-[#F4F4F4] rounded-[11px] border border-[#D2D2D2] overflow-hidden">
     <div class="p-5">
       <h3 class="text-[28px] font-bold mb-7">Calendar</h3>
 
       <div class="flex items-center justify-between mb-6">
-        <div class="flex flex-row gap-4">
+        <div class="flex flex-row gap-4 items-center">
           <span class="text-[16px] font-medium text-gray-700">{{ displayMonthYear }}</span>
-          <img src="/pages/calendar/calendar.svg" alt="" />
+          <img src="/pages/calendar/calendar.svg" alt="cal-icon" class="w-5 h-5" />
         </div>
         <div class="flex gap-2">
           <button
-            aria-label="button"
+            aria-label="change-month"
             (click)="changeMonth(-1)"
-            class="w-6 h-6 rounded-full bg-[#4E7000] flex items-center justify-center text-white hover:bg-black transition cursor-pointer"
+            class="w-8 h-8 rounded-full bg-[#4E7000] flex items-center justify-center text-white hover:bg-black transition cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -20,13 +20,13 @@
                 stroke-linejoin="round"
                 stroke-width="2"
                 d="M15 19l-7-7 7-7"
-              ></path>
+              />
             </svg>
           </button>
           <button
-            aria-label="button"
+            aria-label="change-month"
             (click)="changeMonth(1)"
-            class="w-6 h-6 rounded-full bg-[#4E7000] flex items-center justify-center text-white hover:bg-black transition cursor-pointer"
+            class="w-8 h-8 rounded-full bg-[#4E7000] flex items-center justify-center text-white hover:bg-black transition cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -34,14 +34,14 @@
                 stroke-linejoin="round"
                 stroke-width="2"
                 d="M9 5l7 7-7 7"
-              ></path>
+              />
             </svg>
           </button>
         </div>
       </div>
 
       <div class="grid grid-cols-7 text-center mb-4 mt-7">
-        <div *ngFor="let day of weekDays" class="text-[12px] font-bold text-[#5C8C00]">
+        <div *ngFor="let day of weekDays" class="text-[12px] font-bold text-[#5C8C00] uppercase">
           {{ day }}
         </div>
       </div>
@@ -50,7 +50,7 @@
         <ng-container *ngFor="let row of calendarDays">
           <div *ngFor="let dateObj of row" class="flex justify-center items-center">
             <div
-              class="w-8 h-8 flex items-center justify-center rounded-full text-[12px] font-medium transition select-none cursor-default"
+              class="w-8 h-8 flex items-center justify-center rounded-full text-[12px] font-medium transition select-none"
               [class.bg-[#AFFA01]]="dateObj.isCurrentMonth && dateObj.isWorkout"
               [class.text-black]="dateObj.isCurrentMonth && dateObj.isWorkout"
               [class.font-bold]="dateObj.isCurrentMonth && dateObj.isWorkout"
@@ -67,7 +67,7 @@
     <div class="h-px bg-[#D2D2D2] mx-6 mt-5"></div>
 
     <div class="p-6">
-      <h3 class="text-[18px] font-medium mb-6">Summary</h3>
+      <h3 class="text-[18px] font-medium mb-6">Summary Today</h3>
 
       <div class="mb-8">
         <h4
@@ -79,9 +79,9 @@
         <div class="space-y-4">
           <div class="flex items-center gap-4">
             <div
-              class="w-12 h-12 bg-[#DBF3A3] border border-[#8AC500] rounded-[7px] flex items-center justify-center text-black shrink-0"
+              class="w-12 h-12 bg-[#DBF3A3] border border-[#8AC500] rounded-[7px] flex items-center justify-center shrink-0"
             >
-              <img src="/pages/calendar/summary-duration.svg" alt="" class="w-5 h-5" />
+              <img src="/pages/calendar/summary-duration.svg" alt="dur" class="w-5 h-5" />
             </div>
             <div>
               <p class="text-[13px] font-medium text-gray-600">Avg. Duration</p>
@@ -90,9 +90,9 @@
           </div>
           <div class="flex items-center gap-4">
             <div
-              class="w-12 h-12 bg-[#FFB0A4] border border-[#DB6755] rounded-[7px] flex items-center justify-center text-black shrink-0"
+              class="w-12 h-12 bg-[#FFB0A4] border border-[#DB6755] rounded-[7px] flex items-center justify-center shrink-0"
             >
-              <img src="/pages/calendar/summary-calories.svg" alt="" class="w-5 h-5" />
+              <img src="/pages/calendar/summary-calories.svg" alt="cal" class="w-5 h-5" />
             </div>
             <div>
               <p class="text-[13px] font-medium text-gray-600">Est. Calories</p>
@@ -112,9 +112,9 @@
         <div class="space-y-4">
           <div class="flex items-center gap-4">
             <div
-              class="w-12 h-12 bg-[#C5D6FF] border border-[#9AB7FF] rounded-[7px] flex items-center justify-center text-black shrink-0"
+              class="w-12 h-12 bg-[#C5D6FF] border border-[#9AB7FF] rounded-[7px] flex items-center justify-center shrink-0"
             >
-              <img src="/pages/calendar/summary-duration.svg" alt="" class="w-5 h-5" />
+              <img src="/pages/calendar/summary-duration.svg" alt="dur" class="w-5 h-5" />
             </div>
             <div>
               <p class="text-[13px] font-medium text-gray-600">Avg. Duration</p>
@@ -123,9 +123,9 @@
           </div>
           <div class="flex items-center gap-4">
             <div
-              class="w-12 h-12 bg-[#E1C5FF] border border-[#B39AFF] rounded-[7px] flex items-center justify-center text-black shrink-0"
+              class="w-12 h-12 bg-[#E1C5FF] border border-[#B39AFF] rounded-[7px] flex items-center justify-center shrink-0"
             >
-              <img src="/pages/calendar/summary-calories.svg" alt="" class="w-5 h-5" />
+              <img src="/pages/calendar/summary-calories.svg" alt="cal" class="w-5 h-5" />
             </div>
             <div>
               <p class="text-[13px] font-medium text-gray-600">Est. Calories</p>

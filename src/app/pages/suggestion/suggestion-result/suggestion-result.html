@@ -1,39 +1,41 @@
-<!-- DIFFERENT PAGES(ini page after user ngisi personal data) -->
-
-<!-- Workout goal Section -->
-<section class="relative h-screen px-20 flex justify-between overflow-hidden">
-  <div class="w-1/2 h-full flex flex-col justify-center pr-10 z-10">
-    <p class="text-slate-300 font-semibold text-[20px]">Your Program</p>
-    <h2 class="text-[64px] font-semibold text-[#A3E635] italic mb-2">
+<section
+  class="relative h-screen px-6 lg:px-20 flex flex-col lg:flex-row justify-between overflow-hidden"
+>
+  <div class="w-full lg:w-1/2 h-full flex flex-col justify-center pr-0 lg:pr-10 z-10 pt-20 lg:pt-0">
+    <p class="text-slate-300 font-semibold text-[18px] lg:text-[20px]">Your Program</p>
+    <h2 class="text-[48px] lg:text-[64px] font-semibold text-[#A3E635] italic mb-2 leading-tight">
       {{ userData.program.title }}
     </h2>
-    <p class="text-slate-300 text-[18px] leading-relaxed max-w-lg">
+    <p class="text-slate-300 text-[16px] lg:text-[18px] leading-relaxed max-w-lg">
       {{ userData.program.description }}
     </p>
   </div>
 
-  <div class="w-1/2 h-full flex items-end justify-end z-10 pb-0">
+  <div class="w-full lg:w-1/2 h-full flex items-end justify-end z-10 pb-0">
     <img
       [src]="userData.program.image"
       [alt]="userData.program.title"
-      class="object-contain max-h-[80vh]"
+      class="object-contain max-h-[50vh] lg:max-h-[80vh] mx-auto lg:mx-0"
     />
   </div>
 
   <div class="absolute bottom-0 left-0 w-full z-9">
-    <img src="pages/suggestion/city.png" alt="City Background" class="w-full h-auto object-cover" />
+    <img
+      src="pages/suggestion/city.png"
+      alt="City Background"
+      class="w-full h-auto object-cover opacity-60 lg:opacity-100"
+    />
   </div>
 
-  <div class="absolute h-[94vh] inset-0 bg-black z-0"></div>
+  <div class="absolute h-full inset-0 bg-black z-0 lg:h-[94vh]"></div>
 </section>
 
-<!-- Data User -->
-<section class="px-20 py-20">
+<section class="px-6 lg:px-20 py-20 bg-white">
   <div class="relative py-2 grid grid-cols-1 lg:grid-cols-2 gap-12">
     <div class="items-center">
       <div class="mb-5">
-        <h3 class="text-[24px] font-semibold">Your Information</h3>
-        <h2 class="text-[48px] font-semibold italic leading-[55px]">
+        <h3 class="text-[24px] font-semibold text-gray-800">Your Information</h3>
+        <h2 class="text-[40px] lg:text-[48px] font-semibold italic leading-[1.1] text-gray-900">
           Here's Your <br /><span class="text-[#6A9700]">Wellness Profile</span>
         </h2>
       </div>
@@ -41,51 +43,53 @@
       <div class="grid grid-cols-2 gap-6 mb-5">
         <div>
           <div
-            class="w-full bg-gray-100 text-gray-700 items-center justify-center rounded-xl px-10 py-4"
+            class="w-full bg-gray-50 text-gray-700 items-center justify-center rounded-xl px-6 py-6 border border-gray-100 shadow-sm"
           >
-            <h3 class="text-[16px] pb-2">Height</h3>
-            <div class="text-[24px] font-semibold">{{ userData.height }} cm</div>
+            <h3 class="text-[14px] lg:text-[16px] pb-2 text-gray-400">Height</h3>
+            <div class="text-[24px] font-semibold text-gray-800">{{ userData.height }} cm</div>
           </div>
         </div>
         <div>
           <div
-            class="w-full bg-gray-100 text-gray-700 items-center justify-center rounded-xl px-10 py-4"
+            class="w-full bg-gray-50 text-gray-700 items-center justify-center rounded-xl px-6 py-6 border border-gray-100 shadow-sm"
           >
-            <h3 class="text-[16px] pb-2">Weight</h3>
-            <div class="text-[24px] font-semibold">{{ userData.weight }} kg</div>
+            <h3 class="text-[14px] lg:text-[16px] pb-2 text-gray-400">Weight</h3>
+            <div class="text-[24px] font-semibold text-gray-800">{{ userData.weight }} kg</div>
           </div>
         </div>
       </div>
 
-      <app-bmi-card [bmi]="userData.bmi"> </app-bmi-card>
+      <app-bmi-card [bmi]="userData.bmi"></app-bmi-card>
     </div>
 
-    <div class="mt-8 lg:mt-0 lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-1/2 pl-0 lg:pl-6">
-      <div
-        class="bg-slate-100 rounded-[20px] h-full flex items-center justify-center relative overflow-hidden"
-      >
+    <div
+      class="mt-8 lg:mt-0 lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-1/2 pl-0 lg:pl-6 h-full min-h-[400px]"
+    >
+      <div class="bg-slate-100 rounded-[20px] h-full w-full relative overflow-hidden group">
         <img
           [src]="userData.bodyFat.image"
           [alt]="userData.bodyFat.category"
-          class="absolute top-0 w-full h-[140%] object-cover object-top"
+          class="absolute top-0 w-full h-full object-cover object-top"
         />
-        <div class="absolute bottom-8 left-8 right-8 flex gap-4">
+        <div class="absolute bottom-8 left-6 right-6 flex gap-4">
           <div
-            class="bg-white/80 backdrop-blur-md px-5 py-3 rounded-2xl border border-white shadow-sm flex-1"
+            class="bg-white/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-white shadow-lg flex-1"
           >
-            <p class="text-[14px] italic text-slate-400 mb-1">Gender</p>
-            <div class="flex flex-row items-center gap-4">
-              <div class="bg-(--main-color) h-8 w-8"></div>
-              <p class="text-[20px] font-semibold text-lime-600">{{ userData.gender }}</p>
+            <p class="text-[12px] uppercase tracking-wider text-slate-400 mb-1">Gender</p>
+            <div class="flex flex-row items-center gap-2">
+              <p class="text-[18px] font-bold text-lime-700">{{ userData.gender }}</p>
             </div>
           </div>
 
           <div
-            class="bg-white/80 backdrop-blur-md px-5 py-3 rounded-2xl border border-white shadow-sm flex-1"
+            class="bg-white/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-white shadow-lg flex-1"
           >
-            <p class="text-[14px] italic text-slate-400 mb-1">Body Fat</p>
-            <p class="text-[20px] font-semibold text-lime-600">
-              {{ userData.bodyFat.percentage }} ({{ userData.bodyFat.category }})
+            <p class="text-[12px] uppercase tracking-wider text-slate-400 mb-1">Body Fat</p>
+            <p class="text-[18px] font-bold text-lime-700">
+              {{ userData.bodyFat.percentage }}
+              <span class="text-sm font-normal text-slate-500"
+                >({{ userData.bodyFat.category }})</span
+              >
             </p>
           </div>
         </div>
@@ -94,13 +98,11 @@
   </div>
 </section>
 
-<!-- Workout Recommendation -->
-<section class="py-24 px-20 bg-[#D4F28D] overflow-hidden">
+<section class="py-24 px-6 lg:px-20 bg-[#D4F28D] overflow-hidden relative">
   <div class="relative">
     <div
       class="z-0 absolute -top-50 -left-55 w-100 h-100 rounded-full pointer-events-none bg-linear-to-tl from-[#A7DE27]/60 to-[#D3F08F] mask-[radial-gradient(closest-side,transparent_70%,black_70%)]"
     ></div>
-
     <div
       class="z-0 absolute top-0 -right-75 w-120 h-120 rounded-full pointer-events-none bg-linear-to-tr from-[#A7DE27]/60 to-[#D3F08F] mask-[radial-gradient(closest-side,transparent_70%,black_70%)]"
     ></div>
@@ -108,13 +110,14 @@
     <div class="relative z-10">
       <div class="flex flex-col">
         <div class="font-poppins text-center mb-10 max-w-3xl mx-auto">
-          <h3 class="text-[#4E7000] font-semibold text-[24px] mb-2">Workout Recommendation</h3>
-          <h2 class="text-[60px] md:text-5xl font-semibold italic text-[#2D3319] mb-6">
-            Some <span class="text-[#4E7000]">Workout</span> Recommendation
+          <h3 class="text-[#4E7000] font-semibold text-[24px] mb-2">Workout Preview</h3>
+          <h2
+            class="text-[40px] md:text-[60px] font-semibold italic text-[#2D3319] mb-6 leading-tight"
+          >
+            <span class="text-[#4E7000]">Sneak Peek</span> Plan
           </h2>
           <p class="text-[#5A6340] text-[18px] leading-relaxed max-w-xl mx-auto">
-            Based on your result, here are some workout list <br />that may suits to support your
-            programm.
+            This is a preview of your personalized plan. Log in to see the full schedule.
           </p>
         </div>
 
@@ -123,7 +126,7 @@
             <p class="text-[#2D3319] text-[16px] font-medium">
               Level : <span class="font-semibold text-[#4E7000]">{{ userData.level }}</span>
               <span class="mx-3 opacity-20">|</span>
-              <span class="font-semibold text-[#4E7000]">{{ userData.freq }} Day / Week</span>
+              <span class="font-semibold text-[#4E7000]">{{ userData.freq }} Days / Week</span>
             </p>
           </div>
 
@@ -142,7 +145,6 @@
             >
               Home
             </button>
-
             <button
               type="button"
               (click)="setMode('gym')"
@@ -157,115 +159,130 @@
             </button>
           </div>
         </div>
-      </div>
 
-      <div class="space-y-4">
-        <div
-          *ngFor="let item of filteredWorkouts"
-          class="group bg-[#F1F1F1] p-8 rounded-[18px] border border-transparent transition-all flex flex-col md:flex-row justify-between gap-6"
-        >
-          <div class="flex flex-row gap-8">
-            <div class="max-w-md">
-              <div class="flex items-center gap-0">
-                <span class="text-[16px] font-semibold text-[#4E7000] mb-2">{{
-                  item.category
-                }}</span>
-              </div>
-              <h3 class="text-2xl font-semibold text-[#2D3319]">{{ item.name }}</h3>
-              <p class="text-slate-500 text-sm leading-relaxed">
-                {{ item.description }}
-              </p>
-            </div>
-          </div>
-
+        <div class="space-y-4">
           <div
-            class="flex items-center gap-8 text-center bg-[#F8FAFC] md:bg-transparent p-4 md:p-0 rounded-2xl"
+            *ngFor="let item of previewWorkouts"
+            class="group bg-[#F1F1F1] p-8 rounded-[18px] border border-transparent flex flex-col md:flex-row justify-between gap-6"
           >
-            <div class="flex-1 md:flex-none">
-              <p class="text-[32px] font-semibold text-[#2D3319]">{{ item.sets }}</p>
-              <p class="text-[14px] text-slate-400">Sets</p>
+            <div class="flex flex-row gap-8">
+              <div class="max-w-md">
+                <div class="flex items-center gap-0">
+                  <span class="text-[16px] font-semibold text-[#4E7000] mb-2">{{
+                    item.category
+                  }}</span>
+                </div>
+                <h3 class="text-2xl font-semibold text-[#2D3319]">{{ item.name }}</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">
+                  {{ item.description }}
+                </p>
+              </div>
             </div>
-            <div class="w-1 rounded-full h-8 w bg-slate-300 hidden md:block"></div>
-            <div class="flex-1 md:flex-none">
-              <p class="text-[32px] font-semibold text-[#2D3319]">{{ item.reps }}</p>
-              <p class="text-[14px] text-slate-400">Reps</p>
+
+            <div
+              class="flex items-center gap-8 text-center bg-[#F8FAFC] md:bg-transparent p-4 md:p-0 rounded-2xl"
+            >
+              <div class="flex-1 md:flex-none">
+                <p class="text-[32px] font-semibold text-[#2D3319]">{{ item.sets }}</p>
+                <p class="text-[14px] text-slate-400">Sets</p>
+              </div>
+              <div class="w-1 rounded-full h-8 w bg-slate-300 hidden md:block"></div>
+              <div class="flex-1 md:flex-none">
+                <p class="text-[32px] font-semibold text-[#2D3319]">{{ item.reps }}</p>
+                <p class="text-[14px] text-slate-400">Reps</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div *ngIf="filteredWorkouts.length === 0" class="text-center py-10 text-slate-400 italic">
-          No workouts found for this category.
+          <div class="relative mt-2">
+            <div
+              class="absolute top-0 left-0 w-full h-24 bg-linear-to-b from-[#F1F1F1]/50 to-transparent blur-md rounded-[25px] -z-10"
+            ></div>
+
+            <div class="pt-8 pb-4 text-center">
+              <div
+                class="bg-white/40 backdrop-blur-md border border-white/60 p-6 rounded-3xl max-w-xl mx-auto shadow-lg"
+              >
+                <h3 class="text-xl font-bold text-[#2D3319] mb-2">
+                  Want to see the full schedule?
+                </h3>
+                <p class="text-[#5A6340] mb-4 text-sm">
+                  Create an account to unlock all workout days and detailed guides.
+                </p>
+                <app-button
+                  routerLink="/login"
+                  extraClass="bg-[#2D3319] text-white hover:bg-[#4E7000] px-6 py-2 !text-sm"
+                >
+                  Unlock Full Plan
+                </app-button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- meal recommendation -->
-<section class="pt-20 pb-5">
+<section class="pt-20 pb-20 bg-white">
   <div class="">
-    <div class="font-poppins text-center mb-16 px-20">
+    <div class="font-poppins text-center mb-12 px-6 lg:px-20">
       <h3 class="text-[#4E7000] text-[24px] mb-2 font-semibold">Nutrition Strategy</h3>
-      <h2 class="text-[56px] font-semibold italic text-[#2D3319] leading-[60px] mb-6">
-        Your Personalized <br class="hidden md:block" />
+      <h2 class="text-[40px] md:text-[56px] font-semibold italic text-[#2D3319] leading-tight mb-6">
+        Your Daily <br class="hidden md:block" />
         <span class="text-[#4E7000]">Meal Plan</span>
       </h2>
       <p class="text-[#5A6340] text-lg max-w-xl mx-auto leading-relaxed">
-        We've prepared you some meal recommendation <br />
-        to help you achieve your target.
+        We've prepared a balanced 3-meal strategy to help you achieve your target.
       </p>
     </div>
 
-    <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 px-20">
-      <div class="bg-[#2D3319]/5 border border-[#2D3319]/10 px-6 py-3 rounded-2xl w-full md:w-auto">
+    <div class="flex flex-col md:flex-row justify-center items-center gap-6 mb-10 px-6 lg:px-20">
+      <div
+        class="bg-[#F9FAFB] border border-gray-200 px-6 py-3 rounded-2xl w-full md:w-auto text-center md:text-left"
+      >
         <p class="text-[#2D3319] text-[18px]">
           Daily Target :
           <span class="font-semibold text-[#4E7000]">{{ nutritionData?.targetCalories }} kkal</span>
         </p>
       </div>
-
-      <select
-        aria-label="option"
-        [(ngModel)]="selectedMealFreq"
-        (change)="changeMealFreq(selectedMealFreq)"
+      <div
+        class="bg-[#F9FAFB] border border-gray-200 px-6 py-3 rounded-2xl w-full md:w-auto text-center md:text-left"
       >
-        <option *ngFor="let freq of mealFrequencyOptions" [value]="freq">
-          {{ freq }} Meals / Day
-        </option>
-      </select>
-
-      <!-- <div class="bg-[#2D3319]/5 border border-[#2D3319]/10 px-6 py-3 rounded-2xl w-full md:w-auto">
-        <p class="text-[#2D3319] text-sm font-medium">
-        REKUENSI: <span class="font-black text-[#4E7000]">5x Makan (±550 kkal/sesi)</span> 
+        <p class="text-[#2D3319] text-[18px]">
+          Frequency : <span class="font-semibold text-[#4E7000]">3 Meals / Day</span>
         </p>
-      </div> -->
+      </div>
     </div>
 
-    <div
-      class="flex flex-nowrap gap-6 overflow-x-auto pb-12 px-20 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-    >
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 lg:px-20">
       <div
         *ngFor="let meal of nutritionData?.meals; let i = index"
-        class="group bg-gray-50 p-6 rounded-[20px] border-2 border-gray-100 flex flex-col justify-between gap-6 min-w-[400px] snap-center"
+        class="group bg-gray-50 p-6 rounded-[20px] border-2 border-gray-100 flex flex-col justify-between gap-6 hover:border-[#D4F28D] transition-colors"
       >
         <div class="text-left">
-          <h3 class="text-[20px] font-semibold text-[#2D3319] mb-1 truncate">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wide"
+              >Meal {{ i + 1 }}</span
+            >
+          </div>
+          <h3 class="text-[20px] font-semibold text-[#2D3319] mb-1 leading-tight line-clamp-2">
             {{ meal.name }}
           </h3>
-          <p class="text-slate-400 text-[14px]">Porsi: {{ meal.porsi }}</p>
+          <p class="text-slate-400 text-[14px]">Serving: {{ meal.porsi }}</p>
         </div>
 
         <div
-          class="flex items-center justify-between bg-[#E7F4C8] px-15 py-3 rounded-xl border border-[#8AC500]"
+          class="flex items-center justify-between bg-[#E7F4C8] px-4 py-3 rounded-xl border border-[#8AC500]"
         >
           <div class="text-center">
-            <p class="text-[20px] font-semibold text-[#2D3319] mb-1">{{ meal.calories }}</p>
-            <p class="text-[12px] text-[#6A9700] font-semibold">Kkal</p>
+            <p class="text-[18px] font-semibold text-[#2D3319] mb-0">{{ meal.calories }}</p>
+            <p class="text-[11px] text-[#6A9700] font-semibold">Kkal</p>
           </div>
           <div class="w-0.5 h-8 bg-[#8AC500]"></div>
           <div class="text-center">
-            <p class="text-[20px] font-semibold text-[#2D3319] mb-1">{{ meal.protein }}</p>
-            <p class="text-[12px] text-[#6A9700] font-semibold">Protein</p>
+            <p class="text-[18px] font-semibold text-[#2D3319] mb-0">{{ meal.protein }}</p>
+            <p class="text-[11px] text-[#6A9700] font-semibold">Protein</p>
           </div>
         </div>
       </div>
@@ -273,15 +290,14 @@
   </div>
 </section>
 
-<section class="relative px-20 py-30">
+<section class="relative px-6 lg:px-20 py-20 lg:py-30">
   <div
     class="relative z-1 bg-black w-full rounded-3xl overflow-hidden text-white justifty-center items-center py-10 shadow-sm shadow-[#4E7000]/60 border border-[#7D7D7D]/60"
   >
-    <!-- <img src="pages/home/cta_running.png" alt="" class="absolute z-0 w-full" /> -->
     <img
       src="pages/home/cta_running.png"
       alt=""
-      class="absolute z-0 w-full scale-150 left-30 top-10 h-full object-cover"
+      class="absolute z-0 w-full scale-150 left-30 top-10 h-full object-cover opacity-80"
     />
 
     <div
@@ -290,20 +306,22 @@
 
     <div class="absolute inset-0 z-9 bg-linear-to-l from-black/60 via-black/80 to-black"></div>
 
-    <div class="z-10 py-15 pl-20 w-2/3 relative flex flex-col gap-5 text-left font-poppins">
-      <h2 class="text-[50px] font-semibold leading-[50px] italic">
+    <div
+      class="z-10 py-10 lg:py-15 pl-10 lg:pl-20 w-full lg:w-2/3 relative flex flex-col gap-5 text-left font-poppins"
+    >
+      <h2 class="text-[36px] lg:text-[50px] font-semibold leading-tight italic">
         PERSONALIZE YOUR <br />
         <span class="text-[#C3F74A]">WORKOUT NOW!</span>
       </h2>
-      <p class="text-gray-300">
-        Daftar dan buat akun di Viktorifit sekarang! Buat jadwal olahraga mu <br />yang fleksibel
-        dan sesuai dengan kebutuhan mu sekarang.
+      <p class="text-gray-300 pr-5">
+        Simpan hasil rekomendasi ini dan buat jadwal olahraga mu <br class="hidden lg:block" />yang
+        fleksibel sesuai dengan kebutuhan mu sekarang.
       </p>
       <app-button
         routerLink="/login"
         extraClass="!mt-7 !py-3 !px-8 font-semibold text-black !text-sm border-1 border-transparent
         hover:bg-black hover:boder-1 hover:border-gray-700 hover:text-white 
-        transition-all duration-300"
+        transition-all duration-300 w-fit"
       >
         Start Now
       </app-button>

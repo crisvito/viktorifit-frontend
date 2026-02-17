@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CalendarComponent } from '../../../shared/components';
-import { WorkoutHistoryService } from '../../../core';
-@
-Component({
+import { WorkoutHistoryService } from '../../../core'; 
+
+@Component({
   selector: 'app-history',
   standalone: true,
   imports: [CommonModule, FormsModule, CalendarComponent],
@@ -21,48 +21,101 @@ export class History implements OnInit {
   yearsList = [2024, 2025, 2026];
   
   activityGroups: any[] = [];
-  selectedMode: 'Home' | 'Gym' = 'Home';
-
-  // Anggap saja ID User yang login adalah 1
+  selectedMode: 'Home' | 'Gym' = 'Home'; 
   private currentUserId: number = 1;
+
+  // Kamus besar untuk mencari info gambar & waktu yang tidak ada di DB
+  private allExercisesLookup: any[] = [];
 
   constructor(
     private router: Router,
-    private historyService: WorkoutHistoryService // Inject Service Backend
+    private historyService: WorkoutHistoryService
   ) {}
 
   ngOnInit() { 
+    // 1. Siapkan data lookup dari LocalStorage agar history punya info lengkap
+    const mlData = localStorage.getItem('ml_data_ready');
+    if (mlData) {
+        this.prepareLookupData(JSON.parse(mlData));
+    }
+    
+    // 2. Load data history
     this.loadHistoryData(); 
   }
 
+  // Meratakan semua latihan dari LocalStorage ke 1 array agar mudah dicari detailnya
+  prepareLookupData(data: any) {
+      const homePlan = data?.workoutRecommendation?.home?.workout_plan || {};
+      const gymPlan = data?.workoutRecommendation?.gym?.workout_plan || {};
+      this.allExercisesLookup = [];
+      [homePlan, gymPlan].forEach(plan => {
+          Object.values(plan).forEach((dayList: any) => {
+              if (Array.isArray(dayList)) this.allExercisesLookup.push(...dayList);
+          });
+      });
+  }
+
   loadHistoryData() {
-    // 1. Ambil data dari Backend
     this.historyService.getHistory(this.currentUserId).subscribe({
       next: (data) => {
-        // 2. Filter hanya yang statusnya FINISHED dan sesuai Periode
+        // 1. Filter: FINISHED & Sesuai Periode
         const filtered = data.filter((item: any) => {
-          const date = new Date(item.updatedAt); // Pakai updatedAt dari database
+          const date = new Date(item.updatedAt); 
           return item.status === 'FINISHED' && 
                  date.getMonth() === this.selectedMonth.getMonth() && 
                  date.getFullYear() === this.selectedMonth.getFullYear();
         });
 
-        // 3. Grouping data per tanggal
-        const groups: { [key: string]: any[] } = {};
-        
-        // Sort terbaru di atas
+        // 2. Sort: Terbaru di atas
         filtered.sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
+        // 3. Grouping & Enrichment
+        const groups: { [key: string]: any[] } = {};
+        
         filtered.forEach((item: any) => {
+          // --- LOGIC ENRICHMENT (Cari Gambar & Detail Waktu) ---
+          const details = this.allExercisesLookup.find(p => 
+             p.exercise_name.toLowerCase().trim() === item.title.toLowerCase().trim()
+          );
+
+          let imgUrl = 'assets/images/placeholder_exercise.png';
+          let muscle = "General";
+          let desc = "Well done! You've completed this session.";
+          let durationVal = 0;
+          let restVal = 0;
+
+          if (details) {
+              imgUrl = details.imageUrl || imgUrl;
+              muscle = details.muscle_group || muscle;
+              desc = details.instructions || desc;
+              durationVal = Number(details.duration_minutes) || 0;
+              restVal = Number(details.rest_minutes) || 0;
+          } else {
+              // Fallback parse dari string DB "15 Min"
+              durationVal = parseInt(item.totalTime) || 0;
+          }
+
+          const sets = Number(item.sets) || 1;
+          const restPerSet = sets > 0 ? Math.round(restVal / sets) : 0;
+
           const dateObj = new Date(item.updatedAt);
           const dateStr = dateObj.toISOString().split('T')[0];
           const label = this.formatDateLabel(dateStr);
           
           if (!groups[label]) groups[label] = [];
           
-          // Tambahkan jam selesai untuk tampilan di card
           const timeLabel = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-          groups[label].push({ ...item, completedTime: timeLabel });
+          
+          // Gabungkan data DB + detail LocalStorage
+          groups[label].push({ 
+              ...item, 
+              imageUrl: imgUrl,
+              description: desc,
+              tag: muscle,
+              timePerSet: `${durationVal} min`,
+              rest: restPerSet,
+              completedTime: timeLabel 
+          });
         });
 
         this.activityGroups = Object.keys(groups).map(key => ({ 
@@ -70,7 +123,7 @@ export class History implements OnInit {
           activities: groups[key] 
         }));
       },
-      error: (err) => console.error("Gagal ambil history", err)
+      error: (err) => console.error("Gagal load history", err)
     });
   }
 
@@ -87,48 +140,36 @@ export class History implements OnInit {
 
   undoActivity(gIdx: number, aIdx: number) {
     const activity = this.activityGroups[gIdx].activities[aIdx];
-
-    // 1. Update Status ke PENDING di Backend
-    this.historyService.updateStatus(activity.id, 'PENDING').subscribe({
+    const payload = { ...activity, status: 'PENDING' };
+    
+    this.historyService.saveHistory(payload).subscribe({
       next: () => {
-        // 2. Update localStorage ml_result agar sinkron dengan Schedule (Schedule masih baca local)
-        const mlData = localStorage.getItem('ml_result');
-        if (mlData) {
-          let mlResult = JSON.parse(mlData);
-          const envKey = activity.environment.toLowerCase();
-          const workoutPlan = mlResult.workoutRecommendation[envKey].workout_plan;
-          
-          for (let dayKey in workoutPlan) {
-            const target = workoutPlan[dayKey].find((ex: any) => ex.exercise_name === activity.title);
-            if (target) { 
-              target.status = 'Pending'; 
-              break; 
-            }
-          }
-          localStorage.setItem('ml_result', JSON.stringify(mlResult));
-        }
-
-        // 3. Hapus dari tampilan history secara lokal
         this.activityGroups[gIdx].activities.splice(aIdx, 1);
         if (this.activityGroups[gIdx].activities.length === 0) {
           this.activityGroups.splice(gIdx, 1);
         }
-      },
-      error: (err) => console.error("Gagal undo status", err)
+      }
     });
   }
 
   // --- MODAL & UI LOGIC ---
-  openPeriodModal() { this.isPeriodModalOpen = true; }
+  openPeriodModal() { 
+    this.tempMonthIndex = this.selectedMonth.getMonth();
+    this.tempYear = this.selectedMonth.getFullYear();
+    this.isPeriodModalOpen = true; 
+  }
   closePeriodModal() { this.isPeriodModalOpen = false; }
   closeHistory() { this.router.navigate(['/dashboard/schedule']); }
   
   applyPeriodSelection() {
-    this.selectedMonth = new Date(this.tempYear, this.tempMonthIndex);
+    this.selectedMonth = new Date(this.tempYear, this.tempMonthIndex, 1);
     this.loadHistoryData();
     this.closePeriodModal();
   }
   
   onScrollMonth(e: any) { this.tempMonthIndex = Math.round(e.target.scrollTop / 40); }
-  onScrollYear(e: any) { this.tempYear = this.yearsList[Math.round(e.target.scrollTop / 40)]; }
+  onScrollYear(e: any) { 
+    const index = Math.round(e.target.scrollTop / 40);
+    if(this.yearsList[index]) this.tempYear = this.yearsList[index];
+  }
 }

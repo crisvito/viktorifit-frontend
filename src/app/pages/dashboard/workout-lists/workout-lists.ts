@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { ExerciseService } from '../../../core'; // Sesuaikan path
+import { ExerciseService } from '../../../core'; 
 
 @Component({
   selector: 'app-workout-lists',
@@ -15,12 +15,13 @@ export class WorkoutLists implements OnInit {
   
   searchText = '';      
   activeFilter = 'All'; 
-  workouts: any[] = []; // Menampung data dari database
-  allKeywords: string[] = []; // Untuk sugesti pencarian
+  workouts: any[] = []; 
+  allKeywords: string[] = []; 
   sortValue: 'A - Z' | 'Z - A' = 'A - Z';
   isSortOpen = false;
   showSuggestions = false;
   filteredSuggestions: string[] = [];
+  isLoading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -28,31 +29,77 @@ export class WorkoutLists implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadExercises();
+    this.initWorkoutData();
 
     this.route.queryParams.subscribe(params => {
       const query = params['q'];
-      if (query) { this.searchText = query; }
+      if (query) { 
+        this.searchText = query; 
+        this.onTyping();
+      }
     });
   }
 
-  loadExercises() {
+  // --- CACHING LOGIC ---
+  initWorkoutData() {
+    const cachedData = localStorage.getItem('workout_master_cache');
+    if (cachedData) {
+      this.workouts = JSON.parse(cachedData);
+      this.allKeywords = this.workouts.map(w => w.title);
+    } else {
+      this.loadExercisesFromAPI();
+    }
+  }
+
+  loadExercisesFromAPI() {
+    this.isLoading = true;
     this.exerciseService.getAllExercises().subscribe({
       next: (data) => {
-        this.workouts = data.map(ex => ({
-          id: ex.id,
-          title: ex.name,
-          // Logika sederhana: jika ada kata 'cardio' di targetMuscles, tipenya Cardio
-          type: ex.targetMuscles.includes('cardio') ? 'Cardio' : 'Muscular',
-          duration: 15, // Default duration karena di DB tidak ada
-          image: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${ex.id}.gif`
-        }));
-        
-        // Ambil semua nama untuk bahan sugesti search
+        const mappedData = data.map(ex => {
+          const cleanMuscles = this.cleanFormat(ex.targetMuscles);
+          const cleanEquip = this.cleanFormat(ex.equipment);
+
+          return {
+            id: ex.id,
+            title: ex.name,
+            type: cleanMuscles.toLowerCase().includes('cardio') ? 'Cardio' : 'Muscular',
+            equipment: cleanEquip,
+            duration: 15, 
+            image: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${ex.id}.gif`
+          };
+        });
+
+        this.workouts = mappedData;
         this.allKeywords = this.workouts.map(w => w.title);
+        localStorage.setItem('workout_master_cache', JSON.stringify(mappedData));
+        this.isLoading = false;
       },
-      error: (err) => console.error("Gagal load exercises", err)
+      error: (err) => {
+        console.error("Gagal load API", err);
+        this.isLoading = false;
+      }
     });
+  }
+
+  // --- FIXED CLEANER: MENGHAPUS [' '], NEWLINES, DAN BULLETS ---
+  private cleanFormat(val: any): string {
+    if (!val) return 'No Equipment';
+    
+    let str = '';
+    if (Array.isArray(val)) {
+      str = val.join(', ');
+    } else {
+      str = String(val);
+    }
+
+    return str
+      .replace(/[\[\]']/g, '')         // Hapus [ ] dan '
+      .replace(/[•\-\*]/g, '')         // Hapus bullet points atau dash jika ada dalam string
+      .replace(/[\r\n]+/g, ', ')       // Ganti Newline (pindah baris) dengan koma
+      .split(',')                      // Pecah berdasarkan koma
+      .map(item => item.trim())        // Bersihkan spasi di tiap item
+      .filter(item => item.length > 0) // Buang item kosong
+      .join(', ');                     // Gabungkan kembali dengan rapi
   }
 
   // --- LOGIKA FILTER & SORT ---
@@ -64,7 +111,8 @@ export class WorkoutLists implements OnInit {
     }
 
     if (this.searchText) {
-      result = result.filter(w => w.title.toLowerCase().includes(this.searchText.toLowerCase()));
+      const searchLower = this.searchText.toLowerCase();
+      result = result.filter(w => w.title.toLowerCase().includes(searchLower));
     }
 
     return result.sort((a, b) => {
@@ -74,17 +122,29 @@ export class WorkoutLists implements OnInit {
     });
   }
 
-  // --- UI LOGIC ---
-  setSort(value: 'A - Z' | 'Z - A') { this.sortValue = value; this.isSortOpen = false; }
-  toggleSort() { this.isSortOpen = !this.isSortOpen; }
-  setFilter(category: string) { this.activeFilter = category; }
-  onSearch() { this.showSuggestions = false; }
+  // --- UI INTERACTION ---
+  setSort(value: 'A - Z' | 'Z - A') { 
+    this.sortValue = value; 
+    this.isSortOpen = false; 
+  }
+
+  toggleSort() { 
+    this.isSortOpen = !this.isSortOpen; 
+  }
+
+  setFilter(category: string) { 
+    this.activeFilter = category; 
+  }
+
+  onSearch() { 
+    this.showSuggestions = false; 
+  }
 
   onTyping() {
     if (this.searchText.trim().length > 0) {
-      this.filteredSuggestions = this.allKeywords.filter(keyword => 
-        keyword.toLowerCase().includes(this.searchText.toLowerCase())
-      ).slice(0, 5); // Ambil 5 sugesti saja agar tidak kepanjangan
+      this.filteredSuggestions = this.allKeywords
+        .filter(keyword => keyword.toLowerCase().includes(this.searchText.toLowerCase()))
+        .slice(0, 5); 
       this.showSuggestions = this.filteredSuggestions.length > 0;
     } else {
       this.showSuggestions = false;

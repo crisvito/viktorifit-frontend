@@ -17,8 +17,8 @@
 
       <div class="w-full">
         <img
-          [src]="userProfile.bodyFat.image"
-          [alt]="userProfile.bodyFat.category"
+          [src]="userProfile?.bodyFat?.image"
+          [alt]="userProfile?.bodyFat?.category"
           class="absolute inset-0 w-full h-100% object-cover object-top p-10"
         />
         <div
@@ -226,7 +226,7 @@
             class="flex flex-row gap-3 p-2 md:p-3 bg-white border shadow-sm border-gray-100 rounded-xl relative overflow-hidden shrink-0 items-center"
           >
             <div
-              class="w-16 h-16 md:w-24 md:h-24 bg-gray-100 rounded-lg shrink-0 flex items-center justify-center text-2xl md:text-3xl"
+              class="w-16 h-16 md:w-24 md:h-24 bg-gray-100 rounded-lg shrink-0 flex items-center justify-center text-2xl md:text-3xl overflow-hidden"
             >
               <img
                 [src]="exercise.image"
@@ -267,7 +267,12 @@
           </div>
 
           <div *ngIf="exercises.length === 0" class="text-center py-10 text-gray-400">
-            No exercises for this environment.
+            <div class="flex flex-col items-center">
+              <span>No exercises found.</span>
+              <span *ngIf="activeTab === 'gym'" class="text-xs text-orange-400 mt-1"
+                >Gym plan might be locked.</span
+              >
+            </div>
           </div>
         </ng-container>
       </div>
@@ -419,9 +424,9 @@
             <div class="w-px h-4 md:h-8 bg-[#8AC500]/50 rounded-full"></div>
 
             <div class="text-center flex-1">
-              <span class="block text-xs md:text-lg font-semibold text-gray-900">{{
-                food.protein
-              }}</span>
+              <span class="block text-xs md:text-lg font-semibold text-gray-900"
+                >{{ food.calories * 0.15 | number: '1.0-0' }}g</span
+              >
               <span class="block text-[8px] md:text-sm text-[#657928]">Pro</span>
             </div>
           </div>

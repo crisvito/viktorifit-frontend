@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Penting buat ngModel dropdown
 import { BmiCardComponent, ButtonComponent } from '../../../shared/components';
 
-// ... (Interface Workout, UserWellnessProfile SAMA SEPERTI SEBELUMNYA) ...
-// ... (Interface MealItem, NutritionData SAMA SEPERTI SEBELUMNYA) ...
+// ==========================================
+// INTERFACES
+// ==========================================
 
 interface Workout {
   id: number;
@@ -27,7 +27,7 @@ interface UserWellnessProfile {
   gender: 'Male' | 'Female';
   program: { title: string; description: string; image: string; };
   level: string;
-  freq:number;
+  freq: number;
 }
 
 interface MealItem {
@@ -49,7 +49,6 @@ interface NutritionData {
   imports: [
     CommonModule,
     RouterModule, 
-    FormsModule, // Tambahkan ini
     ButtonComponent,
     BmiCardComponent
   ],
@@ -71,13 +70,8 @@ export class SuggestionResultPage implements OnInit {
   // Workout State
   workoutMode: 'home' | 'gym' = 'home';
   homeWorkouts: Workout[] = []; 
-  gymWorkouts: Workout[] = [];  
+  gymWorkouts: Workout[] = [];   
   
-  // Meal Frequency State
-  mealFrequencyOptions = [2, 3, 4, 5];
-  selectedMealFreq: number = 3; // Default 3 kali makan
-  allMealRecommendations: any = null; // Simpan raw data { freq2, freq3... }
-
   isLoading: boolean = true;
 
   constructor(private router: Router) { }
@@ -100,66 +94,72 @@ export class SuggestionResultPage implements OnInit {
       const profile = parsed.userProfile;
       const workoutRec = parsed.workoutRecommendation;
       
-      // Simpan SEMUA data meal (freq2, freq3, freq4, freq5) ke variable global
-      this.allMealRecommendations = parsed.mealRecommendation; 
+      // Ambil Meal Data (Hardcoded freq3 sesuai logic onboarding)
+      const mealRec = parsed.mealRecommendation?.freq3;
 
-      // 1. MAPPING USER PROFILE (SAMA)
+      // 1. MAPPING USER PROFILE
       const heightM = profile.Height_cm / 100;
       const bmiVal = heightM > 0 ? parseFloat((profile.Weight_kg / (heightM * heightM)).toFixed(1)) : 0;
       const bfInfo = this.getBodyFatInfo(profile.Body_Fat_Category, profile.Gender);
+      
+      // Fix Program Info (Mapping Goal ke Title/Desc)
       const progInfo = this.getProgramInfo(profile.Goal);
 
       this.userData = {
         id: 'guest_01', name: 'Guest User',
         height: profile.Height_cm, weight: profile.Weight_kg, bmi: bmiVal,
-        gender: profile.Gender,
-        bodyFat: { percentage: `${profile.Body_Fat_Percentage}%`, category: bfInfo.label, image: bfInfo.image },
-        program: { title: profile.Goal, description: progInfo.description, image: progInfo.image },
-        level: profile.Level, freq: profile.Frequency
+        gender: profile.Gender === 'Male' ? 'Male' : 'Female',
+        bodyFat: { 
+            percentage: `${profile.Body_Fat_Percentage}%`, 
+            category: bfInfo.label, 
+            image: bfInfo.image 
+        },
+        program: { 
+            title: profile.Goal, 
+            description: progInfo.description, 
+            image: progInfo.image 
+        },
+        level: profile.Level, 
+        freq: profile.Frequency
       };
 
-      // 2. MAPPING MEAL (Set Default ke Frequency 3)
-      this.changeMealFreq(3);
+      // 2. MAPPING MEAL (Langsung Frequency 3)
+      this.mapMealData(mealRec);
 
-      // 3. MAPPING WORKOUT (SAMA)
+      // 3. MAPPING WORKOUT
       const rawHome = workoutRec?.home?.workout_plan;
       this.homeWorkouts = this.flattenWorkoutPlan(rawHome, 'home');
+      
       const rawGym = workoutRec?.gym?.workout_plan;
       this.gymWorkouts = this.flattenWorkoutPlan(rawGym, 'gym');
 
     } catch (e) {
+      console.error('Error parsing data', e);
     } finally {
       this.isLoading = false;
     }
   }
 
   // ==========================================
-  // LOGIC GANTI FREQUENCY MEAL
+  // LOGIC MAPPING MEAL
   // ==========================================
-  changeMealFreq(freq: number) {
-    this.selectedMealFreq = freq; // Update state untuk dropdown
+  mapMealData(mealData: any) {
+    if (!mealData) return;
 
-    if (!this.allMealRecommendations) return;
-
-    // Ambil data spesifik berdasarkan key (freq2, freq3, dst)
-    const key = `freq${freq}`;
-    const specificMealData = this.allMealRecommendations[key];
-
-    // Mapping ulang data Nutrition berdasarkan pilihan frequency
     let mappedMeals: MealItem[] = [];
-    const mealPlanList = specificMealData?.meal_plan || [];
+    const mealPlanList = mealData.meal_plan || [];
 
-    if (Array.isArray(mealPlanList) && mealPlanList.length > 0) {
+    if (Array.isArray(mealPlanList)) {
       mappedMeals = mealPlanList.map((m: any) => ({
-        name: m.menu_name || 'Food Item',
+        name: m.menu_name || 'Healthy Food',
         porsi: `${m.portion || 1} Portion`,
         calories: Math.round(m.calories || 0),
         protein: `${(m.protein || 0).toFixed(1)}g`,
-        image: 'assets/food-placeholder.jpg'
+        image: 'assets/food-placeholder.jpg' // Ganti dengan path image default kamu
       }));
     }
 
-    const totalCal = specificMealData?.planned_total?.calories || specificMealData?.target_daily?.calories || 2000;
+    const totalCal = mealData.planned_total?.calories || mealData.target_daily?.calories || 2000;
 
     this.nutritionData = {
       targetCalories: Math.round(totalCal),
@@ -168,14 +168,15 @@ export class SuggestionResultPage implements OnInit {
   }
 
   // ==========================================
-  // HELPERS (flattenWorkoutPlan, getBodyFatInfo, getProgramInfo) 
-  // ... (Paste method helper yang SAMA DARI SEBELUMNYA di sini) ...
+  // HELPERS
   // ==========================================
   
   private flattenWorkoutPlan(planObj: any, type: 'home' | 'gym'): Workout[] {
     if (!planObj || typeof planObj !== 'object') return [];
     let allExercises: Workout[] = [];
     let idCounter = 1;
+    
+    // Urutkan hari (Monday, Tuesday, etc) jika perlu, atau iterasi object keys
     Object.keys(planObj).forEach(dayKey => {
         const exercises = planObj[dayKey];
         if (Array.isArray(exercises)) {
@@ -197,37 +198,41 @@ export class SuggestionResultPage implements OnInit {
   getBodyFatInfo(catId: number, gender: string) {
     const isFemale = (gender || '').toLowerCase() === 'female';
     const prefix = isFemale ? 'female' : 'male';
+    // Path image sesuaikan dengan folder assets kamu
+    const basePath = '/global/body-fat/'; 
+    
     switch(catId) {
-      case 1: 
-        return { label: 'Essential', image: `global/body-fat/${prefix}_veryLean.svg` };
-      case 2: 
-        return { label: 'Athlete', image: `global/body-fat/${prefix}_athletic.svg` };
-      case 3: 
-        return { label: 'Fitness', image: `global/body-fat/${prefix}_average.svg` };
-      case 4: 
-        return { label: 'Average', image: `global/body-fat/${prefix}_overweight.svg` };
-      case 5: 
-        return { label: 'Obese', image: `global/body-fat/${prefix}_obese.svg` };
-      default: 
-        return { label: 'Average', image: `global/body-fat/${prefix}_average.svg` };
+      case 1: return { label: 'Essential', image: `${basePath}${prefix}_veryLean.svg` };
+      case 2: return { label: 'Athlete', image: `${basePath}${prefix}_athletic.svg` };
+      case 3: return { label: 'Fitness', image: `${basePath}${prefix}_average.svg` };
+      case 4: return { label: 'Average', image: `${basePath}${prefix}_overweight.svg` };
+      case 5: return { label: 'Obese', image: `${basePath}${prefix}_obese.svg` };
+      default: return { label: 'Average', image: `${basePath}${prefix}_average.svg` };
     }
   }
 
   getProgramInfo(goal: string) {
+    // Sesuaikan path image program kamu
     if (goal === 'Muscle Gain') {
-      return { description: 'Fokus hipertrofi otot.', image: 'pages/suggestion/weight.png' };
+      return { description: 'Focus on hypertrophy and strength building.', image: 'pages/suggestion/weight.png' };
     } else if (goal === 'Weight Loss') {
-      return { description: 'Fokus pembakaran kalori.', image: 'pages/suggestion/cardio.png' };
+      return { description: 'High intensity cardio and calorie deficit.', image: 'pages/suggestion/cardio.png' };
     } else {
-      return { description: 'Kebugaran umum.', image: 'pages/suggestion/yoga.png' };
+      return { description: 'Maintain overall fitness and stability.', image: 'pages/suggestion/yoga.png' };
     }
   }
 
-  // UI Logic
-  get filteredWorkouts() {
-    return this.workoutMode === 'home' ? this.homeWorkouts : this.gymWorkouts;
+  // ==========================================
+  // UI LOGIC (Preview Limit)
+  // ==========================================
+  
+  setMode(mode: 'home' | 'gym') { 
+    this.workoutMode = mode; 
   }
-  setMode(mode: 'home' | 'gym') { this.workoutMode = mode; }
 
+  // Getter ini hanya mengambil 3 workout pertama untuk preview
+  get previewWorkouts() {
+    const all = this.workoutMode === 'home' ? this.homeWorkouts : this.gymWorkouts;
+    return all.slice(0, 3); // LIMIT HANYA 3
+  }
 }
-

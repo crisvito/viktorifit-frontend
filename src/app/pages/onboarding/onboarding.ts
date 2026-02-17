@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http'; 
 import { BmiCardComponent } from '../../shared/components';
-import { forkJoin } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
+import { switchMap, tap, map, finalize } from 'rxjs/operators';
 import { environment } from '../../../environment/environment'; 
 import { AuthService } from '../../core';
 
@@ -87,6 +87,7 @@ export class OnboardingPage {
 
   currentStep = 0;
   isLoading = false;
+  isSubmitting = false; 
   loadingText = 'Menyimpan Data...';
 
   // State Form Data
@@ -124,8 +125,8 @@ export class OnboardingPage {
   ];
 
   femaleBodyFatOptions: Bodyfat[] = [
-    { label: 'Essential', range: '10-13%', value: 12, category: 1, image: 'global/onboarding/female_veryLean-1.svg' },
-    { label: 'Athlete', range: '14-20%', value: 17, category: 2, image: '/global/body-fat/female_athleticpng' },
+    { label: 'Essential', range: '10-13%', value: 12, category: 1, image: 'global/body-fat/female_veryLean.svg' },
+    { label: 'Athlete', range: '14-20%', value: 17, category: 2, image: '/global/body-fat/female_athletic.svg' },
     { label: 'Fitness', range: '21-24%', value: 22, category: 3, image: '/global/body-fat/female_average.svg' },
     { label: 'Average', range: '25-31%', value: 28, category: 4, image: '/global/body-fat/female_overweight.svg' },
     { label: 'Obese', range: '32%+', value: 35, category: 5, image: '/global/body-fat/female_obese.svg' }
@@ -184,7 +185,7 @@ export class OnboardingPage {
   selectDay(day: WorkoutDay) {
     const index = this.formData.workoutDays.indexOf(day);
     if (index > -1) {
-      this.formData.workoutDays.splice(index, 1); // Fix: Splice 1 item, not 2
+      this.formData.workoutDays.splice(index, 1);
     } else {
       this.formData.workoutDays.push(day);
     }
@@ -206,22 +207,20 @@ export class OnboardingPage {
     return this.birthYear ? (currentYear - this.birthYear) : 25; // Default 25
   }
 
-  // Helper untuk mengubah "monday" jadi "Mon"
   private formatDaysForDB(days: WorkoutDay[]): string {
-    // Mapping: "monday" -> "Mon", "tuesday" -> "Tue", dst.
     const map: { [key: string]: string } = {
       monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu',
       friday: 'Fri', saturday: 'Sat', sunday: 'Sun'
     };
-    
-    // Ubah jadi format singkat ("Mon,Wed,Fri") agar seragam dengan Profil
     return days.map(d => map[d] || d).join(',');
   }
 
   // ==========================================
-  // MAIN SUBMIT LOGIC (DOUBLE PREDICTION & CHAINING)
+  // MAIN SUBMIT LOGIC (SUPER FAST - HOME ONLY)
   // ==========================================
   startLoadingProcess() {
+    if (this.isSubmitting) return;
+    this.isSubmitting = true;
     this.isLoading = true;
     this.loadingText = 'Menyimpan Data...';
     
@@ -229,9 +228,8 @@ export class OnboardingPage {
   }
 
   submit() {
-    this.loadingText = 'Menganalisa Workout & Meal (All Frequencies)...';
+    this.loadingText = 'Menganalisa Personalisasi...';
 
-    // 1. Data Dasar (SAMA)
     const age = this.calculatedAge;
     const gender = this.formData.gender === 'male' ? 'Male' : 'Female';
     const height = this.formData.height || 170;
@@ -239,7 +237,6 @@ export class OnboardingPage {
     const freq = this.formData.workoutDays.length;
     const duration = this.formData.workoutDuration || 60;
     
-    // Mapping Sports (SAMA)
     const s = this.formData.sports;
     const sportsMap = {
       Badminton: s.includes('badminton') ? 1 : 0,
@@ -249,7 +246,6 @@ export class OnboardingPage {
       Swim: s.includes('swim') ? 1 : 0
     };
 
-    // 2. Payload Base (SAMA)
     const basePayload = {
       Age: age,
       Gender: gender,
@@ -264,8 +260,11 @@ export class OnboardingPage {
       ...sportsMap
     };
 
+    // HANYA Payload Home
     const homePayload: WorkoutPayload = { ...basePayload, Environment: 'Home' };
-    const gymPayload: WorkoutPayload = { ...basePayload, Environment: 'Gym' };
+    
+    // Payload Gym DIBUANG agar cepat
+    // const gymPayload: WorkoutPayload = { ...basePayload, Environment: 'Gym' };
 
     const progressPayload: UserProgressPayload = {
       ...basePayload,
@@ -274,16 +273,14 @@ export class OnboardingPage {
 
     const baseUrl = `${environment.apiUrl}ml`; 
 
-    // 3. STEP 1: Execute Workout & Progress
+    // Step 1: Request Workout (HOME ONLY) & Progress
     forkJoin({
       workoutHome: this.http.post(`${baseUrl}/workout-recommendation`, homePayload),
-      workoutGym: this.http.post(`${baseUrl}/workout-recommendation`, gymPayload),
+      // workoutGym: DIBUANG (Login to unlock)
       progressResult: this.http.post<any>(`${baseUrl}/userprogress-recommendation`, progressPayload) 
     }).pipe(
-      // 4. STEP 2: Handle Progress -> Prepare Multiple Meal Requests
+      // Step 2: Request Meal Plan (Single Request - Optimized)
       switchMap((results: any) => {
-        
-        // --- Ambil Data Week 1 (SAMA) ---
         const progressData = results.progressResult;
         let week1: any = null;
         if (progressData && Array.isArray(progressData.roadmap) && progressData.roadmap.length > 0) {
@@ -296,108 +293,96 @@ export class OnboardingPage {
             throw new Error('Gagal mendapatkan data progress');
         }
 
-        this.loadingText = 'Menyusun Variasi Meal Plan...';
+        this.loadingText = 'Menyusun Meal Plan...';
 
-        const createMealPayload = (freq: number): MealPayload => ({
+        const mealPayload: MealPayload = {
           Daily_Calories: week1.nutrition.calories, 
           Target_Protein_g: week1.macro.protein_g,
           Target_Carbs_g: week1.macro.carbs_g,
           Target_Fat_g: week1.macro.fat_g,
-          Frequency: freq // Frequency dinamis
-        });
+          Frequency: 3 // Fixed 3 meals
+        };
 
-        // Request Paralel untuk Freq 2, 3, 4, 5
-        return forkJoin({
-          freq2: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(2)),
-          freq3: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(3)),
-          freq4: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(4)),
-          freq5: this.http.post(`${baseUrl}/meal-recommendation`, createMealPayload(5))
-        }).pipe(
-          tap(mealResults => {
-            // 5. STEP 3: Simpan SEMUA ke LocalStorage
-            
-            // Konversi hari latihan ke string "Mon,Wed,Fri"
-            const daysString = this.formatDaysForDB(this.formData.workoutDays);
-
-            const finalData = {
-              userProfile: { 
-                ...homePayload, 
-                // Tambahkan field khusus yang dibutuhkan DB
-                workoutDays: daysString, 
-                dob: this.formatDob(this.birthYear||2000, this.birthMonth||1, this.birthDay||1) 
-              },
-              workoutRecommendation: {
-                home: results.workoutHome,
-                gym: results.workoutGym
-              },
-              progressRecommendation: results.progressResult,
-              mealRecommendation: mealResults 
-            };
-
-            localStorage.setItem('ml_result', JSON.stringify(finalData));
-          })
+        return this.http.post(`${baseUrl}/meal-recommendation`, mealPayload).pipe(
+          map(mealResult => ({
+            ...results,
+            mealResult: { freq3: mealResult }
+          }))
         );
+      }),
+      // Step 3: Save Data & Sync Profile
+      switchMap((allResults: any) => {
+        const daysString = this.formatDaysForDB(this.formData.workoutDays);
+
+        const finalData = {
+          userProfile: { 
+            ...homePayload, 
+            workoutDays: daysString, 
+            dob: this.formatDob(this.birthYear||2000, this.birthMonth||1, this.birthDay||1) 
+          },
+          workoutRecommendation: {
+            home: allResults.workoutHome,
+            gym: null // SET NULL (Locked)
+          },
+          progressRecommendation: allResults.progressResult,
+          mealRecommendation: allResults.mealResult 
+        };
+
+        localStorage.setItem('ml_result', JSON.stringify(finalData));
+
+        if (this.authService.isLoggedIn()) {
+          const gp = finalData.userProfile;
+          const profilePayload = {
+            dob: gp.dob,
+            gender: gp.Gender,
+            height: gp.Height_cm,
+            weight: gp.Weight_kg,
+            goal: gp.Goal,
+            level: gp.Level,
+            bodyFatCategory: gp.Body_Fat_Category,
+            bodyFatPercentage: gp.Body_Fat_Percentage,
+            frequency: gp.Frequency,
+            duration: gp.Duration,
+            workoutDays: gp.workoutDays, 
+            badminton: gp.Badminton,
+            football: gp.Football,
+            basketball: gp.Basketball,
+            volleyball: gp.Volleyball,
+            swim: gp.Swim
+          };
+
+          return this.http.post(`${environment.apiUrl}profile/create`, profilePayload).pipe(
+            tap((savedProfile: any) => {
+              this.authService.updateUserSession(savedProfile);
+              localStorage.removeItem('ml_result');
+            })
+          );
+        } else {
+          return of(null);
+        }
+      }),
+      finalize(() => {
+        this.isLoading = false;
+        this.isSubmitting = false;
       })
     ).subscribe({
       next: () => {
-        // --- LOGIC TAMBAHAN: CEK STATUS LOGIN ---
         if (this.authService.isLoggedIn()) {
-          const guestDataStr = localStorage.getItem('ml_result');
-          
-          if (guestDataStr) {
-            const parsed = JSON.parse(guestDataStr);
-            const gp = parsed.userProfile;
-
-            // Mapping ke format DTO Backend
-            const profilePayload = {
-              dob: gp.dob,
-              gender: gp.Gender,
-              height: gp.Height_cm,
-              weight: gp.Weight_kg,
-              goal: gp.Goal,
-              level: gp.Level,
-              bodyFatCategory: gp.Body_Fat_Category,
-              bodyFatPercentage: gp.Body_Fat_Percentage,
-              frequency: gp.Frequency,
-              duration: gp.Duration,
-              
-              // Tambahkan field WorkoutDays (String)
-              workoutDays: gp.workoutDays, 
-
-              badminton: gp.Badminton,
-              football: gp.Football,
-              basketball: gp.Basketball,
-              volleyball: gp.Volleyball,
-              swim: gp.Swim
-            };
-
-            // Simpan ke DB Profile
-            this.http.post(`${environment.apiUrl}profile/create`, profilePayload).subscribe({
-              next: (savedProfile: any) => {
-                this.authService.updateUserSession(savedProfile);
-                localStorage.removeItem('ml_result');
-                this.router.navigate(['/dashboard']);
-              },
-              error: (err) => {
-                console.error('Gagal sync profile ke BE:', err);
-                this.router.navigate(['/dashboard']);
-              }
-            });
-          }
+          this.router.navigate(['/dashboard']);
         } else {
-          // Jika belum login (GUEST), tetap ke halaman hasil
           this.router.navigate(['/suggestion-result']);
         }
       },
       error: (err) => {
-        console.error('ML Processing Error:', err);
-        this.isLoading = false;
+        console.error('Error Processing:', err);
         alert('Gagal memproses rekomendasi.');
       }
     });
   }
 
-  // ... helper methods validasi tetap sama ...
+  // ==========================================
+  // NAVIGATION & VALIDATION
+  // ==========================================
 
   canContinue(): boolean {
     switch (this.currentStep) {
@@ -416,7 +401,7 @@ export class OnboardingPage {
         return d !== null && d >= 15 && d <= 150;
       case 7: return true;
       case 8: return !!this.formData.goal;
-      case 9: return this.formData.workoutDays.length > 0; // Minimal pilih 1 hari
+      case 9: return this.formData.workoutDays.length > 0;
       default: return false;
     }
   }

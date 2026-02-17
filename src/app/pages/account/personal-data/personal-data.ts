@@ -6,6 +6,14 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environment/environment';
 
+interface Bodyfat {
+  label: string;
+  range: string;
+  value: number;
+  category: number;
+  image: string;
+}
+
 @Component({
   selector: 'app-personal-data',
   standalone: true,
@@ -19,38 +27,43 @@ export class PersonalData implements OnInit {
   toastType: 'success' | 'error' = 'success';
   userName: string = '';
 
-  // Struktur Data User
   userData: any = {
     gender: 'male',
     weight: 0,
     height: 0,
     dob: '',
-    workoutDuration: 60, // Default 60 menit
+    workoutDuration: 60,
     workoutDays: [] as string[],
-    hobbies: [] as string[], // Array untuk menampung Sport yang dipilih (UI)
+    hobbies: [] as string[],
     goal: 'Muscle Gain',
     level: 'Beginner',
     bodyFatPercentage: 15,
-    bodyFatCategory: 3
+    bodyFatCategory: 3,
+    bodyFat: 15 // Helper untuk UI Highlight (berisi .value)
   };
 
-  // Opsi Body Fat (Sesuaikan image path dengan projectmu)
-  bodyFatLevels = [
-    { value: 4, label: 'Essential', range: '2-5%', image: 'assets/bodyfat/essential.png' },
-    { value: 10, label: 'Athlete', range: '6-13%', image: 'assets/bodyfat/athlete.png' },
-    { value: 15, label: 'Fitness', range: '14-17%', image: 'assets/bodyfat/fitness.png' },
-    { value: 21, label: 'Average', range: '18-24%', image: 'assets/bodyfat/average.png' },
-    { value: 30, label: 'Obese', range: '25%+', image: 'assets/bodyfat/obese.png' }
+  maleBodyFatOptions: Bodyfat[] = [
+    { label: 'Essential', range: '2-5%', value: 4, category: 1, image: '/global/body-fat/male_veryLean.svg' },
+    { label: 'Athlete', range: '6-13%', value: 10, category: 2, image: '/global/body-fat/male_athletic.svg' },
+    { label: 'Fitness', range: '14-17%', value: 15, category: 3, image: '/global/body-fat/male_average.svg' },
+    { label: 'Average', range: '18-24%', value: 21, category: 4, image: '/global/body-fat/male_overweight.svg' },
+    { label: 'Obese', range: '25%+', value: 30, category: 5, image: '/global/body-fat/male_obese.svg' }
   ];
 
-  // Opsi Durasi (Sesuai HTML baru kamu)
+  femaleBodyFatOptions: Bodyfat[] = [
+    { label: 'Essential', range: '10-13%', value: 12, category: 1, image: 'global/body-fat/female_veryLean.svg' },
+    { label: 'Athlete', range: '14-20%', value: 17, category: 2, image: '/global/body-fat/female_athletic.svg' },
+    { label: 'Fitness', range: '21-24%', value: 22, category: 3, image: '/global/body-fat/female_average.svg' },
+    { label: 'Average', range: '25-31%', value: 28, category: 4, image: '/global/body-fat/female_overweight.svg' },
+    { label: 'Obese', range: '32%+', value: 35, category: 5, image: '/global/body-fat/female_obese.svg' }
+  ];
+
   durationOptions = [30, 45, 60, 90];
-  
   daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   constructor(
-    private authService: AuthService, 
-    private http: HttpClient, 
+    private authService: AuthService,
+    private http: HttpClient,
     private router: Router
   ) {}
 
@@ -58,83 +71,85 @@ export class PersonalData implements OnInit {
     this.loadUserData();
   }
 
+  // Getter untuk mendapatkan list body fat yang aktif sesuai gender saat ini
+  get bodyFatLevels(): Bodyfat[] {
+    return this.userData.gender === 'female' ? this.femaleBodyFatOptions : this.maleBodyFatOptions;
+  }
+
   loadUserData() {
     const user = this.authService.getUser();
-  
-    if (user) {
+    if (user && user.userProfileDTO) {
+      const p = user.userProfileDTO;
       this.userName = user.fullname ? user.fullname.split(' ')[0] : user.username;
-      
-      if (user.userProfileDTO) {
-        const p = user.userProfileDTO;
-        
-        // 1. Mapping Sport dari Database (1/0) ke Array string (UI)
-        const loadedHobbies = [];
-        if (p.badminton) loadedHobbies.push('Badminton');
-        if (p.football) loadedHobbies.push('Football');
-        if (p.volleyball) loadedHobbies.push('Volley'); // Nama harus sama persis dgn HTML
-        if (p.swim) loadedHobbies.push('Swimming');     // Nama harus sama persis dgn HTML
-        if (p.basketball) loadedHobbies.push('Basket'); // Nama harus sama persis dgn HTML
 
-        this.userData = {
-          gender: p.gender?.toLowerCase() || 'male',
-          weight: p.weight || 0,
-          height: p.height || 0,
-          dob: p.dob ? p.dob.split('T')[0] : '',
-          workoutDuration: p.duration || 60, // Load durasi
-          goal: p.goal || 'Muscle Gain',
-          level: p.level || 'Beginner',
-          bodyFatPercentage: p.bodyFatPercentage || 15,
-          bodyFatCategory: p.bodyFatCategory || 3,
-          hobbies: loadedHobbies, // Masukkan ke state UI
-          workoutDays: p.workoutDays 
-            ? p.workoutDays.split(',').map((d: string) => d.trim()).filter((d: string) => d !== "") 
-            : []
-        };
+      const loadedHobbies = [];
+      if (p.badminton) loadedHobbies.push('Badminton');
+      if (p.football) loadedHobbies.push('Football');
+      if (p.volleyball) loadedHobbies.push('Volley');
+      if (p.swim) loadedHobbies.push('Swimming');
+      if (p.basketball) loadedHobbies.push('Basket');
+
+      this.userData = {
+        gender: p.gender?.toLowerCase() || 'male',
+        weight: p.weight || 0,
+        height: p.height || 0,
+        dob: p.dob ? p.dob.split('T')[0] : '',
+        workoutDuration: p.duration || 60,
+        goal: p.goal || 'Muscle Gain',
+        level: p.level || 'Beginner',
+        bodyFatPercentage: p.bodyFatPercentage || 15,
+        bodyFatCategory: p.bodyFatCategory || 3,
+        hobbies: loadedHobbies,
+        workoutDays: p.workoutDays
+          ? p.workoutDays.split(',').map((d: string) => d.trim()).filter((d: string) => d !== "")
+          : []
+      };
+
+      // LOGIC FIX: Cari representative value agar kotak Body Fat menyala hijau saat load
+      const currentOptions = this.bodyFatLevels;
+      const match = currentOptions.find(o => o.category === this.userData.bodyFatCategory);
+      this.userData.bodyFat = match ? match.value : this.userData.bodyFatPercentage;
+    }
+  }
+
+  selectGender(gender: string) {
+    if (this.userData.gender !== gender) {
+      this.userData.gender = gender;
+      // Saat gender berubah, sesuaikan highlight body fat ke kategori yang sama di gender baru
+      const newOptions = this.bodyFatLevels;
+      const match = newOptions.find(o => o.category === this.userData.bodyFatCategory);
+      if (match) {
+        this.userData.bodyFat = match.value;
+        this.userData.bodyFatPercentage = match.value;
       }
     }
   }
 
-  // --- Logic Gender ---
-  selectGender(gender: string) { this.userData.gender = gender; }
-  
-  // --- Logic Body Fat ---
-  getBodyFatImage(path: string) { return path; }
-
-  selectBodyFat(level: any) {
-    this.userData.bodyFatCategory = 0; 
+  selectBodyFat(level: Bodyfat) {
+    this.userData.bodyFat = level.value; // Trigger highlight di HTML
     this.userData.bodyFatPercentage = level.value;
-    // Helper property untuk UI highlight
-    this.userData.bodyFat = level.value; 
+    this.userData.bodyFatCategory = level.category;
   }
 
-  // --- Logic Duration (HTML Baru) ---
-  selectDuration(min: number) { 
-    this.userData.workoutDuration = min; 
-  }
+  selectDuration(min: number) { this.userData.workoutDuration = min; }
 
-  // --- Logic Workout Days ---
   toggleDay(day: string) {
     const idx = this.userData.workoutDays.indexOf(day);
     if (idx > -1) this.userData.workoutDays.splice(idx, 1);
     else this.userData.workoutDays.push(day);
   }
+
   isDaySelected(day: string): boolean { return this.userData.workoutDays.includes(day); }
 
-  // --- Logic Sport (Yang sebelumnya kurang) ---
   toggleSport(sport: string) {
     const idx = this.userData.hobbies.indexOf(sport);
-    if (idx > -1) {
-      this.userData.hobbies.splice(idx, 1); // Hapus (Toggle Off)
-    } else {
-      this.userData.hobbies.push(sport); // Tambah (Toggle On)
-    }
+    if (idx > -1) this.userData.hobbies.splice(idx, 1);
+    else this.userData.hobbies.push(sport);
   }
 
-  // --- Save Data ---
   saveChanges() {
     this.isLoading = true;
 
-    // 2. Mapping Sport dari Array string (UI) ke Database (1/0)
     const sportFlags = {
       badminton: this.userData.hobbies.includes('Badminton') ? 1 : 0,
       football: this.userData.hobbies.includes('Football') ? 1 : 0,
@@ -143,38 +158,35 @@ export class PersonalData implements OnInit {
       basketball: this.userData.hobbies.includes('Basket') ? 1 : 0,
     };
 
-    // Susun Payload
-    const payload = { 
+    const payload = {
       ...this.userData,
-      ...sportFlags, // Spread flag sport 1/0
-      duration: this.userData.workoutDuration, // Kirim durasi
-      workoutDays: this.userData.workoutDays.join(','), // Array hari jadi string "Mon,Tue"
-      frequency: this.userData.workoutDays.length 
+      ...sportFlags,
+      duration: this.userData.workoutDuration,
+      workoutDays: this.userData.workoutDays.join(','),
+      frequency: this.userData.workoutDays.length
     };
 
-    // Bersihkan properti UI helper agar payload bersih
-    delete payload.hobbies;
-    delete payload.bodyFat; 
-    
-    this.http.put(`${environment.apiUrl}profile/update`, payload).subscribe({
+    // Bersihkan helper
+    const cleanPayload = { ...payload };
+    delete cleanPayload.hobbies;
+    delete cleanPayload.bodyFat;
+
+    this.http.put(`${environment.apiUrl}profile/update`, cleanPayload).subscribe({
       next: (res: any) => {
-        // Update Local Storage User
         const currentUser = this.authService.getUser();
         if (currentUser) {
-            currentUser.userProfileDTO = { ...currentUser.userProfileDTO, ...payload };
-            // Update service dan local storage
-            this.authService.updateUserOnly(currentUser); 
+          currentUser.userProfileDTO = { ...currentUser.userProfileDTO, ...cleanPayload };
+          this.authService.updateUserOnly(currentUser);
         }
 
-        // Hapus cache ML agar dashboard hitung ulang
-        localStorage.removeItem('ml_result'); 
+        localStorage.removeItem('ml_result');
+        localStorage.removeItem('ml_data_ready');
 
-        this.triggerToast('Data updated! AI is recalculating...', 'success');
-        this.isLoading = false;
-        this.updateRecommendation();
-        
-        // Opsional: Reload data agar UI sinkron penuh
-        this.loadUserData(); 
+        this.triggerToast('Profile updated! Recalculating...', 'success');
+        setTimeout(() => {
+          this.isLoading = false;
+          this.router.navigate(['/dashboard']);
+        }, 1500);
       },
       error: (err) => {
         this.triggerToast('Update failed!', 'error');
@@ -184,13 +196,9 @@ export class PersonalData implements OnInit {
   }
 
   triggerToast(message: string, type: 'success' | 'error' = 'success') {
-    this.toastMessage = message; 
-    this.toastType = type; 
+    this.toastMessage = message;
+    this.toastType = type;
     this.showToast = true;
     setTimeout(() => this.showToast = false, 3000);
-  }
-
-  updateRecommendation() { 
-    this.router.navigate(['/dashboard']); 
   }
 }

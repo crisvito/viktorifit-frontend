@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, BehaviorSubject } from 'rxjs';
+import { Observable, tap, BehaviorSubject, forkJoin, of } from 'rxjs';
 import { environment } from '../../../environment/environment';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map, catchError } from 'rxjs/operators';
 
 export interface User {
   id: number;
@@ -17,26 +16,13 @@ export interface User {
   updatedAt?: string;
 }
 
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  user: User;
-  token: string;
-}
-
-export interface RegisterRequest {
-  fullname: string;
-  username: string;
-  email: string;
-  password: string;
-}
+export interface LoginRequest { username: string; password: string; }
+export interface LoginResponse { user: User; token: string; }
+export interface RegisterRequest { fullname: string; username: string; email: string; password: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private baseUrl = environment.apiUrl + 'auth';
+  private baseUrl = `${environment.apiUrl}auth`;
 
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
@@ -49,91 +35,29 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  // --- GETTERS & SESSION ---
   private hasToken(): boolean {
     const token = localStorage.getItem('auth_token');
     return token !== null && token !== '';
   }
 
-  isLoggedIn(): boolean {
-    return this.hasToken();
+  isLoggedIn(): boolean { return this.hasToken(); }
+  getToken(): string | null { return localStorage.getItem('auth_token'); }
+  
+  getUser(): User | null {
+    const userStr = localStorage.getItem('auth_user');
+    return userStr ? JSON.parse(userStr) : null;
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('auth_token');
+  getRole(): string | null { 
+    return this.getUser()?.role ?? null; 
   }
 
-  login(data: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/login`, data).pipe(
-      tap((res) => {
-        // 1. Simpan Session Utama
-        this.saveSession(res.token, res.user);
-        this.isLoggedInSubject.next(true);
-
-        const guestData = localStorage.getItem('ml_result');
-        const profile = res.user.userProfileDTO;
-
-        // 2. Cek apakah profil sudah ada isinya di Database
-        const isProfilePopulated =
-          profile && (profile.age !== null || profile.dob !== null);
-
-        if (isProfilePopulated) {
-          // JIKA SUDAH ADA DATA: Bersihkan sampah guest dan ke Dashboard
-          if (guestData) localStorage.removeItem('ml_result');
-          this.router.navigate(['/dashboard']);
-        } else if (guestData) {
-          // JIKA BELUM ADA DATA TAPI PUNYA DATA GUEST: Jalankan Sinkronisasi
-          this.syncGuestData(guestData);
-        } else {
-          // JIKA KOSONG SAMA SEKALI: Onboarding
-          this.router.navigate(['/onboarding']);
-        }
-      })
-    );
-  }
-
-  private syncGuestData(guestDataString: string): void {
-    const parsed = JSON.parse(guestDataString);
-    const guestProfile = parsed.userProfile;
-
-    // Payload disesuaikan dengan kebutuhan Backend Profile
-    const profilePayload = {
-      dob: guestProfile.dob,
-      gender: guestProfile.Gender,
-      height: guestProfile.Height_cm,
-      weight: guestProfile.Weight_kg,
-      goal: guestProfile.Goal,
-      level: guestProfile.Level,
-      bodyFatCategory: guestProfile.Body_Fat_Category,
-      bodyFatPercentage: guestProfile.Body_Fat_Percentage,
-      frequency: guestProfile.Frequency,
-      duration: guestProfile.Duration,
-      workoutDays: guestProfile.workoutDays, // Tambahkan ini agar sinkron
-      badminton: guestProfile.Badminton,
-      football: guestProfile.Football,
-      basketball: guestProfile.Basketball,
-      volleyball: guestProfile.Volleyball,
-      swim: guestProfile.Swim,
-    };
-
-    const profileUrl = environment.apiUrl + 'profile/create';
-
-    this.http.post(profileUrl, profilePayload).subscribe({
-      next: (savedProfile: any) => {
-
-        // --- POIN KRITIS ---
-        // 1. Update data User Session di LocalStorage agar ProfileDTO tidak null lagi
-        this.updateUserSession(savedProfile);
-        this.mlDataReadySource.next(true);
-        // 2. Hapus data ML Result (Guest) agar tidak memicu redirect loop
-        localStorage.removeItem('ml_result');
-        // 3. Sekarang aman untuk ke Dashboard
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        console.error('Gagal sinkronisasi data profil:', err);
-        this.router.navigate(['/onboarding']);
-      },
-    });
+  saveSession(token: string, user: User): void {
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('auth_user', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+    this.isLoggedInSubject.next(true);
   }
 
   updateUserSession(updatedProfile: any): void {
@@ -141,14 +65,13 @@ export class AuthService {
     if (user) {
       user.userProfileDTO = updatedProfile;
       localStorage.setItem('auth_user', JSON.stringify(user));
-      this.currentUserSubject.next(user); // Emit data user terbaru
+      this.currentUserSubject.next(user);
     }
   }
 
   updateUserOnly(res: any): void {
     const currentUser = this.getUser();
     if (!currentUser) return;
-
     if (res.email || res.fullname) {
       localStorage.setItem('auth_user', JSON.stringify(res));
       this.currentUserSubject.next(res);
@@ -159,22 +82,79 @@ export class AuthService {
     }
   }
 
+  // --- CORE AUTH ---
+  login(data: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/login`, data).pipe(
+      tap((res) => {
+        this.saveSession(res.token, res.user);
+        
+        const guestData = localStorage.getItem('ml_result');
+        const profile = res.user.userProfileDTO;
+        const isProfilePopulated = profile && (profile.age !== null || profile.dob !== null);
+
+        if (isProfilePopulated) {
+          if (guestData) localStorage.removeItem('ml_result');
+          this.router.navigate(['/dashboard']);
+        } else if (guestData) {
+          this.syncGuestData(guestData);
+        } else {
+          this.router.navigate(['/onboarding']);
+        }
+      })
+    );
+  }
+
   register(data: RegisterRequest): Observable<any> {
     return this.http.post(`${this.baseUrl}/register`, data);
   }
 
   logout(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    localStorage.removeItem('ml_result');
-    localStorage.removeItem('notification_state');
+    const keys = ['auth_token', 'auth_user', 'ml_result', 'notification_state', 'ml_data_ready'];
+    keys.forEach(k => localStorage.removeItem(k));
     this.mlDataReadySource.next(false);
     this.isLoggedInSubject.next(false);
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
 
-  // --- Fungsi ML Sync (Jika dipanggil manual dari Dashboard) ---
+  // --- ML SYNC LOGIC ---
+  private syncGuestData(guestDataString: string): void {
+    const parsed = JSON.parse(guestDataString);
+    const gp = parsed.userProfile;
+
+    const profilePayload = {
+      dob: gp.dob,
+      gender: gp.Gender || gp.gender,
+      height: gp.Height_cm || gp.height,
+      weight: gp.Weight_kg || gp.weight,
+      goal: gp.Goal || gp.goal,
+      level: gp.Level || gp.level,
+      bodyFatCategory: gp.Body_Fat_Category || gp.bodyFatCategory,
+      bodyFatPercentage: gp.Body_Fat_Percentage || gp.bodyFatPercentage,
+      frequency: gp.Frequency || gp.frequency,
+      duration: gp.Duration || gp.duration,
+      workoutDays: gp.workoutDays,
+      badminton: gp.Badminton ?? gp.badminton,
+      football: gp.Football ?? gp.football,
+      basketball: gp.Basketball ?? gp.basketball,
+      volleyball: gp.Volleyball ?? gp.volleyball,
+      swim: gp.Swim ?? gp.swim,
+    };
+
+    this.http.post(`${environment.apiUrl}profile/create`, profilePayload).subscribe({
+      next: (savedProfile: any) => {
+        this.updateUserSession(savedProfile);
+        this.mlDataReadySource.next(true);
+        localStorage.removeItem('ml_result');
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error('Gagal sinkronisasi data profil:', err);
+        this.router.navigate(['/onboarding']);
+      }
+    });
+  }
+
   syncMLRecommendations(profile: any): Observable<any> {
     const baseUrl = `${environment.apiUrl}ml`;
     const age = profile.age || this.calculateAge(profile.dob);
@@ -198,61 +178,40 @@ export class AuthService {
     };
 
     return forkJoin({
-      workoutHome: this.http.post(`${baseUrl}/workout-recommendation`, {
-        ...basePayload,
-        Environment: 'Home',
-      }),
-      workoutGym: this.http.post(`${baseUrl}/workout-recommendation`, {
-        ...basePayload,
-        Environment: 'Gym',
-      }),
-      progress: this.http.post(`${baseUrl}/userprogress-recommendation`, {
-        ...basePayload,
-        Initial_Weight_kg: Number(profile.weight),
-      }),
+      workoutHome: this.http.post(`${baseUrl}/workout-recommendation`, { ...basePayload, Environment: 'Home' }),
+      workoutGym: this.http.post(`${baseUrl}/workout-recommendation`, { ...basePayload, Environment: 'Gym' }),
+      progress: this.http.post(`${baseUrl}/userprogress-recommendation`, { ...basePayload, Initial_Weight_kg: Number(profile.weight) }),
     }).pipe(
-      switchMap((step1Results: any) => {
-        const roadmap = step1Results.progress.roadmap || step1Results.progress;
+      switchMap((res: any) => {
+        const roadmap = res.progress.roadmap || res.progress;
         const week1 = Array.isArray(roadmap) ? roadmap[0] : roadmap;
-
-        const createMealReq = (f: number) =>
-          this.http.post(`${baseUrl}/meal-recommendation`, {
-            Daily_Calories: Number(week1.nutrition.calories),
-            Target_Protein_g: Number(week1.macro.protein_g),
-            Target_Carbs_g: Number(week1.macro.carbs_g),
-            Target_Fat_g: Number(week1.macro.fat_g),
-            Frequency: f,
-          });
+        const createMealReq = (f: number) => this.http.post(`${baseUrl}/meal-recommendation`, {
+          Daily_Calories: Number(week1.nutrition.calories),
+          Target_Protein_g: Number(week1.macro.protein_g),
+          Target_Carbs_g: Number(week1.macro.carbs_g),
+          Target_Fat_g: Number(week1.macro.fat_g),
+          Frequency: f,
+        });
 
         return forkJoin({
-          freq2: createMealReq(2),
-          freq3: createMealReq(3),
-          freq4: createMealReq(4),
-          freq5: createMealReq(5),
-        }).pipe(
-          map((mealResults) => ({
-            step1: step1Results,
-            meal: mealResults,
-          }))
-        );
+          freq2: createMealReq(2), freq3: createMealReq(3), freq4: createMealReq(4), freq5: createMealReq(5)
+        }).pipe(map(meals => ({ step1: res, meal: meals })));
       }),
-      tap((allData: any) => {
-        const { step1, meal } = allData;
-        const finalJsonStructure = {
+      tap((all: any) => {
+        const finalJson = {
           userProfile: profile,
-          workoutRecommendation: {
-            home: step1.workoutHome,
-            gym: step1.workoutGym,
-          },
-          progressRecommendation: step1.progress,
-          mealRecommendation: meal,
+          workoutRecommendation: { home: all.step1.workoutHome, gym: all.step1.workoutGym },
+          progressRecommendation: all.step1.progress,
+          mealRecommendation: all.meal,
         };
-        localStorage.setItem('ml_result', JSON.stringify(finalJsonStructure));
+        localStorage.setItem('ml_result', JSON.stringify(finalJson));
         this.mlDataReadySource.next(true);
-      })
+      }),
+      catchError(err => { console.error("ML Sync Error", err); return of(null); })
     );
   }
 
+  // --- HELPERS & CHECKERS ---
   private calculateAge(dob: string): number {
     if (!dob) return 25;
     const birthDate = new Date(dob);
@@ -263,42 +222,15 @@ export class AuthService {
     return age;
   }
 
-  saveSession(token: string, user: User): void {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_user', JSON.stringify(user));
-  }
-
-  getUser(): User | null {
-    const userStr = localStorage.getItem('auth_user');
-    return userStr ? JSON.parse(userStr) : null;
-  }
-
-  getRole(): string | null {
-    return this.getUser()?.role ?? null;
-  }
-
   deleteAccount(): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}auth/users/me`, {
-      responseType: 'text',
-    });
+    return this.http.delete(`${environment.apiUrl}auth/users/me`, { responseType: 'text' });
   }
 
   changePassword(payload: any): Observable<any> {
-    return this.http.put(`${environment.apiUrl}auth/change-password`, payload, {
-      responseType: 'text',
-    });
+    return this.http.put(`${environment.apiUrl}auth/change-password`, payload, { responseType: 'text' });
   }
 
-  isGuest(): boolean {
-    return !this.getToken();
-  }
-
-  isAdmin(): boolean {
-    return this.getRole() === 'ADMIN';
-  }
-
-  isUser(): boolean {
-    return this.getRole() === 'USER';
-  }
+  isGuest(): boolean { return !this.getToken(); }
+  isAdmin(): boolean { return this.getRole() === 'ADMIN'; }
+  isUser(): boolean { return this.getRole() === 'USER'; }
 }
-
