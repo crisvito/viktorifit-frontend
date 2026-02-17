@@ -14,8 +14,6 @@ export class ProfileGuard implements CanActivate, CanActivateChild {
     if (user) {
       const profile = user.userProfileDTO;
       const isProfileEmpty = !profile || (profile.age === null && profile.dob === null);
-
-      console.log(profile);
       
       if (isProfileEmpty) {
         this.router.navigate(['/onboarding']);

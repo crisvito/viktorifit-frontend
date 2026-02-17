@@ -68,7 +68,6 @@ export class LoginPage {
         this.isLoading = false;
       },
       error: (error) => {
-        console.log(error);
         
         if (error.error && error.error.message) {
           this.serverError = error.error.message;

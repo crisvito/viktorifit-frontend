@@ -235,12 +235,11 @@ export class MainDashboardPage implements OnInit {
         this.workoutTitle = dayKey;
         this.workoutDesc = `Ready for your ${this.selectedEnvironment} session!`;
 
-        console.log(profile);
         
         if(profile.goal == "Muscle Gain"){
           this.workoutImage = `/global/workout-type/muscleGain_transparent_background.svg`;
         }else if(profile.goal == "Weight Loss"){
-          this.workoutImage = `/global/workout-type/weightGain_transparent_background.svg`;
+          this.workoutImage = `/global/workout-type/weightLoss_transparent_background.svg`;
         }else{
           this.workoutImage = `/global/workout-type/maintain_transparent_background.svg`;
         }

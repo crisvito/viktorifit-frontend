@@ -40,7 +40,12 @@ export class HeaderActions implements OnInit {
 
   ngOnInit() {
     this.checkTodayPendingWorkouts();
-  }
+    this.authService.mlDataReady$.subscribe(isReady => {
+        if (isReady && this.notifications.length === 0) {
+          window.location.reload();
+        }
+      });
+      }
 
   // --- HELPER DATE ---
   private getLocalDateString(dateInput: string | Date): string {

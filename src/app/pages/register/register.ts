@@ -103,7 +103,6 @@ export class RegisterPage {
         } else {
           this.serverError = "Connection error. Please try again.";
         }
-        console.log("Server Response Error:", this.serverError);
       }
     });
   }

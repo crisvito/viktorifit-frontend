@@ -41,6 +41,9 @@ export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
+  private mlDataReadySource = new BehaviorSubject<boolean>(false);
+  mlDataReady$ = this.mlDataReadySource.asObservable();
+
   private currentUserSubject = new BehaviorSubject<User | null>(this.getUser());
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -116,9 +119,11 @@ export class AuthService {
 
     this.http.post(profileUrl, profilePayload).subscribe({
       next: (savedProfile: any) => {
+
         // --- POIN KRITIS ---
         // 1. Update data User Session di LocalStorage agar ProfileDTO tidak null lagi
         this.updateUserSession(savedProfile);
+        this.mlDataReadySource.next(true);
         // 2. Hapus data ML Result (Guest) agar tidak memicu redirect loop
         localStorage.removeItem('ml_result');
         // 3. Sekarang aman untuk ke Dashboard
@@ -162,6 +167,8 @@ export class AuthService {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
     localStorage.removeItem('ml_result');
+    localStorage.removeItem('notification_state');
+    this.mlDataReadySource.next(false);
     this.isLoggedInSubject.next(false);
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
@@ -241,6 +248,7 @@ export class AuthService {
           mealRecommendation: meal,
         };
         localStorage.setItem('ml_result', JSON.stringify(finalJsonStructure));
+        this.mlDataReadySource.next(true);
       })
     );
   }
@@ -293,3 +301,4 @@ export class AuthService {
     return this.getRole() === 'USER';
   }
 }
+
