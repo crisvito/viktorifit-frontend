@@ -334,7 +334,7 @@ export class MainDashboardPage implements OnInit {
   private setRestDay() {
     this.workoutTitle = "Rest Day";
     this.workoutDesc = "Saatnya otot beristirahat agar tumbuh lebih maksimal.";
-    this.workoutImage = 'pages/workoutType/rest.png';
+    this.workoutImage = 'global/workout-type/maintain_transparent_background.svg';
     this.todayActivities = [];
   }
 
