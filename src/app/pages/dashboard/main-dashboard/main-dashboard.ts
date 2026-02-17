@@ -246,7 +246,7 @@ export class MainDashboardPage implements OnInit {
     const dayKey = Object.keys(workoutPlan).find(k => k.toLowerCase().includes(`day ${dayNumber}`));
     if (dayKey && workoutPlan[dayKey]) {
         this.workoutTitle = dayKey;
-        this.workoutDesc = `Day Workout ${dayNumber} • Week ${this.currentWeek}`;
+        this.workoutDesc = `Day Workout ${dayNumber} • Week ${this.currentWeek + 1}`;
         this.workoutImage = this.readyData.userProfile.goal === "Muscle Gain" ? '/global/workout-type/muscleGain_transparent_background.svg' : '/global/workout-type/weightLoss_transparent_background.svg';
         
         this.todayActivities = workoutPlan[dayKey].map((ex: any) => ({
