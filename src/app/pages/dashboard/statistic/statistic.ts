@@ -79,6 +79,7 @@ export class StatisticPage implements OnInit {
   topActivities: any[] = [];
   donutSegments: { dashArray: string, dashOffset: number }[] = [];
   readonly CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 40; 
+  readonly SEGMENT_GAP = 2;
 
   public lineChartData: ChartConfiguration<'line'>['data'] = { datasets: [], labels: [] };
   public lineChartType: 'line' = 'line'; 
@@ -93,7 +94,7 @@ export class StatisticPage implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: () => this.currentTheme.color,
         titleFont: { family: "'Poppins', sans-serif", size: 13, weight: 'bold' },
         padding: 12,
         callbacks: { label: (context: any) => ` ${context.dataset.label}: ${context.parsed.y} ${this.getUnit()}` }
@@ -179,9 +180,6 @@ export class StatisticPage implements OnInit {
 
     // Theme Color
     const activeCard = this.statCards.find(c => c.id === this.selectedStat);
-    this.currentTheme = (this.selectedStat === 'weights' && targetW > profile.weight) || activeCard?.isPositive 
-      ? { color: '#AFFA01', gradientStart: 'rgba(175, 250, 1, 0.25)' }
-      : { color: '#3b82f6', gradientStart: 'rgba(59, 130, 246, 0.25)' };
   }
 
   calculateChart(roadmap: any[], profile: any) {
@@ -190,10 +188,16 @@ export class StatisticPage implements OnInit {
 
     if (this.selectedStat === 'weights') {
       targetData = roadmap.map(w => w.physical.weight_kg);
+      // Ganti warna Kuning di sini
+      this.currentTheme = { color: '#ABA437', gradientStart: '#EDE689' }; 
     } else if (this.selectedStat === 'calories') {
       targetData = roadmap.map(w => w.nutrition.calories);
+      // Ganti warna Merah di sini
+      this.currentTheme = { color: '#ef4444', gradientStart: 'rgba(239, 68, 68, 0.3)' }; 
     } else {
       targetData = roadmap.map(() => profile.duration || 60);
+      // Ganti warna Hijau di sini
+      this.currentTheme = { color: '#84cc16', gradientStart: 'rgba(132, 204, 22, 0.3)' }; 
     }
 
     this.lineChartData = {
@@ -207,8 +211,8 @@ export class StatisticPage implements OnInit {
             const chartArea = ctx.chart.chartArea;
             if (!chartArea) return;
             const grad = ctx.chart.ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            grad.addColorStop(0, this.currentTheme.gradientStart);
-            grad.addColorStop(1, 'transparent');
+            grad.addColorStop(0.4, this.currentTheme.gradientStart);
+            grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
             return grad;
           },
           fill: true,
@@ -260,7 +264,8 @@ export class StatisticPage implements OnInit {
 
     this.topActivities.forEach(act => {
       const ratio = act.count / total;
-      const len = ratio * this.CIRCLE_CIRCUMFERENCE;
+      let len = ratio * this.CIRCLE_CIRCUMFERENCE;
+      if(len > 0) len = Math.max(0, len - this.SEGMENT_GAP)
       this.donutSegments.push({
         dashArray: `${len} ${this.CIRCLE_CIRCUMFERENCE}`,
         dashOffset: -acc * this.CIRCLE_CIRCUMFERENCE

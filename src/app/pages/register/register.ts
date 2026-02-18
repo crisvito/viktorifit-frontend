@@ -4,6 +4,7 @@ import { ButtonComponent } from '../../shared/components';
 import { AuthService } from '../../core';
 import { FormsModule, NgModel, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HostListener, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-register',
@@ -13,6 +14,8 @@ import { CommonModule } from '@angular/common';
   styleUrl: './register.css',
 })
 export class RegisterPage {
+  @ViewChild('registerForm') registerForm!: NgForm;
+
   serverError: string = '';
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
@@ -33,6 +36,13 @@ export class RegisterPage {
     private authService: AuthService,
     private router: Router
   ) {}
+
+  @HostListener('document:keydown.enter')
+  handleEnterKey() {
+    if (this.registerForm) {
+      this.onRegister(this.registerForm);
+    }
+  }
   
   getErrorMessage(control: NgModel, label: string): string {
     // 1. Prioritas Utama: Cek Error dari Backend (Case Insensitive)

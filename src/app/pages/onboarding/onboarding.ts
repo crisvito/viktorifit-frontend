@@ -138,11 +138,11 @@ export class OnboardingPage {
   ];
 
   sportsOptions: { id: Sport, label: string, icon: string }[] = [
-    { id: 'badminton', label: 'Badminton', icon: '🏸' },
-    { id: 'football', label: 'Football', icon: '⚽' },
-    { id: 'basketball', label: 'Basket', icon: '🏀' },
-    { id: 'volley', label: 'Volley', icon: '🏐' },
-    { id: 'swim', label: 'Swimming', icon: '🏊' }
+    { id: 'badminton', label: 'Badminton', icon: '/pages/onboarding/Badminton.svg' },
+    { id: 'football', label: 'Football', icon: '/pages/onboarding/Football.svg' },
+    { id: 'basketball', label: 'Basket', icon: '/pages/onboarding/Basketball.svg' },
+    { id: 'volley', label: 'Volley', icon: '/pages/onboarding/Volley.svg' },
+    { id: 'swim', label: 'Swimming', icon: '/pages/onboarding/Swimming.svg' }
   ];
 
   ngOnInit() {
@@ -225,14 +225,11 @@ export class OnboardingPage {
   startLoadingProcess() {
     if (this.isSubmitting) return;
     this.isSubmitting = true;
-    this.isLoading = true;
-    this.loadingText = 'Menyimpan Data...';
     
     this.submit(); 
   }
 
   submit() {
-    this.loadingText = 'Menganalisa Personalisasi...';
 
     const age = this.calculatedAge;
     const gender = this.formData.gender === 'male' ? 'Male' : 'Female';
@@ -292,8 +289,6 @@ export class OnboardingPage {
         if (!week1 || !week1.nutrition || !week1.macro) {
             throw new Error('Gagal mendapatkan data progress');
         }
-
-        this.loadingText = 'Menyusun Meal Plan...';
 
         const mealPayload: MealPayload = {
           Daily_Calories: week1.nutrition.calories, 
@@ -362,7 +357,6 @@ export class OnboardingPage {
         }
       }),
       finalize(() => {
-        this.isLoading = false;
         this.isSubmitting = false;
       })
     ).subscribe({
@@ -392,8 +386,8 @@ export class OnboardingPage {
       case 3: 
         const h = this.formData.height;
         const w = this.formData.weight;
-        return (h !== null && h >= 50 && h <= 250) && 
-               (w !== null && w >= 30 && w <= 250);
+        return (h !== null && h >= 130 && h <= 250) && 
+               (w !== null && w >= 40 && w <= 250);
       case 4: return this.formData.bodyFat !== null; 
       case 5: return true; 
       case 6: 
@@ -402,7 +396,7 @@ export class OnboardingPage {
       case 7: return true;
       case 8: return !!this.formData.level; // VALIDASI STEP LEVEL
       case 9: return !!this.formData.goal;
-      case 10: return this.formData.workoutDays.length > 0;
+      case 10: return (this.formData.workoutDays.length > 1 && this.formData.workoutDays.length < 7);
       default: return false;
     }
   }

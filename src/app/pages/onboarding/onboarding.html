@@ -69,23 +69,25 @@
   <div class="w-full max-w-3xl mx-auto">
     <div *ngIf="currentStep === 0" class="text-center py-12 md:py-20 px-6 animate-fade-in">
       <div
-        class="w-20 h-20 md:w-24 md:h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 text-4xl md:text-5xl"
+        class="h-60 w-60 flex items-center justify-center mx-auto mb-6 md:mb-8 text-4xl md:text-5xl"
       >
-        👋
+        <img src="/global/workout-type/weightLoss_background.svg" alt="Workout Image" />
       </div>
       <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">
-        Selamat Datang di ViktoriFit!
+        Hello, Lets Take a Quiz!
       </h1>
       <p class="text-gray-600 mb-8 md:mb-10 text-base md:text-lg leading-relaxed max-w-md mx-auto">
-        Kami butuh sedikit data untuk merancang program latihan yang
-        <span class="font-bold text-green-600">spesifik untuk tubuhmu</span>. Hanya butuh 3 menit!
+        To make a recommendation we need your
+        <span class="font-semibold italic text-[#6A9700]"
+          ><br />body wellness and workout habit data</span
+        >. You only need 3 minutes answer this quiz!
       </p>
       <button
         type="button"
         (click)="nextStep()"
-        class="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-2xl font-bold text-xl hover:bg-gray-800 transition transform active:scale-95 shadow-lg"
+        class="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-xl font-semibold text-[16px] hover:bg-(--main-color) hover:text-black transition transform active:scale-95"
       >
-        Mulai Sekarang
+        Start Now!
       </button>
     </div>
 
@@ -281,7 +283,7 @@
               </div>
             </div>
             <p
-              *ngIf="formData.height && (formData.height < 50 || formData.height > 250)"
+              *ngIf="formData.height && (formData.height < 130 || formData.height > 250)"
               class="text-red-500 text-sm mt-2"
             >
               Height must be between 130–250 cm
@@ -451,7 +453,7 @@
               : 'bg-white border-gray-200 text-gray-500 hover:border-[#AFFA01]'
           "
         >
-          <span class="text-3xl md:text-5xl">{{ sport.icon }}</span>
+          <img src="{{ sport.icon }}" alt="" class="w-17 h-17">
           <span class="font-semibold text-xs md:text-base">{{ sport.label }}</span>
         </button>
       </div>
@@ -482,12 +484,12 @@
           class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
           [ngClass]="
             formData.level === 'Beginner'
-              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              ? 'border-4 border-[#AFFA01]'
               : 'bg-white border-gray-200 hover:border-[#AFFA01]'
           "
         >
-          <div class="text-4xl mb-4">🌱</div>
-          <h2 class="text-xl md:text-2xl font-semibold">Beginner</h2>
+          <img src="/pages/onboarding/Beginner.svg" alt="Beginner" class="w-18 h-18">
+          <h2 class="mt-2 text-xl md:text-2xl font-semibold">Beginner</h2>
           <p class="text-sm mt-2 opacity-80 leading-relaxed">
             New to working out or just starting my journey.
           </p>
@@ -498,12 +500,12 @@
           class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
           [ngClass]="
             formData.level === 'Intermediate'
-              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              ? 'border-4 border-[#AFFA01]'
               : 'bg-white border-gray-200 hover:border-[#AFFA01]'
           "
         >
-          <div class="text-4xl mb-4">⚡</div>
-          <h2 class="text-xl md:text-2xl font-semibold">Intermediate</h2>
+          <img src="/pages/onboarding/Intermediate.svg" alt="Intermediate" class="w-18 h-18">
+          <h2 class="mt-2 text-xl md:text-2xl font-semibold">Intermediate</h2>
           <p class="text-sm mt-2 opacity-80 leading-relaxed">
             I have 6+ months of consistent training experience.
           </p>
@@ -514,12 +516,12 @@
           class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
           [ngClass]="
             formData.level === 'Advanced'
-              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              ? 'border-4 border-[#AFFA01]'
               : 'bg-white border-gray-200 hover:border-[#AFFA01]'
           "
         >
-          <div class="text-4xl mb-4">🔥</div>
-          <h2 class="text-xl md:text-2xl font-semibold">Advanced</h2>
+          <img src="/pages/onboarding/Advanced.svg" alt="Advanced" class="w-18 h-18">
+          <h2 class="mt-2 text-xl md:text-2xl font-semibold">Advanced</h2>
           <p class="text-sm mt-2 opacity-80 leading-relaxed">
             I've been training seriously for 2+ years.
           </p>
@@ -548,14 +550,14 @@
           class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
           [ngClass]="
             selectedGoal === 'Muscle Gain'
-              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              ? 'border-4 border-[#AFFA01]'
               : 'bg-white border-gray-200 hover:border-[#AFFA01]'
           "
         >
           <img
-            src=""
+            src="/global/workout-type/muscleGain_transparent_background.svg"
             alt="muscle gain"
-            class="bg-gray-500 w-50 h-8 rounded-sm justify-center hidden"
+            class="w-40 h-40 rounded-sm justify-center md:block hidden"
           />
           <h2 class="text-xl md:text-2xl font-semibold mt-2 md:mt-8">Muscle Gain</h2>
           <p class="text-sm mt-2 opacity-80 leading-relaxed">
@@ -567,10 +569,15 @@
           class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
           [ngClass]="
             selectedGoal === 'Weight Loss'
-              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              ? 'border-4 border-[#AFFA01]'
               : 'bg-white border-gray-200 hover:border-[#AFFA01]'
           "
         >
+          <img
+            src="/global/workout-type/weightLoss_transparent_background.svg"
+            alt="muscle gain"
+            class="w-40 h-40 rounded-sm justify-center md:block hidden"
+          />
           <h2 class="text-xl md:text-2xl font-semibold mt-2 md:mt-8">Weight Loss</h2>
           <p class="text-sm mt-2 opacity-80 leading-relaxed">
             Burn fat and improve your cardiovascular health.
@@ -581,10 +588,15 @@
           class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
           [ngClass]="
             selectedGoal === 'Maintain'
-              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              ? 'border-4 border-[#AFFA01]'
               : 'bg-white border-gray-200 hover:border-[#AFFA01]'
           "
         >
+          <img
+            src="/global/workout-type/maintain_transparent_background.svg"
+            alt="muscle gain"
+            class="w-40 h-40 rounded-sm justify-center md:block hidden"
+          />
           <h2 class="text-xl md:text-2xl font-semibold mt-2 md:mt-8">Maintain</h2>
           <p class="text-sm mt-2 opacity-80 leading-relaxed">
             Burn fat and improve your cardiovascular health.
@@ -623,8 +635,17 @@
       </div>
 
       <div class="flex justify-center mt-4 h-6">
-        <p *ngIf="selectedDay.length === 0" class="text-red-500 text-sm font-medium animate-pulse">
+        <p
+          *ngIf="selectedDay.length < 2"
+          class="text-red-500 text-sm font-medium animate-pulse"
+        >
           * Please select at least 2 day
+        </p>
+        <p
+          *ngIf="selectedDay.length > 6"
+          class="text-red-500 text-sm font-medium animate-pulse"
+        >
+          * Please select less than 6 days
         </p>
       </div>
     </section>

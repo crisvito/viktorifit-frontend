@@ -40,21 +40,23 @@
         </h2>
       </div>
 
-      <div class="grid grid-cols-2 gap-6 mb-5">
+      <div class="grid grid-cols-3 gap-6 mb-5">
         <div>
-          <div
-            class="w-full bg-gray-50 text-gray-700 items-center justify-center rounded-xl px-6 py-6 border border-gray-100 shadow-sm"
-          >
+          <div class="w-full bg-gray-50 text-gray-700 items-center justify-center rounded-xl px-6 py-6 border border-gray-100 shadow-sm">
             <h3 class="text-[14px] lg:text-[16px] pb-2 text-gray-400">Height</h3>
             <div class="text-[24px] font-semibold text-gray-800">{{ userData.height }} cm</div>
           </div>
         </div>
         <div>
-          <div
-            class="w-full bg-gray-50 text-gray-700 items-center justify-center rounded-xl px-6 py-6 border border-gray-100 shadow-sm"
-          >
+          <div class="w-full bg-gray-50 text-gray-700 items-center justify-center rounded-xl px-6 py-6 border border-gray-100 shadow-sm">
             <h3 class="text-[14px] lg:text-[16px] pb-2 text-gray-400">Weight</h3>
             <div class="text-[24px] font-semibold text-gray-800">{{ userData.weight }} kg</div>
+          </div>
+        </div>
+        <div>
+          <div class="w-full bg-gray-50 text-gray-700 items-center justify-center rounded-xl px-6 py-6 border border-gray-100 shadow-sm">
+            <h3 class="text-[14px] lg:text-[16px] pb-2 text-gray-400">Body Fat</h3>
+            <div class="text-[24px] font-semibold text-gray-800">{{ userData.bodyFat.percentage }}</div>
           </div>
         </div>
       </div>
@@ -62,35 +64,28 @@
       <app-bmi-card [bmi]="userData.bmi"></app-bmi-card>
     </div>
 
-    <div
-      class="mt-8 lg:mt-0 lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-1/2 pl-0 lg:pl-6 h-full min-h-[400px]"
-    >
+    <div class="mt-8 lg:mt-0 lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-1/2 pl-0 lg:pl-6 h-full min-h-[400px]">
       <div class="bg-slate-100 rounded-[20px] h-full w-full relative overflow-hidden group">
         <img
           [src]="userData.bodyFat.image"
           [alt]="userData.bodyFat.category"
           class="absolute top-0 w-full h-full object-cover object-top"
         />
-        <div class="absolute bottom-8 left-6 right-6 flex gap-4">
-          <div
-            class="bg-white/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-white shadow-lg flex-1"
-          >
-            <p class="text-[12px] uppercase tracking-wider text-slate-400 mb-1">Gender</p>
-            <div class="flex flex-row items-center gap-2">
-              <p class="text-[18px] font-bold text-lime-700">{{ userData.gender }}</p>
-            </div>
+        
+        <div class="absolute bottom-8 left-4 right-4 flex flex-wrap gap-2">
+          <div class="bg-white/90 backdrop-blur-md px-4 py-3 rounded-2xl border border-white shadow-lg flex-1 min-w-[100px]">
+            <p class="text-[12px] text-slate-600 mb-1">Target Weight</p>
+            <p class="text-[16px] font-semibold text-lime-700">{{ targetWeight }} kg</p>
           </div>
 
-          <div
-            class="bg-white/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-white shadow-lg flex-1"
-          >
-            <p class="text-[12px] uppercase tracking-wider text-slate-400 mb-1">Body Fat</p>
-            <p class="text-[18px] font-bold text-lime-700">
-              {{ userData.bodyFat.percentage }}
-              <span class="text-sm font-normal text-slate-500"
-                >({{ userData.bodyFat.category }})</span
-              >
-            </p>
+          <div class="bg-white/90 backdrop-blur-md px-4 py-3 rounded-2xl border border-white shadow-lg flex-1 min-w-[100px]">
+            <p class="text-[12px] text-slate-600 mb-1">Target Fat</p>
+            <p class="text-[16px] font-semibold text-lime-700">{{ targetBodyFat }}%</p>
+          </div>
+
+          <div class="bg-white/90 backdrop-blur-md px-4 py-3 rounded-2xl border border-white shadow-lg flex-1 min-w-[100px]">
+            <p class="text-[12px] text-slate-600 mb-1">Target BMI</p>
+            <p class="text-[16px] font-semibold text-lime-700">{{ targetBMI }} ({{ targetBMIStatus }})</p>
           </div>
         </div>
       </div>

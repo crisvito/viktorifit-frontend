@@ -12,14 +12,13 @@
 
   <div class="h-fit container relative z-10 justify-items-center">
     <div class="max-w-4/5 text-center">
-      <h1 class="text-(--main-color) text-[72px] leading-[110px] font-bold mb-4 italic">
+      <h1 class="text-(--main-color) text-[60px] leading-none font-bold mb-4 italic md:text-[72px]">
         GET YOUR WORKOUT!
       </h1>
-      <p class="text-slate-300 w-2/3 mx-auto text-[20px] leading-[25px]">
-        Hanya dalam waktu 10 menit, dapatkan penjelasan “yang begitu akurat“ tentang diri Anda dan
-        alasan yang mendasari cara Anda dalam bertindak.
+      <p class="text-slate-300 w-2/3 mx-auto text-[20px] leading-[25px] hidden md:block">
+        In just under 3 minutes, get an explanation of the workout that's right for you
       </p>
-      <app-button ariaLabel="Klik untuk memulai pendaftaran" (click)="startOnboarding()">
+      <app-button ariaLabel="Klik untuk memulai pendaftaran" (click)="startOnboarding()" extraClass="font-semibold !text-[18px]">
         Try Now
       </app-button>
     </div>

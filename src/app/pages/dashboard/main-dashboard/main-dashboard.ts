@@ -43,9 +43,10 @@ export class MainDashboardPage implements OnInit {
   };
   
   public selectedChart: ChartCategory = 'weight';
+  
   private chartDataMaster: any = {
-    weight: { labels: [], target: [], color: '#3b82f6', bg: 'rgba(59, 131, 246, 0.79)' },
-    calories: { labels: [], target: [], color: '#ec8a00', bg: 'rgba(233, 89, 0, 0.84)' },
+    weight: { labels: [], target: [], color: '#ABA437', bg: '#EDE689' },
+    calories: { labels: [], target: [], color: '#E10000', bg: '#FFB0A4' },
     duration: { labels: [], target: [], color: '#84cc16', bg: 'rgba(137, 228, 0, 0.96)' }
   };
 
@@ -53,14 +54,20 @@ export class MainDashboardPage implements OnInit {
   public lineChartOptions: ChartOptions = {
     responsive: true, maintainAspectRatio: false,
     elements: { line: { tension: 0.4 }, point: { radius: 4 } },
-    plugins: { legend: { display: false } },
-    scales: { x: { display: false }, y: { display: false } } 
+    plugins: { legend: { display: false }, tooltip: {mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        titleColor: '#1f2937',
+        bodyColor: '#4b5563',
+        borderColor: '#e5e7eb',
+        borderWidth: 1,}},
+    scales: { x: {grid: { display: false }}, y: {grid: {color: '#f3f4f6'}} } 
   };
 
   tabs = [
-    { id: 'weight', label: 'Weight Target', value: '0 kg', icon: '⚖️', color: 'blue' },
-    { id: 'calories', label: 'Calories Plan', value: '0 Kcal', icon: '🔥', color: 'red' },
-    { id: 'duration', label: 'Duration', value: '0 min', icon: '⏱️', color: 'green' }
+    { id: 'weight', label: 'Weight Target', value: '0 kg', icon: '/pages/dashboard/weights.svg', color: 'yellow' },
+    { id: 'calories', label: 'Calories Plan', value: '0 Kcal', icon: '/pages/dashboard/calories.svg', color: 'red' },
+    { id: 'duration', label: 'Duration', value: '0 min', icon: '/pages/dashboard/duration.svg', color: 'green' }
   ];
 
   constructor(
@@ -212,7 +219,7 @@ export class MainDashboardPage implements OnInit {
         ex.imageUrl = match ? `https://res.cloudinary.com/dmhzqtzrr/image/upload/${match.id}.gif` : 'assets/images/placeholder_exercise.png';
         const rawMuscle = match ? (match.muscle_group || match.category || '') : (ex.muscleGroup || ex.muscle_group || '');
         const cleanMuscles = rawMuscle.toLowerCase();
-        ex.type = cleanMuscles.includes('cardio') ? 'Cardio' : 'Mascular';
+        ex.type = cleanMuscles.includes('cardio') ? 'Cardio' : 'Muscular';
       });
     });    
   }
@@ -289,6 +296,7 @@ export class MainDashboardPage implements OnInit {
   }
 
   mapStatistics(roadmap: any[], profile: any, currentWeekData: any) {
+    
     if (!roadmap || roadmap.length === 0) return;
     const startIndex = Math.max(0, this.currentWeek - 1); 
     const chartWeeks = roadmap.slice(startIndex, startIndex + 4);
@@ -299,7 +307,9 @@ export class MainDashboardPage implements OnInit {
     this.chartDataMaster.calories.target = chartWeeks.map((w: any) => Number(w.nutrition?.calories || 0));
     this.chartDataMaster.duration.labels = labels;
     this.chartDataMaster.duration.target = chartWeeks.map(() => Number(profile.duration || 60));
-    this.tabs[0].value = `${(chartWeeks[chartWeeks.length-1] || currentWeekData).physical?.weightKg || 0} kg`; 
+    console.log((chartWeeks[chartWeeks.length-1] || currentWeekData).physical.weight_kg);
+    
+    this.tabs[0].value = (chartWeeks[chartWeeks.length-1] || currentWeekData).physical.weight_kg + ' Kg'; 
     this.tabs[1].value = `${currentWeekData?.nutrition?.calories || 0} kcal`;
     this.tabs[2].value = `${profile.duration || 60} min`;
   }
@@ -315,7 +325,18 @@ export class MainDashboardPage implements OnInit {
     if (!data || !data.labels || data.labels.length === 0) return;
     this.lineChartData = {
       labels: [...data.labels], datasets: [{
-          data: [...data.target], label: 'Target', borderColor: data.color, backgroundColor: data.bg,
+          data: [...data.target], label: 'Target', borderColor: data.color, backgroundColor: (context: any) => {
+              const chart = context.chart;
+              const {ctx, chartArea} = chart;
+              if (!chartArea) return null;
+
+              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+              
+              gradient.addColorStop(0, data.bg);
+              gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  
+              return gradient;
+          },
           fill: true, pointBackgroundColor: '#fff', pointBorderColor: data.color,
           pointRadius: 6, pointHoverRadius: 8, borderWidth: 3, tension: 0.4          
       }]
@@ -328,7 +349,7 @@ export class MainDashboardPage implements OnInit {
     if (plan) {
         const firstDay = plan[Object.keys(plan)[0]];
         if (firstDay) this.workoutslist = firstDay.slice(0, 3).map((ex:any) => ({ 
-          id: ex.realId, title: ex.exerciseName || ex.exercise_name, type: 'Strength', image: ex.imageUrl 
+          id: ex.realId, title: ex.exerciseName || ex.exercise_name, type: ex.type, image: ex.imageUrl 
         }));
     }
   }
@@ -362,4 +383,17 @@ export class MainDashboardPage implements OnInit {
   getActiveTab() { return this.tabs.find(t => t.id === this.selectedChart); }
   getLabel() { return this.selectedChart.charAt(0).toUpperCase() + this.selectedChart.slice(1); }
   goToDetail(id: string) { if (id) this.router.navigate(['/dashboard/workout-detail', id]); }
+
+  isEnvironmentOpen = false;
+  // selectedEnvironment: 'home' | 'gym' = 'home';
+
+  toggleMode() { 
+    this.isEnvironmentOpen = !this.isEnvironmentOpen; 
+  }
+
+  setMode(mode: 'home' | 'gym') {
+    this.selectedEnvironment = mode;
+    this.onEnvironmentChange(mode);
+    this.isEnvironmentOpen = false;
+  }
 }

@@ -190,8 +190,28 @@ export class RecommendationPage implements OnInit {
       this.currentTotalCalories = this.displayedMeals.reduce((sum, item) => sum + item.calories, 0); 
   }
 
+  isDropdownOpen: boolean = false;
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
   selectDay(index: number) { 
-      this.selectedDayIndex = index; 
+    this.selectedDayIndex = index; 
+    this.selectDay(index); // Panggil fungsi selectDay yang sudah kamu punya
+    this.isDropdownOpen = false;
+  }
+
+  isFreqDropdownOpen: boolean = false;
+
+  toggleFreqDropdown() {
+    this.isFreqDropdownOpen = !this.isFreqDropdownOpen;
+  }
+
+  selectFrequency(val: number) {
+    this.selectedFrequency = val;
+    this.onDayChange({ target: { value: val } });
+    this.isFreqDropdownOpen = false;
   }
   
   // --- UTILS ---

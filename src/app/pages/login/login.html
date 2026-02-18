@@ -1,9 +1,9 @@
 <div class="min-h-screen flex w-full bg-white">
-  <div class="hidden md:block md:w-1/2 lg:w-[45%] relative bg-[#f3f4f6]">
+  <div class="hidden md:block md:w-1/2 lg:w-[45%] relative bg-(--main-color)">
     <img
       src="/global/workout-type/muscleGain_transparent_background.svg"
       alt="bg"
-      class="absolute inset-0 w-full h-full object-cover object-center"
+      class="absolute inset-0 w-full h-full object-contain object-center"
     />
     <div class="absolute inset-0 bg-black/5"></div>
   </div>
@@ -19,7 +19,7 @@
         </p>
       </div>
 
-      <form #loginForm="ngForm" class="flex flex-col gap-3">
+      <form #loginForm="ngForm" class="flex flex-col gap-3" (ngSubmit)="onLogin(loginForm)">
         <div class="flex flex-col gap-1.5">
           <label for="username" class="text-sm font-semibold text-gray-700">Email / Username</label>
           <input
@@ -107,11 +107,11 @@
             <span class="text-red-500 text-xs font-medium" *ngIf="getErrorMessage(password, '')">
               {{ getErrorMessage(password, 'Password') }}
             </span>
-            <a
+            <!-- <a
               href="javascript:void(0)"
               class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline ml-auto"
               >Forgot password?</a
-            >
+            > -->
           </div>
         </div>
 

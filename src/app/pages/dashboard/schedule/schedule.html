@@ -49,7 +49,7 @@
       <div
         class="bg-black text-white rounded-[7.52px] p-8 md:p-10 flex flex-col justify-center min-h-34.25"
       >
-        <h3 class="text-[32px] font-bold leading-tight mb-2">
+        <h3 class="text-[32px] font-semibold leading-tight mb-2">
           You're Doing {{ selectedMode }} Workout
         </h3>
         <p class="text-gray-400 text-[14px]">
@@ -141,7 +141,6 @@
                       <div
                         class="flex items-center gap-1.5 bg-white border border-gray-300 px-2 py-1 rounded text-[10px] text-gray-600 font-medium"
                       >
-                        <span class="text-gray-500">⏱️</span>
                         <span
                           >Time: <b class="text-black">{{ item.timePerSet }}</b></span
                         >
@@ -149,7 +148,6 @@
                       <div
                         class="flex items-center gap-1.5 bg-white border border-gray-300 px-2 py-1 rounded text-[10px] text-gray-600 font-medium"
                       >
-                        <span class="text-gray-400">⏳</span>
                         <span
                           >Rest: <b class="text-black">{{ item.rest }} min</b></span
                         >
@@ -171,7 +169,7 @@
                       <div class="w-5 h-5 bg-[#E10000] flex items-center justify-center rounded-sm">
                         <img src="/pages/calendar/calories.svg" alt="calories" class="w-3 h-3" />
                       </div>
-                      {{ item.calories }}
+                      {{ item.calories }} Cal
                     </div>
                   </div>
                 </div>

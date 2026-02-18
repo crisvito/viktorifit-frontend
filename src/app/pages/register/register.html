@@ -1,9 +1,9 @@
 <div class="min-h-screen flex w-full bg-white">
-  <div class="hidden md:block md:w-1/2 lg:w-[45%] relative bg-gray-50">
+  <div class="hidden md:block md:w-1/2 lg:w-[45%] relative bg-(--main-color)">
     <img
-      src="/global/workout-type/muscleGain_background.svg"
+      src="/global/workout-type/weightLoss_transparent_background.svg"
       alt="bg"
-      class="absolute inset-0 w-full h-full object-cover"
+      class="absolute inset-0 w-full h-full object-contain"
     />
     <div class="absolute inset-0 bg-black/10"></div>
   </div>
@@ -19,7 +19,7 @@
         </p>
       </div>
 
-      <form #RegisterForm="ngForm" class="flex flex-col gap-2">
+      <form #RegisterForm="ngForm" class="flex flex-col gap-2" (ngSubmit)="onRegister(registerForm)">
         <div class="flex flex-col gap-1.5">
           <label for="fullname" class="text-sm font-semibold text-gray-700">Full Name</label>
           <input

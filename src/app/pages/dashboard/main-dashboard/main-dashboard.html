@@ -9,11 +9,11 @@
       <div class="absolute inset-0 bg-linear-to-r from-black via-black/50 to-transparent"></div>
     </div>
 
-    <div class="absolute right-0 bottom-0 top-0 z-10 h-full w-[40%] md:w-[35%]">
+    <div class="absolute right-0 bottom-0 top-25 z-10 h-full w-[40%] md:w-[35%]">
       <img
         [src]="workoutImage"
         [alt]="workoutTitle"
-        class="h-full w-full object-contain object-bottom-right"
+        class="h-full w-full scale-[230%] object-contain object-top-center"
       />
     </div>
 
@@ -35,31 +35,50 @@
       <div class="mb-4 flex items-center justify-between">
         <h2 class="text-[20px] md:text-[24px] font-semibold text-[#313131]">Today's Plan</h2>
 
-        <div class="flex items-center gap-3 md:gap-4">
-          <div class="relative">
-            <select
-              title="enviroment"
-              [(ngModel)]="selectedEnvironment"
-              (change)="onEnvironmentChange($any($event.target).value)"
-              class="appearance-none bg-[#F3F4F6] border-none text-[12px] md:text-[14px] font-medium py-2 px-4 pr-8 rounded-lg outline-none focus:ring-2 focus:ring-[#C3F74A] cursor-pointer text-gray-700"
+        <div class="flex items-center gap-3 md:gap-4 custom-scrollbar">
+          <div class="relative inline-block text-left">
+            <button 
+              type="button"
+              (click)="toggleMode()"
+              class="flex items-center justify-between gap-3 text-gray-500 border border-gray-500 rounded-full px-4 py-1 md:px-5 text-[11px] md:text-[12px] font-semibold focus:outline-none transition-all hover:text-gray-600 hover:bg-gray-100"
             >
-              <option value="home">Home</option>
-              <option value="gym">Gym</option>
-            </select>
-
-            <div
-              class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500"
-            >
-              <svg
-                class="fill-current h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
+              {{ selectedEnvironment | titlecase }}
+              <svg 
+                class="w-3 h-3 md:w-4 md:h-4 transition-transform duration-200" 
+                [class.rotate-180]="isEnvironmentOpen"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
               >
-                <path
-                  d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
+            </button>
+
+            <div 
+              *ngIf="isEnvironmentOpen"
+              class="absolute left-0 mt-2 w-32 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in duration-200"
+            >
+              <div class="py-1">
+                <div 
+                  (click)="setMode('home')"
+                  class="px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+                  [class.bg-gray-100]="selectedEnvironment === 'home'"
+                >
+                  Home
+                </div>
+                <div 
+                  (click)="setMode('gym')"
+                  class="px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+                  [class.bg-gray-100]="selectedEnvironment === 'gym'"
+                >
+                  Gym
+                </div>
+              </div>
             </div>
+
+            <div 
+              *ngIf="isEnvironmentOpen" 
+              class="fixed inset-0 z-40" 
+              (click)="isEnvironmentOpen = false"
+            ></div>
           </div>
 
           <a
@@ -86,7 +105,7 @@
         </div>
       </div>
 
-      <div class="w-full overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
+      <div class="w-full overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
         <table class="w-full text-left border-collapse">
           <thead class="sticky top-0 z-10 bg-white">
             <tr class="text-[10px] md:text-[12px] text-gray-400 border-b border-gray-100">
@@ -113,7 +132,7 @@
                       {{ item.name }}
                     </p>
                     <span
-                      class="bg-[#C3F74A] text-[#425F00] text-[8px] md:text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                      class="bg-[#C3F74A] text-[#425F00] text-[8px] md:text-[10px] px-2 py-0.5 rounded-full"
                     >
                       {{ item.type }}
                     </span>
@@ -275,8 +294,8 @@
         </div>
       </div>
 
-      <button
-        class="z-10 mt-4 text-sm bg-[#C3F74A] py-3 font-semibold text-gray-900 border-2 border-transparent hover:bg-black hover:text-white hover:shadow-md hover:border-gray-800 transition rounded-xl"
+      <button routerLink="/dashboard/recommendation"
+        class="z-10 mt-4 text-sm bg-[#8DED18] py-3 font-semibold text-gray-900 border-2 border-transparent hover:bg-(--main-color) hover:shadow-m transition rounded-lg"
       >
         More Information
       </button>
@@ -301,11 +320,11 @@
             class="h-2.5 w-2.5 md:h-3 md:w-3 rounded-full"
             [style.backgroundColor]="getActiveTab()?.color"
           ></span>
-          <span class="text-[10px] md:text-xs text-gray-600">Your {{ getLabel() }}</span>
+          <span class="text-[10px] md:text-xs text-gray-600">Target {{ getLabel() }}</span>
         </div>
       </div>
 
-      <div class="relative h-52 md:h-60 w-full">
+      <div class="relative h-52 md:h-80 w-full">
         <canvas
           baseChart
           [data]="lineChartData"
@@ -322,15 +341,15 @@
             [class]="
               selectedChart === tab.id
                 ? 'bg-[#C3F74A] border border-[#8AC500]/30 shadow-md ring-1 ring-[#8AC500]/20'
-                : 'bg-transparent opacity-60 border border-gray-100 hover:opacity-100 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm'
+                : 'opacity-60 border border-gray-100 hover:opacity-100 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm'
             "
-            class="relative shrink-0 min-w-[135px] xl:w-auto p-2 md:p-3 rounded-xl transition-all duration-300 flex items-center gap-2 md:gap-3 text-left"
+            class="relative shrink-0 min-w-[135px] xl:w-auto p-2 md:p-3 rounded-[11px] transition-all duration-300 flex items-center gap-2 md:gap-3 text-left"
           >
             <div
               [class]="'bg-' + tab.color + '-100 text-' + tab.color + '-600'"
-              class="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-lg md:rounded-xl text-base md:text-xl transition-colors"
+              class="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-lg text-base md:text-xl transition-colors"
             >
-              {{ tab.icon }}
+              <img [src]="tab.icon" alt="" class="w-5 h-5">
             </div>
 
             <div class="whitespace-nowrap">

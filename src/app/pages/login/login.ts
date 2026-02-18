@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core';
 import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HostListener, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -12,6 +13,8 @@ import { CommonModule } from '@angular/common';
   styleUrl: './login.css',
 })
 export class LoginPage {
+  @ViewChild('loginForm') loginForm!: NgForm;
+
   showActivationModal: boolean = false;
   activationMessage: string = '';
   serverError: string = '';
@@ -26,6 +29,13 @@ export class LoginPage {
     private authService: AuthService,
     private router: Router
   ) {}
+
+@HostListener('document:keydown.enter')
+  handleEnterKey() {
+    if (this.loginForm) {
+      this.onLogin(this.loginForm);
+    }
+  }
 
   getErrorMessage(control: NgModel, label: string): string {
     if (this.serverError.includes('User not found') || this.serverError.includes('Invalid')) {
