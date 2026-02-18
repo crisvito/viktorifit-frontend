@@ -16,6 +16,9 @@ import { HostListener, ViewChild } from '@angular/core';
 export class RegisterPage {
   @ViewChild('registerForm') registerForm!: NgForm;
 
+  showActivationModal: boolean = false;
+  activationMessage: string = '';
+
   serverError: string = '';
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
@@ -102,7 +105,8 @@ export class RegisterPage {
     this.authService.register(this.dataRegister).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.router.navigate(['/login']); 
+        this.showActivationModal = true;
+        this.activationMessage = 'Please check your email to verify your account.';
       },
       error: (error) => {
         this.isLoading = false;
@@ -115,5 +119,8 @@ export class RegisterPage {
         }
       }
     });
+  }
+  goToLogin(){
+    this.router.navigate(['/login']); 
   }
 }

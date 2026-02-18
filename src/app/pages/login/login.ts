@@ -31,6 +31,7 @@ export class LoginPage {
   ) {}
 
 @HostListener('document:keydown.enter')
+
   handleEnterKey() {
     if (this.loginForm) {
       this.onLogin(this.loginForm);

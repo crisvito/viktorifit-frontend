@@ -19,7 +19,11 @@
         </p>
       </div>
 
-      <form #RegisterForm="ngForm" class="flex flex-col gap-2" (ngSubmit)="onRegister(registerForm)">
+      <form
+        #RegisterForm="ngForm"
+        class="flex flex-col gap-2"
+        (ngSubmit)="onRegister(registerForm)"
+      >
         <div class="flex flex-col gap-1.5">
           <label for="fullname" class="text-sm font-semibold text-gray-700">Full Name</label>
           <input
@@ -266,6 +270,51 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="showActivationModal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300"
+>
+  <div
+    class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100 animate-fade-in border border-gray-100"
+  >
+    <div class="flex flex-col items-center text-center mb-4">
+      <div
+        class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-3 text-yellow-600"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6 text-green-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold text-gray-900">Registration Successful!</h2>
+    </div>
+
+    <p class="text-sm text-gray-600 text-center mb-6 leading-relaxed">
+      {{ activationMessage }}
+    </p>
+
+    <div class="flex justify-center w-full">
+      <button
+        type="button"
+        class="w-full py-2.5 rounded-lg bg-green-600 text-white font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200"
+        (click)="goToLogin()"
+      >
+        Got it
+      </button>
     </div>
   </div>
 </div>
