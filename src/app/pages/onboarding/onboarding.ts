@@ -118,19 +118,19 @@ export class OnboardingPage {
   // DATA OPTIONS
   // ==========================================
   maleBodyFatOptions: Bodyfat[] = [
-    { label: 'Essential', range: '2-5%', value: 4, category: 1, image: '/global/body-fat/male_veryLean.svg' },
+    { label: 'Very Lean', range: '2-5%', value: 4, category: 1, image: '/global/body-fat/male_veryLean.svg' },
     { label: 'Athlete', range: '6-13%', value: 10, category: 2, image: '/global/body-fat/male_athletic.svg' },
-    { label: 'Fitness', range: '14-17%', value: 15, category: 3, image: '/global/body-fat/male_average.svg' },
-    { label: 'Average', range: '18-24%', value: 21, category: 4, image: '/global/body-fat/male_overweight.svg' },
+    { label: 'Average', range: '14-17%', value: 15, category: 3, image: '/global/body-fat/male_average.svg' },
+    { label: 'Overweight', range: '18-24%', value: 21, category: 4, image: '/global/body-fat/male_overweight.svg' },
     { label: 'Obese', range: '25%+', value: 30, category: 5, image: '/global/body-fat/male_obese.svg' }
   ];
 
   femaleBodyFatOptions: Bodyfat[] = [
-    { label: 'Essential', range: '10-13%', value: 12, category: 1, image: 'global/body-fat/female_veryLean.svg' },
-    { label: 'Athlete', range: '14-20%', value: 17, category: 2, image: '/global/body-fat/female_athletic.svg' },
-    { label: 'Fitness', range: '21-24%', value: 22, category: 3, image: '/global/body-fat/female_average.svg' },
-    { label: 'Average', range: '25-31%', value: 28, category: 4, image: '/global/body-fat/female_overweight.svg' },
-    { label: 'Obese', range: '32%+', value: 35, category: 5, image: '/global/body-fat/female_obese.svg' }
+    { label: 'Very Lean', range: '2-5%', value: 4, category: 1, image: '/global/body-fat/female_veryLean.svg' },
+    { label: 'Athlete', range: '6-13%', value: 10, category: 2, image: '/global/body-fat/female_athletic.svg' },
+    { label: 'Average', range: '14-17%', value: 15, category: 3, image: '/global/body-fat/female_average.svg' },
+    { label: 'Overweight', range: '18-24%', value: 21, category: 4, image: '/global/body-fat/female_overweight.svg' },
+    { label: 'Obese', range: '25%+', value: 30, category: 5, image: '/global/body-fat/female_obese.svg' }
   ];
 
   workoutDuration: WorkoutDuration[] = [

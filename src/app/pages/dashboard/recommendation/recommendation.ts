@@ -198,10 +198,10 @@ export class RecommendationPage implements OnInit {
   getBodyFatInfo(catId: number, gender: string) {
     const prefix = (gender || '').toLowerCase() === 'female' ? 'female' : 'male'; 
     switch(catId) {
-      case 1: return { label: 'Essential', image: `/global/body-fat/${prefix}_veryLean.svg` };
+      case 1: return { label: 'VeryLean', image: `/global/body-fat/${prefix}_veryLean.svg` };
       case 2: return { label: 'Athlete', image: `/global/body-fat/${prefix}_athletic.svg` };
-      case 3: return { label: 'Fitness', image: `/global/body-fat/${prefix}_average.svg` };
-      case 4: return { label: 'Average', image: `/global/body-fat/${prefix}_overweight.svg` };
+      case 3: return { label: 'Average', image: `/global/body-fat/${prefix}_average.svg` };
+      case 4: return { label: 'Overweight', image: `/global/body-fat/${prefix}_overweight.svg` };
       case 5: return { label: 'Obese', image: `/global/body-fat/${prefix}_obese.svg` };
       default: return { label: 'Average', image: `/global/body-fat/${prefix}_average.svg` };
     }
