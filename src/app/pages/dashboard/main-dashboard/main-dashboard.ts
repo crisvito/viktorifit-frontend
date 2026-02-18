@@ -101,26 +101,28 @@ export class MainDashboardPage implements OnInit {
   // ==========================================
   // 1. INITIALIZER
   // ==========================================
-  initDashboard() {
-    this.isLoading = true;
-    this.readyData = null; 
+initDashboard() {
+  this.isLoading = true;
+  const cached = localStorage.getItem('ml_data_ready');
 
-    const cached = localStorage.getItem('ml_data_ready');
-
-    if (cached) {
-        try {
-            const parsedData = JSON.parse(cached);
-            if (parsedData.progressRecommendation && parsedData.progressRecommendation.startDate) {
-                this.currentWeek = this.progressService.calculateCurrentWeek(parsedData.progressRecommendation.startDate);
-            }
-            this.processAndEnrich(parsedData, false); 
-        } catch (e) {
-            this.fetchAndEnrich(true);
-        }
-    } else {
-        this.fetchAndEnrich(true); 
+  if (cached) {
+    const parsedData = JSON.parse(cached);
+    this.readyData = parsedData;
+    
+    // Hitung minggu saat ini tanpa fetch ulang
+    if (parsedData.progressRecommendation?.startDate) {
+      this.currentWeek = this.progressService.calculateCurrentWeek(parsedData.progressRecommendation.startDate);
     }
+
+    // Langsung render (Asumsi data sudah di-enrich saat pertama kali simpan)
+    this.renderDashboard();
+    this.isLoading = false;
+    this.cdr.detectChanges();
+  } else {
+    // Hanya panggil API jika cache kosong (misal: user baru pertama kali masuk)
+    this.fetchAndEnrich(true);
   }
+}
 
   // ==========================================
   // 2. ML REQUESTS
@@ -307,7 +309,6 @@ export class MainDashboardPage implements OnInit {
     this.chartDataMaster.calories.target = chartWeeks.map((w: any) => Number(w.nutrition?.calories || 0));
     this.chartDataMaster.duration.labels = labels;
     this.chartDataMaster.duration.target = chartWeeks.map(() => Number(profile.duration || 60));
-    console.log((chartWeeks[chartWeeks.length-1] || currentWeekData).physical.weight_kg);
     
     this.tabs[0].value = (chartWeeks[chartWeeks.length-1] || currentWeekData).physical.weight_kg + ' Kg'; 
     this.tabs[1].value = `${currentWeekData?.nutrition?.calories || 0} kcal`;
