@@ -88,14 +88,11 @@ export class MainDashboardPage implements OnInit {
   }
 
   private getStrictUserProfile() {
-    const sessionStr = localStorage.getItem('auth_token');
-    if (sessionStr) {
-        try {
-            const session = JSON.parse(sessionStr);
-            if (session.userProfileDTO) return session.userProfileDTO;
-        } catch (e) { console.warn('Gagal parsing auth_token', e); }
-    }
-    return this.authService.getUser()?.userProfileDTO;
+    // Langsung ambil dari AuthService yang sudah menangani parsing data user
+    const user = this.authService.getUser();
+    
+    // Pastikan data profile ada sebelum dikembalikan
+    return user?.userProfileDTO || null;
   }
 
   // ==========================================
@@ -104,22 +101,29 @@ export class MainDashboardPage implements OnInit {
 initDashboard() {
   this.isLoading = true;
   const cached = localStorage.getItem('ml_data_ready');
+  const profileFromServer = this.getStrictUserProfile();
 
-  if (cached) {
+  if (cached && profileFromServer) {
     const parsedData = JSON.parse(cached);
-    this.readyData = parsedData;
-    
-    // Hitung minggu saat ini tanpa fetch ulang
-    if (parsedData.progressRecommendation?.startDate) {
-      this.currentWeek = this.progressService.calculateCurrentWeek(parsedData.progressRecommendation.startDate);
-    }
+    const profileInCache = parsedData.userProfile;
 
-    // Langsung render (Asumsi data sudah di-enrich saat pertama kali simpan)
-    this.renderDashboard();
-    this.isLoading = false;
-    this.cdr.detectChanges();
+    const isIdentical = JSON.stringify(profileFromServer) === JSON.stringify(profileInCache);
+
+    if (isIdentical) {
+      this.readyData = parsedData;
+      
+      if (parsedData.progressRecommendation?.startDate) {
+        this.currentWeek = this.progressService.calculateCurrentWeek(parsedData.progressRecommendation.startDate);
+      }
+
+      this.renderDashboard();
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    } else {
+      localStorage.removeItem('ml_data_ready');
+      this.fetchAndEnrich(true);
+    }
   } else {
-    // Hanya panggil API jika cache kosong (misal: user baru pertama kali masuk)
     this.fetchAndEnrich(true);
   }
 }

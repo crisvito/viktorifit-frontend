@@ -93,7 +93,6 @@ export class WorkoutDetail implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error("Error loading detail", err);
         this.isLoading = false;
       }
     });

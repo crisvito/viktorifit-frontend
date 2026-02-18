@@ -29,7 +29,7 @@ export class DashboardSidebar {
       activeKey: 'workout' 
     },
     { 
-      label: 'Calendar', 
+      label: 'schedule', 
       icon: 'calendar', 
       route: 'schedule', 
       activeKey: 'schedule' 
@@ -39,7 +39,7 @@ export class DashboardSidebar {
       icon: 'recommendation', 
       route: 'recommendation', 
       activeKey: 'recommendation' 
-    }
+    },
   ];
 
   isSidebarOpen = false;
@@ -56,6 +56,11 @@ export class DashboardSidebar {
 
   isMenuActive(m: any): boolean {
     const currentUrl = this.router.url;
+    
+    if (currentUrl.includes('/history') && m.activeKey === 'schedule') {
+      return true;
+    }
+
     if (m.route === '') {
       return currentUrl === '/dashboard' || currentUrl === '/';
     }
