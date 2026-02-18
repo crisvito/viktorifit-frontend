@@ -3,7 +3,7 @@
   "short_name": "Viktorifit",
   "theme_color": "#C3F74A",
   "background_color": "#000000",
-  "display": "standalone",
+  "display": "fullscreen",
   "scope": "./",
   "start_url": "./",
   "icons": [
