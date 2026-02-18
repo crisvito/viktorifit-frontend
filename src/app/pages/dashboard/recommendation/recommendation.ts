@@ -144,6 +144,7 @@ export class RecommendationPage implements OnInit {
         cals: ex.calories_burned,
         // Gambar sudah disiapkan oleh Main Dashboard di 'ml_data_ready'
         // Jika null/undefined, pakai placeholder
+        type:ex.type,
         image: ex.imageUrl || 'assets/images/placeholder_exercise.png' 
       }))
     };

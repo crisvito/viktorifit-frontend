@@ -39,7 +39,7 @@ export class PersonalData implements OnInit {
     level: 'Beginner',
     bodyFatPercentage: 15,
     bodyFatCategory: 3,
-    bodyFat: 15 // Helper untuk UI Highlight (berisi .value)
+    bodyFat: 15 
   };
 
   maleBodyFatOptions: Bodyfat[] = [
@@ -71,7 +71,6 @@ export class PersonalData implements OnInit {
     this.loadUserData();
   }
 
-  // Getter untuk mendapatkan list body fat yang aktif sesuai gender saat ini
   get bodyFatLevels(): Bodyfat[] {
     return this.userData.gender === 'female' ? this.femaleBodyFatOptions : this.maleBodyFatOptions;
   }
@@ -105,7 +104,6 @@ export class PersonalData implements OnInit {
           : []
       };
 
-      // LOGIC FIX: Cari representative value agar kotak Body Fat menyala hijau saat load
       const currentOptions = this.bodyFatLevels;
       const match = currentOptions.find(o => o.category === this.userData.bodyFatCategory);
       this.userData.bodyFat = match ? match.value : this.userData.bodyFatPercentage;
@@ -115,7 +113,6 @@ export class PersonalData implements OnInit {
   selectGender(gender: string) {
     if (this.userData.gender !== gender) {
       this.userData.gender = gender;
-      // Saat gender berubah, sesuaikan highlight body fat ke kategori yang sama di gender baru
       const newOptions = this.bodyFatLevels;
       const match = newOptions.find(o => o.category === this.userData.bodyFatCategory);
       if (match) {
@@ -126,7 +123,7 @@ export class PersonalData implements OnInit {
   }
 
   selectBodyFat(level: Bodyfat) {
-    this.userData.bodyFat = level.value; // Trigger highlight di HTML
+    this.userData.bodyFat = level.value;
     this.userData.bodyFatPercentage = level.value;
     this.userData.bodyFatCategory = level.category;
   }
@@ -166,7 +163,6 @@ export class PersonalData implements OnInit {
       frequency: this.userData.workoutDays.length
     };
 
-    // Bersihkan helper
     const cleanPayload = { ...payload };
     delete cleanPayload.hobbies;
     delete cleanPayload.bodyFat;
@@ -179,14 +175,13 @@ export class PersonalData implements OnInit {
           this.authService.updateUserOnly(currentUser);
         }
 
+        // --- PENTING: HAPUS CACHE AGAR DASHBOARD TAU ADA UPDATE ---
         localStorage.removeItem('ml_result');
         localStorage.removeItem('ml_data_ready');
 
         this.triggerToast('Profile updated! Recalculating...', 'success');
-        setTimeout(() => {
-          this.isLoading = false;
-          this.router.navigate(['/dashboard']);
-        }, 1500);
+        this.isLoading = false;
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.triggerToast('Update failed!', 'error');

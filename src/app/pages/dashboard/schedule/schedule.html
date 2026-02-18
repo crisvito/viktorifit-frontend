@@ -78,10 +78,22 @@
       <div class="flex flex-col gap-5 -mt-5">
         <div
           *ngIf="activities.length === 0"
-          class="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300"
+          class="flex flex-col items-center justify-center py-10 text-center"
         >
-          <h3 class="text-xl font-bold text-gray-400">Rest Day</h3>
-          <p class="text-gray-400 text-sm mt-1">Recovery is important. Enjoy your day off!</p>
+          <div *ngIf="isRestDay">
+            <h3 class="text-xl font-bold text-gray-800">It's Your Rest Day!</h3>
+            <p class="text-gray-500">Recover to grow stronger. See you tomorrow!</p>
+          </div>
+
+          <div *ngIf="!isRestDay && isAllCompleted" class="flex flex-col gap-3 items-center">
+            <h3 class="text-xl font-bold text-gray-800">All Done!</h3>
+            <p class="text-gray-500">
+              You've finished all your scheduled workouts for today. Great job!
+            </p>
+            <a routerLink="/dashboard/history" class="mt-4 text-blue-500 font-semibold underline"
+              >View History</a
+            >
+          </div>
         </div>
 
         <div

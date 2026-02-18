@@ -101,6 +101,7 @@ export class OnboardingPage {
     frequency: null as number | null,
     sports: [] as Sport[],
     goal: '' as Goal,
+    level: '', // TAMBAHAN UNTUK LEVEL
     workoutDuration: null as number | null,
     workoutDays: [] as WorkoutDay[]
   };
@@ -182,6 +183,9 @@ export class OnboardingPage {
   }
   selectGoal(goal: Goal) { this.formData.goal = goal; }
   
+  // FUNGSI BARU UNTUK LEVEL
+  selectLevel(level: string) { this.formData.level = level; }
+
   selectDay(day: WorkoutDay) {
     const index = this.formData.workoutDays.indexOf(day);
     if (index > -1) {
@@ -256,16 +260,13 @@ export class OnboardingPage {
       Goal: this.formData.goal,
       Frequency: freq,
       Duration: duration,
-      Level: 'Beginner', 
+      Level: this.formData.level || 'Beginner', // MENGGUNAKAN LEVEL DARI FORM
       ...sportsMap
     };
 
     // HANYA Payload Home
     const homePayload: WorkoutPayload = { ...basePayload, Environment: 'Home' };
     
-    // Payload Gym DIBUANG agar cepat
-    // const gymPayload: WorkoutPayload = { ...basePayload, Environment: 'Gym' };
-
     const progressPayload: UserProgressPayload = {
       ...basePayload,
       Initial_Weight_kg: weight, 
@@ -276,7 +277,6 @@ export class OnboardingPage {
     // Step 1: Request Workout (HOME ONLY) & Progress
     forkJoin({
       workoutHome: this.http.post(`${baseUrl}/workout-recommendation`, homePayload),
-      // workoutGym: DIBUANG (Login to unlock)
       progressResult: this.http.post<any>(`${baseUrl}/userprogress-recommendation`, progressPayload) 
     }).pipe(
       // Step 2: Request Meal Plan (Single Request - Optimized)
@@ -400,15 +400,16 @@ export class OnboardingPage {
         const d = this.formData.workoutDuration;
         return d !== null && d >= 15 && d <= 150;
       case 7: return true;
-      case 8: return !!this.formData.goal;
-      case 9: return this.formData.workoutDays.length > 0;
+      case 8: return !!this.formData.level; // VALIDASI STEP LEVEL
+      case 9: return !!this.formData.goal;
+      case 10: return this.formData.workoutDays.length > 0;
       default: return false;
     }
   }
 
   next() {
     if (this.canContinue()) {
-      if (this.currentStep === 9) {
+      if (this.currentStep === 10) {
         this.startLoadingProcess();
       } else {
         this.currentStep++;

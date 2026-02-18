@@ -24,13 +24,17 @@ export class AuthGuard implements CanActivate, CanActivateChild {
 
   private check(): boolean {
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
+      this.authService.logout(); 
       return false;
     }
-    if (this.authService.isAdmin()) {
+
+    const user = this.authService.getUser();
+    
+    if (user?.role === 'ADMIN' || this.authService.isAdmin()) {
       this.router.navigate(['/admin']);
       return false;
     }
+
     return true;
   }
 }

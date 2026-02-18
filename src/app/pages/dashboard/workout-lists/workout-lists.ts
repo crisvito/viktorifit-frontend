@@ -56,13 +56,15 @@ export class WorkoutLists implements OnInit {
     this.exerciseService.getAllExercises().subscribe({
       next: (data) => {
         const mappedData = data.map(ex => {
-          const cleanMuscles = this.cleanFormat(ex.targetMuscles);
+          const cleanMuscles = this.cleanFormat(ex.targetMuscles).toLowerCase();
           const cleanEquip = this.cleanFormat(ex.equipment);
+
+          const isCardioType = cleanMuscles.includes('cardio') || cleanMuscles.includes('body weight');
 
           return {
             id: ex.id,
             title: ex.name,
-            type: cleanMuscles.toLowerCase().includes('cardio') ? 'Cardio' : 'Muscular',
+            type: isCardioType ? 'Cardio' : 'Muscular',
             equipment: cleanEquip,
             duration: 15, 
             image: `https://res.cloudinary.com/dmhzqtzrr/image/upload/${ex.id}.gif`

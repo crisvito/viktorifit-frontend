@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ExerciseService } from '../../../core/services/exercise.service';
 
 @Component({
   selector: 'app-workout-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, RouterLink],
   templateUrl: './workout-detail.html',
   styleUrl: './workout-detail.css',
 })
@@ -113,19 +113,27 @@ export class WorkoutDetail implements OnInit {
     }
   }
 
-  private processOtherTutorials(data: any[]) {
-    this.workout.otherTutorials = data
-      .filter(ex => ex.id !== this.workoutId)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 3)
-      .map(ex => ({
+private processOtherTutorials(data: any[]) {
+  this.workout.otherTutorials = data
+    .filter(ex => ex.id !== this.workoutId)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 3)
+    .map(ex => {
+      // Gabungkan data otot jadi satu teks kecil semua
+      const muscleText = this.cleanToArray(ex.targetMuscles || ex.muscle_group).join(' ').toLowerCase();
+      
+      // Cek apakah ada kata 'cardio' atau 'body weight'
+      const isCardio = ['cardio', 'body weight'].some(key => muscleText.includes(key));
+
+      return {
         id: ex.id,
         title: ex.title || ex.name,
-        type: ex.type || (this.cleanToArray(ex.targetMuscles).join('').toLowerCase().includes('cardio') ? 'Cardio' : 'Muscular'),
+        type: ex.type || (isCardio ? 'Cardio' : 'Muscular'),
         duration: ex.duration || '15 Min',
         image: ex.image || `https://res.cloudinary.com/dmhzqtzrr/image/upload/${ex.id}.gif`
-      }));
-  }
+      };
+    });
+}
 
   goBack(): void {
     this.location.back();

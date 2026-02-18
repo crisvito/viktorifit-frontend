@@ -1,6 +1,6 @@
 <div class="font-poppins w-full overflow-x-hidden min-h-screen pb-10 bg-white">
   <div
-    *ngIf="currentStep > 0 && currentStep <= 9"
+    *ngIf="currentStep > 0 && currentStep <= 10"
     class="w-full max-w-lg justify-center mx-auto px-4 md:px-8 py-6"
   >
     <div class="flex items-center justify-between relative">
@@ -8,7 +8,7 @@
 
       <div
         class="absolute top-1/2 left-0 h-1 bg-[#8AC500] transition-all duration-500 ease-out"
-        [style.width.%]="(currentStep - 1) * (100 / 8)"
+        [style.width.%]="(currentStep - 1) * (100 / 9)"
       ></div>
 
       <div
@@ -352,9 +352,7 @@
               class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
             />
 
-            <div
-              *ngIf="formData.bodyFat === option.value"
-            >
+            <div *ngIf="formData.bodyFat === option.value">
               <div class="bg-[#AFFA01] rounded-full p-2"></div>
             </div>
           </div>
@@ -419,9 +417,10 @@
               : 'border-gray-200 hover:border-[#AFFA01]'
           "
         >
-
           <div class="py-3 md:py-4 text-center w-full">
-            <p class="font-semibold text-gray-800 text-base md:text-lg">{{ option.duration }} Minutes</p>
+            <p class="font-semibold text-gray-800 text-base md:text-lg">
+              {{ option.duration }} Minutes
+            </p>
           </div>
         </button>
       </div>
@@ -463,6 +462,72 @@
     </section>
 
     <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 8">
+      <div class="grid justify-center text-center px-6 md:px-0">
+        <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
+          Your Experience Level!
+        </h2>
+        <span
+          class="text-center max-w-3xl text-base md:text-lg mt-4 md:mt-2 leading-relaxed text-gray-600"
+        >
+          How experienced are you with
+          <span class="font-semibold text-black">fitness training?</span>
+        </span>
+      </div>
+
+      <div
+        class="flex flex-col md:flex-row flex-wrap lg:flex-nowrap justify-center gap-4 md:gap-6 pt-10 px-6 mb-10"
+      >
+        <div
+          (click)="selectLevel('Beginner')"
+          class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
+          [ngClass]="
+            formData.level === 'Beginner'
+              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              : 'bg-white border-gray-200 hover:border-[#AFFA01]'
+          "
+        >
+          <div class="text-4xl mb-4">🌱</div>
+          <h2 class="text-xl md:text-2xl font-semibold">Beginner</h2>
+          <p class="text-sm mt-2 opacity-80 leading-relaxed">
+            New to working out or just starting my journey.
+          </p>
+        </div>
+
+        <div
+          (click)="selectLevel('Intermediate')"
+          class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
+          [ngClass]="
+            formData.level === 'Intermediate'
+              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              : 'bg-white border-gray-200 hover:border-[#AFFA01]'
+          "
+        >
+          <div class="text-4xl mb-4">⚡</div>
+          <h2 class="text-xl md:text-2xl font-semibold">Intermediate</h2>
+          <p class="text-sm mt-2 opacity-80 leading-relaxed">
+            I have 6+ months of consistent training experience.
+          </p>
+        </div>
+
+        <div
+          (click)="selectLevel('Advanced')"
+          class="cursor-pointer w-full max-w-xs mx-auto md:mx-0 md:w-64 lg:w-80 border-2 rounded-3xl p-6 md:p-8 transition-all"
+          [ngClass]="
+            formData.level === 'Advanced'
+              ? 'bg-[#AFFA01] border-[#AFFA01]'
+              : 'bg-white border-gray-200 hover:border-[#AFFA01]'
+          "
+        >
+          <div class="text-4xl mb-4">🔥</div>
+          <h2 class="text-xl md:text-2xl font-semibold">Advanced</h2>
+          <p class="text-sm mt-2 opacity-80 leading-relaxed">
+            I've been training seriously for 2+ years.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 9">
       <div class="grid justify-center text-center px-6 md:px-0">
         <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
           What is Your Plan?
@@ -528,7 +593,7 @@
       </div>
     </section>
 
-    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 9">
+    <section class="pt-6 md:pt-10 animate-fade-in" *ngIf="currentStep === 10">
       <div class="grid justify-center text-center px-6 md:px-0">
         <h2 class="grid justify-center text-3xl md:text-4xl font-bold leading-tight">
           What is Your Plan?
@@ -565,7 +630,7 @@
     </section>
   </div>
 
-  <div *ngIf="currentStep >= 1 && currentStep <= 9" class="w-full max-w-lg mx-auto px-6 py-6">
+  <div *ngIf="currentStep >= 1 && currentStep <= 10" class="w-full max-w-lg mx-auto px-6 py-6">
     <div class="flex flex-row gap-3 w-full">
       <button
         (click)="previous()"
@@ -588,7 +653,7 @@
           currentStep === 9 ? 'Create Plan' : 'Continue'
         }}</span>
         <img
-          *ngIf="currentStep < 10"
+          *ngIf="currentStep < 11"
           src="/pages/onboarding/continue.svg"
           alt="Next"
           class="w-4 h-4 md:w-6 md:h-6 items-center mt-0.5"

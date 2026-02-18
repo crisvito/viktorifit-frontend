@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CalendarComponent } from '../../../shared/components';
-import { WorkoutHistoryService } from '../../../core'; 
+import { WorkoutHistoryService, AuthService } from '../../../core'; 
 
 @Component({
   selector: 'app-history',
@@ -12,41 +12,48 @@ import { WorkoutHistoryService } from '../../../core';
   templateUrl: './history.html',
 })
 export class History implements OnInit {
+  // UI State
   isPeriodModalOpen = false;
   selectedMonth: Date = new Date();
   tempMonthIndex: number = new Date().getMonth();
   tempYear: number = new Date().getFullYear();
+  selectedMode: 'Home' | 'Gym' = 'Home'; // Variabel yang tadi hilang
   
   monthsList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   yearsList = [2024, 2025, 2026];
   
   activityGroups: any[] = [];
-  selectedMode: 'Home' | 'Gym' = 'Home'; 
-  private currentUserId: number = 1;
+  private currentUserId: number = 0;
 
-  // Kamus besar untuk mencari info gambar & waktu yang tidak ada di DB
+  // Kamus besar untuk mencari info gambar & instruksi yang tidak ada di DB
   private allExercisesLookup: any[] = [];
 
   constructor(
     private router: Router,
+    private authService: AuthService,
     private historyService: WorkoutHistoryService
   ) {}
 
   ngOnInit() { 
-    // 1. Siapkan data lookup dari LocalStorage agar history punya info lengkap
+    // 1. Ambil User ID Dinamis dari AuthService
+    const user = this.authService.getUser();
+    this.currentUserId = user?.id || 0;
+
+    // 2. Siapkan data lookup detail latihan dari Cache ML
     const mlData = localStorage.getItem('ml_data_ready');
     if (mlData) {
         this.prepareLookupData(JSON.parse(mlData));
     }
     
-    // 2. Load data history
+    // 3. Load data history dari Database
     this.loadHistoryData(); 
   }
 
-  // Meratakan semua latihan dari LocalStorage ke 1 array agar mudah dicari detailnya
+  // Meratakan rencana latihan ke 1 array agar mudah dicari detail gambarnya
   prepareLookupData(data: any) {
-      const homePlan = data?.workoutRecommendation?.home?.workout_plan || {};
-      const gymPlan = data?.workoutRecommendation?.gym?.workout_plan || {};
+      const homePlan = data?.workoutRecommendation?.home?.workoutPlan || data?.workoutRecommendation?.home?.workout_plan || {};
+      const gymPlan = data?.workoutRecommendation?.gym?.workoutPlan || data?.workoutRecommendation?.gym?.workout_plan || {};
+      
       this.allExercisesLookup = [];
       [homePlan, gymPlan].forEach(plan => {
           Object.values(plan).forEach((dayList: any) => {
@@ -58,7 +65,7 @@ export class History implements OnInit {
   loadHistoryData() {
     this.historyService.getHistory(this.currentUserId).subscribe({
       next: (data) => {
-        // 1. Filter: FINISHED & Sesuai Periode
+        // 1. Filter: Hanya status FINISHED & Sesuai Periode Bulan/Tahun yang dipilih user
         const filtered = data.filter((item: any) => {
           const date = new Date(item.updatedAt); 
           return item.status === 'FINISHED' && 
@@ -66,47 +73,43 @@ export class History implements OnInit {
                  date.getFullYear() === this.selectedMonth.getFullYear();
         });
 
-        // 2. Sort: Terbaru di atas
+        // 2. Sort: Terbaru di atas (Desc)
         filtered.sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
-        // 3. Grouping & Enrichment
+        // 3. Grouping & Enrichment (Menambahkan gambar/muscle group yang hilang di DB)
         const groups: { [key: string]: any[] } = {};
         
         filtered.forEach((item: any) => {
-          // --- LOGIC ENRICHMENT (Cari Gambar & Detail Waktu) ---
-          const details = this.allExercisesLookup.find(p => 
-             p.exercise_name.toLowerCase().trim() === item.title.toLowerCase().trim()
-          );
+          const details = this.allExercisesLookup.find(p => {
+             const pName = (p.exerciseName || p.exercise_name || "").toLowerCase().trim();
+             return pName === item.title.toLowerCase().trim();
+          });
 
           let imgUrl = 'assets/images/placeholder_exercise.png';
           let muscle = "General";
           let desc = "Well done! You've completed this session.";
-          let durationVal = 0;
+          let durationVal = parseInt(item.totalTime) || 0;
           let restVal = 0;
 
           if (details) {
               imgUrl = details.imageUrl || imgUrl;
-              muscle = details.muscle_group || muscle;
+              muscle = details.muscleGroup || details.muscle_group || muscle;
               desc = details.instructions || desc;
-              durationVal = Number(details.duration_minutes) || 0;
-              restVal = Number(details.rest_minutes) || 0;
-          } else {
-              // Fallback parse dari string DB "15 Min"
-              durationVal = parseInt(item.totalTime) || 0;
+              restVal = Number(details.restMinutes || details.rest_minutes) || 0;
           }
 
           const sets = Number(item.sets) || 1;
           const restPerSet = sets > 0 ? Math.round(restVal / sets) : 0;
 
+          // Format Tanggal Lokal (Bukan UTC)
           const dateObj = new Date(item.updatedAt);
-          const dateStr = dateObj.toISOString().split('T')[0];
+          const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
           const label = this.formatDateLabel(dateStr);
           
           if (!groups[label]) groups[label] = [];
           
-          const timeLabel = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          const timeLabel = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
           
-          // Gabungkan data DB + detail LocalStorage
           groups[label].push({ 
               ...item, 
               imageUrl: imgUrl,
@@ -128,19 +131,26 @@ export class History implements OnInit {
   }
 
   formatDateLabel(dateStr: string): string {
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 
-    if (dateStr === today) return 'Today';
+    if (dateStr === todayStr) return 'Today';
     if (dateStr === yesterdayStr) return 'Yesterday';
     return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
+  // Kembalikan ke Schedule (Set status PENDING lagi)
   undoActivity(gIdx: number, aIdx: number) {
     const activity = this.activityGroups[gIdx].activities[aIdx];
-    const payload = { ...activity, status: 'PENDING' };
+    const payload = { 
+        ...activity, 
+        status: 'PENDING',
+        userId: this.currentUserId 
+    };
     
     this.historyService.saveHistory(payload).subscribe({
       next: () => {
@@ -158,7 +168,9 @@ export class History implements OnInit {
     this.tempYear = this.selectedMonth.getFullYear();
     this.isPeriodModalOpen = true; 
   }
+
   closePeriodModal() { this.isPeriodModalOpen = false; }
+  
   closeHistory() { this.router.navigate(['/dashboard/schedule']); }
   
   applyPeriodSelection() {
@@ -167,9 +179,19 @@ export class History implements OnInit {
     this.closePeriodModal();
   }
   
-  onScrollMonth(e: any) { this.tempMonthIndex = Math.round(e.target.scrollTop / 40); }
+  onScrollMonth(e: any) { 
+      const index = Math.round(e.target.scrollTop / 40);
+      if (index >= 0 && index < 12) this.tempMonthIndex = index;
+  }
+  
   onScrollYear(e: any) { 
     const index = Math.round(e.target.scrollTop / 40);
     if(this.yearsList[index]) this.tempYear = this.yearsList[index];
+  }
+
+  // Fungsi tambahan kalau HTML butuh ganti mode
+  setMode(mode: 'Home' | 'Gym') {
+    this.selectedMode = mode;
+    this.loadHistoryData();
   }
 }

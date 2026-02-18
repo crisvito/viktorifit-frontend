@@ -214,11 +214,11 @@ export class SuggestionResultPage implements OnInit {
   getProgramInfo(goal: string) {
     // Sesuaikan path image program kamu
     if (goal === 'Muscle Gain') {
-      return { description: 'Focus on hypertrophy and strength building.', image: 'pages/suggestion/weight.png' };
+      return { description: 'Focus on hypertrophy and strength building.', image: '/global/workout-type/muscleGain_transparent_background.svg' };
     } else if (goal === 'Weight Loss') {
-      return { description: 'High intensity cardio and calorie deficit.', image: 'pages/suggestion/cardio.png' };
+      return { description: 'High intensity cardio and calorie deficit.', image: '/global/workout-type/weightLoss_transparent_background.svg' };
     } else {
-      return { description: 'Maintain overall fitness and stability.', image: 'pages/suggestion/yoga.png' };
+      return { description: 'Maintain overall fitness and stability.', image: '/global/workout-type/maintain_transparent_background.svg' };
     }
   }
 
