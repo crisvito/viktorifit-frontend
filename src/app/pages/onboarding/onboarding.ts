@@ -40,7 +40,6 @@ interface UserProgressPayload {
   Goal: string;
   Level: string;
   Body_Fat_Category: number;
-  Body_Fat_Percentage: number;
   Frequency: number;
   Duration: number;
   Badminton: number;
@@ -261,11 +260,24 @@ export class OnboardingPage {
       ...sportsMap
     };
 
+    const userProgressPayload = {
+      Age: age,
+      Gender: gender,
+      Height_cm: height,
+      Weight_kg: weight,
+      Body_Fat_Category: this.formData.bodyFatCategory || 2,
+      Goal: this.formData.goal,
+      Frequency: freq,
+      Duration: duration,
+      Level: this.formData.level || 'Beginner', // MENGGUNAKAN LEVEL DARI FORM
+      ...sportsMap
+    };
+
     // HANYA Payload Home
     const homePayload: WorkoutPayload = { ...basePayload, Environment: 'Home' };
     
     const progressPayload: UserProgressPayload = {
-      ...basePayload,
+      ...userProgressPayload,
       Initial_Weight_kg: weight, 
     };
 

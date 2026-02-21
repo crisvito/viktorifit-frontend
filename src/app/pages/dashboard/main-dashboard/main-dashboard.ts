@@ -154,10 +154,24 @@ initDashboard() {
       Basketball: profile.basketball ? 1 : 0, Volleyball: profile.volleyball ? 1 : 0, Swim: profile.swim ? 1 : 0
     };
 
+    const userProgressPayload = {
+      Age: Number(age || 20),
+      Gender: profile.gender === 'female' ? 'Female' : 'Male',
+      Height_cm: Number(profile.height),
+      Weight_kg: Number(profile.weight),
+      Body_Fat_Category: Number(profile.bodyFatCategory),
+      Goal: profile.goal,
+      Frequency: Number(profile.frequency),
+      Duration: realDuration, 
+      Level: profile.level,
+      Badminton: profile.badminton ? 1 : 0, Football: profile.football ? 1 : 0,
+      Basketball: profile.basketball ? 1 : 0, Volleyball: profile.volleyball ? 1 : 0, Swim: profile.swim ? 1 : 0
+    };
+
     return forkJoin({
       workoutHome: this.http.post(`${baseUrl}/workout-recommendation`, { ...basePayload, Environment: 'Home' }),
       workoutGym: this.http.post(`${baseUrl}/workout-recommendation`, { ...basePayload, Environment: 'Gym' }),
-      progressResult: this.http.post<any>(`${baseUrl}/userprogress-recommendation`, { ...basePayload, Initial_Weight_kg: Number(profile.weight) })
+      progressResult: this.http.post<any>(`${baseUrl}/userprogress-recommendation`, { ...userProgressPayload, Initial_Weight_kg: Number(profile.weight) })
     }).pipe(
       switchMap((res: any) => {
         const roadmap = res.progressResult.roadmap || res.progressResult;
