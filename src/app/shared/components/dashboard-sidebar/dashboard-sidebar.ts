@@ -29,7 +29,7 @@ export class DashboardSidebar {
       activeKey: 'workout' 
     },
     { 
-      label: 'schedule', 
+      label: 'Schedule', 
       icon: 'calendar', 
       route: 'schedule', 
       activeKey: 'schedule' 
