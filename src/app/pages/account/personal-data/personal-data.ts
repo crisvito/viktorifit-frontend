@@ -132,8 +132,15 @@ export class PersonalData implements OnInit {
 
   toggleDay(day: string) {
     const idx = this.userData.workoutDays.indexOf(day);
-    if (idx > -1) this.userData.workoutDays.splice(idx, 1);
-    else this.userData.workoutDays.push(day);
+    if (idx > -1) {
+      if (this.userData.workoutDays.length > 2) {
+        this.userData.workoutDays.splice(idx, 1);
+      }
+    } else {
+      if (this.userData.workoutDays.length < 6) {
+        this.userData.workoutDays.push(day);
+      }
+    }
   }
 
   isDaySelected(day: string): boolean { return this.userData.workoutDays.includes(day); }
